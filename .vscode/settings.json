@@ -1,0 +1,13 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {"source.fixAll": true},
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "markdown.extension.italic.indicator": "_",
+  "markdown.extension.toc.unorderedList.marker": "-",
+  "markdown.extension.toc.slugifyMode": "github",
+  "markdown.preview.fontFamily": "system-ui, -apple-system, sans-serif",
+  "files.associations": {
+    "CODEOWNERS": "ini"
+  }
+}
