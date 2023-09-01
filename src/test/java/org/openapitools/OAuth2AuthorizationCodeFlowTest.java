@@ -12,6 +12,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ class OAuth2AuthorizationCodeFlowTest {
 
     @Test
     void testLoginTypeAuthorizationCodeFlowWithAudience() {
-        kindeClientSDK = new KindeClientSDK(domain, redirectUri, clientId, clientSecret, GrantType.AUTHORIZATION_CODE.getValue(), logoutRedirectUri, "", Map.of("audience", domain + "/api"));
+        kindeClientSDK = new KindeClientSDK(domain, redirectUri, clientId, clientSecret, GrantType.AUTHORIZATION_CODE.getValue(), logoutRedirectUri, "", Collections.singletonMap("audience", domain + "/api"));
         Object result = kindeClientSDK.login(response);
         System.out.println(result);
         assertNotNull(result);
@@ -71,7 +72,7 @@ class OAuth2AuthorizationCodeFlowTest {
 
     @Test
     void testLoginTypeAuthorizationCodeFlowWithAdditional() {
-        kindeClientSDK = new KindeClientSDK(domain, redirectUri, clientId, clientSecret, GrantType.AUTHORIZATION_CODE.getValue(), logoutRedirectUri, "", Map.of("audience", domain + "/api"));
+        kindeClientSDK = new KindeClientSDK(domain, redirectUri, clientId, clientSecret, GrantType.AUTHORIZATION_CODE.getValue(), logoutRedirectUri, "", Collections.singletonMap("audience", domain + "/api"));
         Map<String, Object> additional = new HashMap<>();
         additional.put("org_code", "org_123");
         additional.put("org_name", "My Application");

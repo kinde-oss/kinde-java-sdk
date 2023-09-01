@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ class OAuth2ClientCredentialTest {
 
     @Test
     void testLoginTypeClientCredentialFlowWithAudience() {
-        kindeClientSDK = new KindeClientSDK(domain, redirectUri, clientId, clientSecret, GrantType.CLIENT_CREDENTIALS.getValue(), logoutRedirectUri, "", Map.of("audience", domain + "/api"));
+        kindeClientSDK = new KindeClientSDK(domain, redirectUri, clientId, clientSecret, GrantType.CLIENT_CREDENTIALS.getValue(), logoutRedirectUri, "", Collections.singletonMap("audience", domain + "/api"));
         Object resp = kindeClientSDK.login(response);
         System.out.println(resp);
         assertResponse(resp);
@@ -66,7 +67,7 @@ class OAuth2ClientCredentialTest {
 
     @Test
     void testLoginTypeClientCredentialFlowWithOrgCode() {
-        kindeClientSDK = new KindeClientSDK(domain, redirectUri, clientId, clientSecret, GrantType.CLIENT_CREDENTIALS.getValue(), logoutRedirectUri, "", Map.of("audience", domain + "/api"));
+        kindeClientSDK = new KindeClientSDK(domain, redirectUri, clientId, clientSecret, GrantType.CLIENT_CREDENTIALS.getValue(), logoutRedirectUri, "", Collections.singletonMap("audience", domain + "/api"));
         Map<String, Object> additional = new HashMap<>();
         additional.put("org_code", "org_123");
         additional.put("org_name", "My Application");

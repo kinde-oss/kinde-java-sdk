@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -128,7 +129,7 @@ public class KindeClientSDKTest {
     public void testInitialValidAudience() {
         KindeClientSDK client = new KindeClientSDK(
                 domain, redirectUri, clientId, clientSecret, GrantType.PKCE.getValue(), logoutRedirectUri, "",
-                Map.of("audience",this.domain+"/api")
+                Collections.singletonMap("audience",this.domain+"/api")
         );
 
         assertNotNull(client);
@@ -138,7 +139,7 @@ public class KindeClientSDKTest {
     @Test
     public void testInitialInvalidAudience() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new KindeClientSDK(this.domain, this.redirectUri, this.clientId, this.clientSecret, GrantType.PKCE.getValue(), this.logoutRedirectUri, "", Map.of("audience", 1233));
+            new KindeClientSDK(this.domain, this.redirectUri, this.clientId, this.clientSecret, GrantType.PKCE.getValue(), this.logoutRedirectUri, "", Collections.singletonMap("audience", 1233));
         });
 
         String expectedMessage = "Please supply a valid audience. Expected: string";
@@ -151,7 +152,7 @@ public class KindeClientSDKTest {
     public void testGetIsAuthenticated() {
         KindeClientSDK client = new KindeClientSDK(
                 domain, redirectUri, clientId, clientSecret,
-                GrantType.PKCE.getValue(), logoutRedirectUri, "", Map.of("audience", domain + "/api"));
+                GrantType.PKCE.getValue(), logoutRedirectUri, "", Collections.singletonMap("audience", domain + "/api"));
 
         assertTrue((Boolean) client.isAuthenticated(request,response) instanceof Boolean);
         assertFalse(client.isAuthenticated(request,response));
@@ -270,8 +271,8 @@ public class KindeClientSDKTest {
         MockHttpServletResponse response_ = new MockHttpServletResponse();
 
         Storage storage = Storage.getInstance();
-        storage.setToken(response_,Map.of("access_token", accessToken));
-        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Map.of("access_token", accessToken)), "UTF-8")));
+        storage.setToken(response_,Collections.singletonMap("access_token", accessToken));
+        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Collections.singletonMap("access_token", accessToken)), "UTF-8")));
 
         System.out.println(client.getClaim(request_,"iss").get("name")+" :: "+client.getClaim(request_,"iss").get("value"));
         assertEquals("https://trung.kinde.com", client.getClaim(request_,"iss").get("value"));
@@ -291,8 +292,8 @@ public class KindeClientSDKTest {
         MockHttpServletResponse response_ = new MockHttpServletResponse();
 
         Storage storage = Storage.getInstance();
-        storage.setToken(response_,Map.of("access_token", accessToken));
-        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Map.of("access_token", accessToken)), "UTF-8")));
+        storage.setToken(response_,Collections.singletonMap("access_token", accessToken));
+        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Collections.singletonMap("access_token", accessToken)), "UTF-8")));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
                     client.getBooleanFlag(request_, "iss");
@@ -316,8 +317,8 @@ public class KindeClientSDKTest {
         MockHttpServletResponse response_ = new MockHttpServletResponse();
 
         Storage storage = Storage.getInstance();
-        storage.setToken(response_,Map.of("access_token", accessToken));
-        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Map.of("access_token", accessToken)), "UTF-8")));
+        storage.setToken(response_, Collections.singletonMap("access_token", accessToken));
+        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Collections.singletonMap("access_token", accessToken)), "UTF-8")));
 
         assertEquals(true, client.getBooleanFlag(request_,"iss", true).get("value"));
         assertEquals("iss", client.getBooleanFlag(request_,"iss", true).get("code"));
@@ -337,8 +338,8 @@ public class KindeClientSDKTest {
         MockHttpServletResponse response_ = new MockHttpServletResponse();
 
         Storage storage = Storage.getInstance();
-        storage.setToken(response_,Map.of("access_token", accessToken));
-        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Map.of("access_token", accessToken)), "UTF-8")));
+        storage.setToken(response_,Collections.singletonMap("access_token", accessToken));
+        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Collections.singletonMap("access_token", accessToken)), "UTF-8")));
 
         assertEquals(true, client.getBooleanFlag(request_,"enable_dark_theme").get("value"));
         assertEquals("enable_dark_theme", client.getBooleanFlag(request_,"enable_dark_theme").get("code"));
@@ -358,8 +359,8 @@ public class KindeClientSDKTest {
         MockHttpServletResponse response_ = new MockHttpServletResponse();
 
         Storage storage = Storage.getInstance();
-        storage.setToken(response_,Map.of("access_token", accessToken));
-        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Map.of("access_token", accessToken)), "UTF-8")));
+        storage.setToken(response_,Collections.singletonMap("access_token", accessToken));
+        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Collections.singletonMap("access_token", accessToken)), "UTF-8")));
 
         assertEquals(false,client.isAuthenticated(request_,response_));
     }
@@ -375,8 +376,11 @@ public class KindeClientSDKTest {
         MockHttpServletResponse response_ = new MockHttpServletResponse();
 
         Storage storage = Storage.getInstance();
-        storage.setToken(response_,Map.of("access_token", accessToken,"should_valid",true));
-        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Map.of("access_token", accessToken,"should_valid",true)), "UTF-8")));
+        Map<String, Object> map = new HashMap<>();
+        map.put("access_token", accessToken);
+        map.put("should_valid",true);
+        storage.setToken(response_,map);
+        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString(map), "UTF-8")));
 
         assertEquals(false, client.isAuthenticated(request_,response_));
     }
@@ -395,8 +399,11 @@ public class KindeClientSDKTest {
         MockHttpServletResponse response_ = new MockHttpServletResponse();
 
         Storage storage = Storage.getInstance();
-        storage.setToken(response_,Map.of("refresh_token", refreshToken, "access_token", accessToken));
-        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Map.of("refresh_token", refreshToken, "access_token", accessToken)), "UTF-8")));
+        Map<String, Object> map = new HashMap<>();
+        map.put("refresh_token", refreshToken);
+        map.put("access_token", accessToken);
+        storage.setToken(response_,map);
+        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString(map), "UTF-8")));
 
 //        assertEquals(true,client.isAuthenticated(request_,response_)); //when refreshToken provided, uncomment this
         assertEquals(false,client.isAuthenticated(request_,response_)); //when refreshToken provided, comment this
@@ -414,8 +421,12 @@ public class KindeClientSDKTest {
         MockHttpServletResponse response_ = new MockHttpServletResponse();
 
         Storage storage = Storage.getInstance();
-        storage.setToken(response_,Map.of("should_valid", true, "id_token", idToken));
-        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) Map.of("should_valid", true, "id_token", idToken)), "UTF-8")));
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("should_valid", true);
+        map.put("id_token", idToken);
+        storage.setToken(response_,map);
+        request_.setCookies(new Cookie("kinde_token", URLEncoder.encode(new ObjectMapper().writeValueAsString(map), "UTF-8")));
 
 
         assertEquals("user", client.getClaim(request_,"given_name", TokenType.ID_TOKEN.getValue()).get("value"));
