@@ -104,11 +104,13 @@ Add @ComponentScan annotation in your main application. It should include the pa
 
 The core team handles publishing.
 
-[comment]: <> (**`<todo>`**)
+**`<steps>`**
 
-[comment]: <> (- [ ] Include steps here on how to publish a new version of the SDK package. E.g., the GitHub Actions steps.)
+- [ ] If we need to update the version of the SDK, we will have to update the value of the version in the <version> tag in the pom.xml file.
+- [ ] After that, we will need to run mvn clean install.
+- [ ] Next, you will need to update the version value in both places - within the -Dversion parameter in the mvn install:install-file command and in the <version> tag in the dependency entry added to the other project's pom.xml. Ensure that both places have the same version value to maintain consistency.
 
-[comment]: <> (**`</todo>`**)
+**`</steps>`**
 
 ## Contributing
 
