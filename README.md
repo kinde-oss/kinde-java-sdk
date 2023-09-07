@@ -1,9 +1,11 @@
-##Kinde Java SDK
+# Kinde Java SDK
+
 The Kinde SDK for Java.
 
-######PRs Welcome Kinde Docs Kinde Community
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com) [![Kinde Docs](https://img.shields.io/badge/Kinde-Docs-eee?style=flat-square)](https://kinde.com/docs/developer-tools) [![Kinde Community](https://img.shields.io/badge/Kinde-Community-eee?style=flat-square)](https://thekindecommunity.slack.com)
 
-###Development
+## Development
+
 This project contains an SDK package with a class called KindClientSDK. Inside this class, you will find all the main functions and methods that you need to use in another project. Any changes related to the SDK should be made through this file.
 
 Additionally, within the SDK package, there is a callback controller class where we have implemented a method for handling callbacks. If you need to make any changes to the callback request processing, you should do so in this file.
@@ -12,28 +14,31 @@ Furthermore, the SDK package includes sub-packages for enums, OAuth2, storage, a
 
 These components collectively make up the SDK, and you should make any necessary modifications or enhancements within the respective files to maintain and extend the SDK's functionality.
 
-###Initial set up
-Clone the repository to your machine:
-```
-git clone https://github.com/kinde-oss/kinde-java-sdk
-```
 
-Go into the project:
-```
-cd kinde-java-sdk
-```
+### Initial set up
 
-Install the dependencies:
-```
-mvn clean install
-```
+1. Clone the repository to your machine:
 
+   ```bash
+   git clone https://github.com/kinde-oss/kinde-java-sdk
+   ```
 
-##Publishing
-The core team handles publishing.
+2. Go into the project:
 
-##Documentation
-For details on integrating this SDK into your project, head over to the Kinde docs and see the Java SDK doc 👍🏼.
+   ```bash
+   cd kinde-java-sdk
+   ```
+
+3. Install the dependencies:
+
+   ```bash
+   mvn clean install
+   ```
+
+## Documentation
+
+For details on integrating this SDK into your project, head over to the [Kinde docs](https://kinde.com/docs/) and see the [Java SDK](<[link-to-kinde-doc](https://kinde.com/docs/developer-tools/)>) doc 👍🏼.
+
 
 ####Create a JAR file of sdk project
 ```
@@ -95,9 +100,20 @@ Add @ComponentScan annotation in your main application. It should include the pa
 ```
 
 
+## Publishing
 
-###Contributing
-Please refer to Kinde’s contributing guidelines.
+The core team handles publishing.
 
-###License
+[comment]: <> (**`<todo>`**)
+
+[comment]: <> (- [ ] Include steps here on how to publish a new version of the SDK package. E.g., the GitHub Actions steps.)
+
+[comment]: <> (**`</todo>`**)
+
+## Contributing
+
+Please refer to Kinde’s [contributing guidelines](https://github.com/kinde-oss/.github/blob/489e2ca9c3307c2b2e098a885e22f2239116394a/CONTRIBUTING.md).
+
+## License
+
 By contributing to Kinde, you agree that your contributions will be licensed under its MIT License.
