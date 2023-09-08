@@ -64,7 +64,7 @@ Save the pom.xml file.
 
 Maven will automatically download the dependency from your local repository and make it available in your project.
 
-###Project Setup
+### Project Setup
 Add following properties in application.properties file
 
 ```
