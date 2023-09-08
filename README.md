@@ -40,18 +40,18 @@ These components collectively make up the SDK, and you should make any necessary
 For details on integrating this SDK into your project, head over to the [Kinde docs](https://kinde.com/docs/) and see the [Java SDK](<[link-to-kinde-doc](https://kinde.com/docs/developer-tools/)>) doc 👍🏼.
 
 
-####Create a JAR file of sdk project
+Create a JAR file of sdk project
 ```
 mvn clean install
 ```
 
-####Execute the mvn install:install-file command to install the JAR file to your local repository:
+Execute the mvn install:install-file command to install the JAR file to your local repository:
 ```
 mvn install:install-file -Dfile=/Users/rahoolkumar/Downloads/international-kinde-java/target/kindejava.jar -DgroupId=org.openapitools -DartifactId=openapi-spring -Dversion=1 -Dpackaging=jar
 ```
 Make sure to replace ``` /Users/rahoolkumar/Downloads/international-kinde-java/target/kindejava.jar``` with the actual path to your JAR file.
 
-####In the pom.xml of the other project where you want to use this dependency, add the following dependency entry:
+In the pom.xml of the other project where you want to use this dependency, add the following dependency entry:
 ```
 <dependency>
     <groupId>org.openapitools</groupId>
@@ -104,13 +104,9 @@ Add @ComponentScan annotation in your main application. It should include the pa
 
 The core team handles publishing.
 
-**`<steps>`**
-
 - [ ] If we need to update the version of the SDK, we will have to update the value of the version in the <version> tag in the pom.xml file.
 - [ ] After that, we will need to run mvn clean install.
 - [ ] Next, you will need to update the version value in both places - within the -Dversion parameter in the mvn install:install-file command and in the <version> tag in the dependency entry added to the other project's pom.xml. Ensure that both places have the same version value to maintain consistency.
-
-**`</steps>`**
 
 ## Contributing
 
