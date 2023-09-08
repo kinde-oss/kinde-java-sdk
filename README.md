@@ -8,7 +8,7 @@ The Kinde SDK for Java.
 
 This project contains an SDK package with a class called KindClientSDK. Inside this class, you will find all the main functions and methods that you need to use in another project. Any changes related to the SDK should be made through this file.
 
-Additionally, within the SDK package, there is a callback controller class where we have implemented a method for handling callbacks. If you need to make any changes to the callback request processing, you should do so in this file.
+Additionally, within the SDK package, there is a callback controller class where we have implemented a method for handling callback requests. If you need to make any changes to the callback request processing, you should do so in this file.
 
 Furthermore, the SDK package includes sub-packages for enums, OAuth2, storage, and utilities. In the storage package, you will find functionality related to cookie storage, and within the OAuth2 package, we have classes for handling authorization code, client credentials, and PKCE (Proof Key for Code Exchange).
 
