@@ -214,6 +214,17 @@ public class KindeClientSDK {
         this(domain,redirectUri,clientId,clientSecret,grantType,logoutRedirectUri,null,null,null);
     }
 
+    public KindeClientSDK(
+            String domain,
+            String redirectUri,
+            String clientId,
+            String clientSecret,
+            String grantType,
+            String logoutRedirectUri,
+            Map<String, Object> additionalParameters
+    ){
+        this(domain,redirectUri,clientId,clientSecret,grantType,logoutRedirectUri,null,additionalParameters,null);
+    }
 
     public Object login(HttpServletResponse response,Map<String, Object> additionalParameters) {
 //        if (additionalParameters==null){
