@@ -249,7 +249,7 @@ public class KindeClientSDK {
 //            additionalParameters=new HashMap<>();
 //        }
 //        PKCE pkce=new PKCE(this.storage);
-        this.grantType = "authorization_code";
+//        this.grantType = "authorization_code";
 
 //        return pkce.authenticate(this, "registration", additionalParameters);
         switch (this.grantType) {
