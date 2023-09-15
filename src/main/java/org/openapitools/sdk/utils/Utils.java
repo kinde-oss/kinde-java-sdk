@@ -55,14 +55,53 @@ public class Utils {
 
     public static Map<String, String> generateChallenge() {
         String state = randomString();
-        String codeVerifier = randomString();
+//        String codeVerifier = randomString();
+        String codeVerifier = generateRandomCodeVerifier();
 //        String codeChallenge = base64UrlEncode(hash("SHA-256", codeVerifier));
-        String codeChallenge = base64UrlEncode(sha256(codeVerifier));
+//        String codeChallenge = base64UrlEncode(sha256(codeVerifier));
+        String codeChallenge = generateCodeChallenge(codeVerifier);
         Map<String, String> result = new HashMap<>();
         result.put("state", state);
         result.put("codeVerifier", codeVerifier);
         result.put("codeChallenge", codeChallenge);
         return result;
+    }
+
+    public static String generateRandomCodeVerifier() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] randomBytes = new byte[32]; // At least 43 bytes for a valid PKCE code verifier
+
+        // Generate random bytes
+        secureRandom.nextBytes(randomBytes);
+
+        // Encode the random bytes to a URL-safe Base64 string
+        String codeVerifier = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+        return codeVerifier;
+    }
+
+    public static String generateCodeChallenge(String codeVerifier) {
+        try {
+            // Create a message digest instance for SHA-256
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            // Generate a byte array from the codeVerifier string
+            byte[] codeVerifierBytes = codeVerifier.getBytes();
+
+            // Update the digest with the codeVerifier bytes
+            digest.update(codeVerifierBytes);
+
+            // Calculate the digest value
+            byte[] digestBytes = digest.digest();
+
+            // Base64 URL-encode the digest value
+            String codeChallenge = Base64.getUrlEncoder().withoutPadding().encodeToString(digestBytes);
+
+            return codeChallenge;
+        } catch (NoSuchAlgorithmException e) {
+            // Handle the exception appropriately (e.g., log or throw a custom exception)
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+        }
     }
 
     public static boolean validateURL(String url) {

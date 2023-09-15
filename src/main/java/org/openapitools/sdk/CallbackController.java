@@ -51,9 +51,15 @@ public class CallbackController {
                 body.add("client_id", kindeClientSDK.getClientId());
                 body.add("client_secret", kindeClientSDK.getClientSecret());
                 body.add("code", code);
-//                body.add("code_verifier", codeVerifierCookie);
-                body.add("scope",kindeClientSDK.getScopes());
-                body.add("grant_type", kindeClientSDK.getGrantType());
+                if(kindeClientSDK.getGrantType().equals("authorization_code_flow_pkce")){
+//                  body.add("code_verifier", codeVerifierCookie);
+                    String codeVerifier = storage.getCodeVerifier(request);
+                    body.add("grant_type", "authorization_code");
+                    body.add("code_verifier",codeVerifier);
+                }else{
+                    body.add("scope",kindeClientSDK.getScopes());
+                    body.add("grant_type", kindeClientSDK.getGrantType());
+                }
                 body.add("redirect_uri", kindeClientSDK.getLogoutRedirectUri() + "/api/auth/kinde_callback");
 
                 HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
