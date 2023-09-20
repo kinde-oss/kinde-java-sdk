@@ -91,9 +91,9 @@ public class CallbackController {
                     String newKey = "kinde" + '_' + StorageEnums.TOKEN.getValue();
                     Cookie cookie = new Cookie(newKey, URLEncoder.encode(new ObjectMapper().writeValueAsString((Map<String, Object>) data_), "UTF-8"));
                     Long exp = System.currentTimeMillis() + 3600 * 24 * 15 * 1000;
-//                    cookie.setMaxAge(exp.intValue());
-                    long currentTimeSeconds = System.currentTimeMillis() / 1000;
-                    cookie.setMaxAge((int) ((long) (Integer) payload.get("exp")- currentTimeSeconds));
+                    cookie.setMaxAge(exp.intValue());
+//                    long currentTimeSeconds = System.currentTimeMillis() / 1000;
+//                    cookie.setMaxAge((int) ((long) (Integer) payload.get("exp")- currentTimeSeconds));
                     cookie.setPath("/");
 //                cookie.setDomain(domain);
                     cookie.setSecure(true);
