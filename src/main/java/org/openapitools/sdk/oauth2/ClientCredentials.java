@@ -38,7 +38,7 @@ public class ClientCredentials {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            headers.add("Kinde-SDK", "Java/1.0");
+            headers.add("Kinde-SDK", "Java/1.2.0");
 
             MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
             formData.add("client_id", clientSDK.getClientId());

@@ -526,7 +526,7 @@ public class KindeClientSDK {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.add("Kinde-SDK", "Java/1.0"); // current SDK version
+        headers.add("Kinde-SDK", "Java/1.2.0"); // current SDK version
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(formParams, headers);
         ResponseEntity<Object> response = restTemplate.postForEntity(

@@ -45,7 +45,7 @@ public class CallbackController {
                 RestTemplate restTemplate = new RestTemplate();
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-                headers.add("Kinde-SDK", "Java/1.0");
+                headers.add("Kinde-SDK", "Java/1.2.0");
 
                 MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
                 body.add("client_id", kindeClientSDK.getClientId());
