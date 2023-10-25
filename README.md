@@ -68,11 +68,11 @@ Maven will automatically download the dependency from your local repository and 
 Add following properties in application.properties file
 
 ```
-kinde.host=https://invozone.kinde.com
+kinde.host=https://<YOUR-DOMAIN>.kinde.com
 kinde.redirect.url=http://localhost:8080/api/auth/kinde_callback
 kinde.post.logout.redirect.url=http://localhost:8080
-kinde.client.id=b744e0d23fd1445dae2d9fd0845997f9
-kinde.client.secret=NHUaiCR2ULZtR7FQLrfrJP1gkkMxK1odtWiRAyEjrLFBJqkkGNC
+kinde.client.id=<YOUR_CLIENT_ID>
+kinde.client.secret=<YOUR_CLIENT_SECRET>
 kinde.grant.type=authorization_code
 ```
 
