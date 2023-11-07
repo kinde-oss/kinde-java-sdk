@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.kinde.sdk</groupId>
-    <artifactId>kinde</artifactId>
+    <groupId>com.kinde</groupId>
+    <artifactId>java-sdk</artifactId>
     <packaging>jar</packaging>
-    <name>kinde</name>
-    <version>1</version>
+    <name>java-sdk</name>
+    <version>1.0.0</version>
     <url>https://github.com/kinde-oss/kinde-java-sdk/</url>
     <description>Kinde Java SDK</description>
     <properties>
