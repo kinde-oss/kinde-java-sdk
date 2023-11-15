@@ -1,14 +1,18 @@
 # Kinde Java SDK
 
-The Kinde SDK for Java.
+[![PRs Welcome](https://img.shields.io/badge/✋%20PRs-Welcome-darkred.svg?style=flat-square)](https://makeapullrequest.com) [![Kinde Docs](https://img.shields.io/badge/🅺%20Kinde-Java%20SDK%20Docs-blue)](https://kinde.com/docs/developer-tools/java-sdk/) [![GitHub Repo](https://img.shields.io/badge/GitHub-Starter%20Kit-darkred?logo=github)](https://github.com/kinde-starter-kits/kinde-java-starter-kit/) ![Maven Central](https://img.shields.io/maven-central/v/com.kinde/java-sdk.svg)
+![GitHub stars](https://img.shields.io/github/stars/kinde-oss/kinde-java-sdk.svg?style=social&label=Star)
 
-You can also use the Java starter kit [here](https://github.com/kinde-starter-kits/kinde-java-starter-kit).
+Reach out to the community!
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com) [![Kinde Docs](https://img.shields.io/badge/Kinde-Docs-eee?style=flat-square)](https://kinde.com/docs/developer-tools) [![Kinde Community](https://img.shields.io/badge/Kinde-Community-eee?style=flat-square)](https://thekindecommunity.slack.com)
+[![Slack](https://img.shields.io/badge/Slack-Kinde-white.svg?logo=slack)](https://thekindecommunity.slack.com) [![Discord](https://img.shields.io/discord/1070212618549219328.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/QBf5mAwk) [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/HeyKinde)
+
+Be sure to check out our [Java Starter Kit](https://github.com/kinde-starter-kits/kinde-java-starter-kit).
+
 
 ## Documentation
 
-For details on integrating this SDK into your project, head over to the [Kinde docs](https://kinde.com/docs/) and see the [Java SDK](https://kinde.com/docs/developer-tools/java-sdk) doc 👍🏼.
+For details on integrating this SDK into your project, head over to the [Kinde docs](https://kinde.com/docs/) and see the [Java SDK](https://kinde.com/docs/developer-tools/java-sdk) doc 👍🏼
 
 ## Publishing
 
@@ -21,3 +25,4 @@ Please refer to Kinde’s [contributing guidelines](https://github.com/kinde-os
 ## License
 
 By contributing to Kinde, you agree that your contributions will be licensed under its MIT License.
+
