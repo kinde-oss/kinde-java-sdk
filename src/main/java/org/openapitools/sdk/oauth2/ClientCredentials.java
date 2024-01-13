@@ -2,6 +2,7 @@ package org.openapitools.sdk.oauth2;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.openapitools.sdk.KindeClientSDK;
 import org.openapitools.sdk.enums.GrantType;
 import org.openapitools.sdk.storage.Storage;
@@ -15,7 +16,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,7 +29,7 @@ public class ClientCredentials {
         this.storage = storage;
     }
 
-    public Map<String, Object> authenticate(HttpServletResponse resp,KindeClientSDK clientSDK, Map<String, Object> additionalParameters) {
+    public Map<String, Object> authenticate(HttpServletResponse resp, KindeClientSDK clientSDK, Map<String, Object> additionalParameters) {
 //        if (additionalParameters==null){
 //            additionalParameters=new HashMap<>();
 //        }
@@ -57,7 +57,7 @@ public class ClientCredentials {
             );
 
             Object token = response.getBody();
-            storage.setToken(resp,token);
+            storage.setToken(resp, token);
 
 //            return Utils.parseJWT(token);
 
@@ -85,8 +85,8 @@ public class ClientCredentials {
         }
     }
 
-    public Map<String, Object> authenticate(HttpServletResponse resp,KindeClientSDK clientSDK){
-        return authenticate(resp,clientSDK,new HashMap<>());
+    public Map<String, Object> authenticate(HttpServletResponse resp, KindeClientSDK clientSDK) {
+        return authenticate(resp, clientSDK, new HashMap<>());
 
     }
 }

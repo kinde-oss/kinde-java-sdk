@@ -2,8 +2,9 @@ package org.openapitools.sdk;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
-import org.openapitools.sdk.enums.AdditionalParameters;
 import org.openapitools.sdk.enums.GrantType;
 import org.openapitools.sdk.enums.StorageEnums;
 import org.openapitools.sdk.enums.TokenType;
@@ -12,26 +13,20 @@ import org.openapitools.sdk.oauth2.ClientCredentials;
 import org.openapitools.sdk.oauth2.PKCE;
 import org.openapitools.sdk.storage.Storage;
 import org.openapitools.sdk.utils.Utils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.context.annotation.Primary;
-import org.springframework.http.*;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 
 public class KindeClientSDK {
@@ -102,7 +97,8 @@ public class KindeClientSDK {
         return storage;
     }
 
-    public KindeClientSDK(){}
+    public KindeClientSDK() {
+    }
 
     public KindeClientSDK(
             String domain,
@@ -153,20 +149,20 @@ public class KindeClientSDK {
             throw new IllegalArgumentException("Please provide valid logout_redirect_uri");
         }
 
-        if (additionalParameters==null){
-            additionalParameters=new HashMap<>();
+        if (additionalParameters == null) {
+            additionalParameters = new HashMap<>();
         }
         this.additionalParameters = Utils.checkAdditionalParameters(additionalParameters);
 
         this.logoutRedirectUri = logoutRedirectUri;
 
-        if (scopes==null || scopes.equals("")){
-            scopes="openid profile email offline";
+        if (scopes == null || scopes.equals("")) {
+            scopes = "openid profile email offline";
         }
         this.scopes = scopes;
 
-        if (protocol==null){
-            protocol="";
+        if (protocol == null) {
+            protocol = "";
         }
         this.protocol = protocol;
 
@@ -187,8 +183,8 @@ public class KindeClientSDK {
             String logoutRedirectUri,
             String scopes,
             Map<String, Object> additionalParameters
-    ){
-        this(domain,redirectUri,clientId,clientSecret,grantType,logoutRedirectUri,scopes,additionalParameters,null);
+    ) {
+        this(domain, redirectUri, clientId, clientSecret, grantType, logoutRedirectUri, scopes, additionalParameters, null);
     }
 
     public KindeClientSDK(
@@ -199,8 +195,8 @@ public class KindeClientSDK {
             String grantType,
             String logoutRedirectUri,
             String scopes
-    ){
-        this(domain,redirectUri,clientId,clientSecret,grantType,logoutRedirectUri,scopes,null,null);
+    ) {
+        this(domain, redirectUri, clientId, clientSecret, grantType, logoutRedirectUri, scopes, null, null);
     }
 
     public KindeClientSDK(
@@ -210,8 +206,8 @@ public class KindeClientSDK {
             String clientSecret,
             String grantType,
             String logoutRedirectUri
-    ){
-        this(domain,redirectUri,clientId,clientSecret,grantType,logoutRedirectUri,null,null,null);
+    ) {
+        this(domain, redirectUri, clientId, clientSecret, grantType, logoutRedirectUri, null, null, null);
     }
 
     public KindeClientSDK(
@@ -222,11 +218,11 @@ public class KindeClientSDK {
             String grantType,
             String logoutRedirectUri,
             Map<String, Object> additionalParameters
-    ){
-        this(domain,redirectUri,clientId,clientSecret,grantType,logoutRedirectUri,null,additionalParameters,null);
+    ) {
+        this(domain, redirectUri, clientId, clientSecret, grantType, logoutRedirectUri, null, additionalParameters, null);
     }
 
-    public Object login(HttpServletResponse response,Map<String, Object> additionalParameters) {
+    public Object login(HttpServletResponse response, Map<String, Object> additionalParameters) {
 //        if (additionalParameters==null){
 //            additionalParameters=new HashMap<>();
 //        }
@@ -236,13 +232,13 @@ public class KindeClientSDK {
             switch (this.grantType) {
                 case "client_credentials":
                     ClientCredentials clientCredentials = new ClientCredentials(this.storage);
-                    return clientCredentials.authenticate(response,this, additionalParameters);
+                    return clientCredentials.authenticate(response, this, additionalParameters);
                 case "authorization_code":
                     AuthorizationCode authorizationCode = new AuthorizationCode(this.storage);
-                    return authorizationCode.authenticate(response,this,"login", additionalParameters);
+                    return authorizationCode.authenticate(response, this, "login", additionalParameters);
                 case "authorization_code_flow_pkce":
                     PKCE pkce = new PKCE(this.storage);
-                    return pkce.authenticate(response,this, "login", additionalParameters);
+                    return pkce.authenticate(response, this, "login", additionalParameters);
                 default:
                     throw new IllegalArgumentException("Please provide correct grant_type");
             }
@@ -251,11 +247,11 @@ public class KindeClientSDK {
         }
     }
 
-    public Object login(HttpServletResponse response){
-        return login(response,new HashMap<>());
+    public Object login(HttpServletResponse response) {
+        return login(response, new HashMap<>());
     }
 
-    public Object register(HttpServletResponse resp,Map<String, Object> additionalParameters) {
+    public Object register(HttpServletResponse resp, Map<String, Object> additionalParameters) {
 //        if (additionalParameters==null){
 //            additionalParameters=new HashMap<>();
 //        }
@@ -266,39 +262,39 @@ public class KindeClientSDK {
         switch (this.grantType) {
             case "client_credentials":
                 ClientCredentials clientCredentials = new ClientCredentials(this.storage);
-                return clientCredentials.authenticate(resp,this, additionalParameters);
+                return clientCredentials.authenticate(resp, this, additionalParameters);
             case "authorization_code":
                 AuthorizationCode authorizationCode = new AuthorizationCode(this.storage);
-                return authorizationCode.authenticate(resp,this,"registration", additionalParameters);
+                return authorizationCode.authenticate(resp, this, "registration", additionalParameters);
             case "authorization_code_flow_pkce":
                 PKCE pkce = new PKCE(this.storage);
-                return pkce.authenticate(resp,this, "registration", additionalParameters);
+                return pkce.authenticate(resp, this, "registration", additionalParameters);
             default:
                 throw new IllegalArgumentException("Please provide correct grant_type");
         }
     }
 
-    public Object register(HttpServletResponse response){
-        return register(response,new HashMap<>());
+    public Object register(HttpServletResponse response) {
+        return register(response, new HashMap<>());
     }
 
-    public Object createOrg(HttpServletResponse resp,Map<String, Object> additionalParameters) {
+    public Object createOrg(HttpServletResponse resp, Map<String, Object> additionalParameters) {
         additionalParameters.put("is_create_org", "true");
-        if (!additionalParameters.containsKey("org_name")){
+        if (!additionalParameters.containsKey("org_name")) {
             additionalParameters.put("org_name", "");
         }
-        return this.register(resp,additionalParameters);
+        return this.register(resp, additionalParameters);
     }
 
     public Object createOrg(HttpServletResponse resp, String orgName) {
-        Map<String, Object> additionalParameters_=new HashMap<>();
+        Map<String, Object> additionalParameters_ = new HashMap<>();
         additionalParameters_.put("is_create_org", "true");
         additionalParameters_.put("org_name", orgName);
-        return this.register(resp,additionalParameters_);
+        return this.register(resp, additionalParameters_);
     }
 
-    public Object createOrg(HttpServletResponse response){
-        return createOrg(response,new HashMap<>());
+    public Object createOrg(HttpServletResponse response) {
+        return createOrg(response, new HashMap<>());
     }
 
     public RedirectView logout(HttpServletResponse response) {
@@ -312,13 +308,13 @@ public class KindeClientSDK {
         return new RedirectView(logoutUrl);
     }
 
-    public Object getToken(HttpServletResponse response,HttpServletRequest req) throws Exception {
+    public Object getToken(HttpServletResponse response, HttpServletRequest req) throws Exception {
         if (GrantType.CLIENT_CREDENTIALS.getValue().equals(this.grantType)) {
-            return login(response,new HashMap<>());
+            return login(response, new HashMap<>());
         }
 
         // Check authenticated
-        if (this.isAuthenticated(req,response)) {
+        if (this.isAuthenticated(req, response)) {
             Object token = storage.getToken(req);
             if (token != null) {
                 return token;
@@ -339,18 +335,18 @@ public class KindeClientSDK {
             url += "?" + queryString;
         }
         MultiValueMap<String, String> params = UriComponentsBuilder.fromUriString(url).build().getQueryParams();
-        String stateServer = params.containsKey("state") && params.getFirst("state")!=null ? params.getFirst("state") : "";
+        String stateServer = params.containsKey("state") && params.getFirst("state") != null ? params.getFirst("state") : "";
 
-        checkStateAuthentication(req,stateServer);
+        checkStateAuthentication(req, stateServer);
 
-        String error = params.containsKey("error") && params.getFirst("error")!=null ? params.getFirst("error") : "";
+        String error = params.containsKey("error") && params.getFirst("error") != null ? params.getFirst("error") : "";
         if (!StringUtils.isEmpty(error)) {
-            String errorDescription = params.containsKey("error_description") && params.getFirst("error_description")!=null ? params.getFirst("error_description") : "";
+            String errorDescription = params.containsKey("error_description") && params.getFirst("error_description") != null ? params.getFirst("error_description") : "";
             String msg = !StringUtils.isEmpty(errorDescription) ? errorDescription : error;
             throw new IllegalArgumentException(msg);
         }
 
-        String authorizationCode = params.containsKey("code") && params.getFirst("code")!=null ? params.getFirst("code") : "";
+        String authorizationCode = params.containsKey("code") && params.getFirst("code") != null ? params.getFirst("code") : "";
         if (StringUtils.isEmpty(authorizationCode)) {
             throw new IllegalArgumentException("Not found code param");
         }
@@ -364,27 +360,27 @@ public class KindeClientSDK {
             throw new IllegalArgumentException("Not found code_verifier");
         }
 
-        return fetchToken(response,formParams);
+        return fetchToken(response, formParams);
     }
 
     public Map<String, Object> getUserDetails(HttpServletRequest req) {
         return storage.getUserProfile(req);
     }
 
-    public Map<String, Object> getClaim(HttpServletRequest req,String keyName,String tokenType) {
+    public Map<String, Object> getClaim(HttpServletRequest req, String keyName, String tokenType) {
 //        if (tokenType==null){
 //            tokenType=TokenType.ACCESS_TOKEN.getValue();
 //        }
-        Map<String, Object> data = getClaims(req,tokenType);
+        Map<String, Object> data = getClaims(req, tokenType);
 
-        Map<String,Object> result=new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         result.put("name", keyName);
-        result.put("value",data.containsKey(keyName) && data.get(keyName)!=null ? data.get(keyName) : null);
+        result.put("value", data.containsKey(keyName) && data.get(keyName) != null ? data.get(keyName) : null);
         return result;
     }
 
-    public Map<String, Object> getClaim(HttpServletRequest req,String keyName) {
-        return getClaim(req,keyName,TokenType.ACCESS_TOKEN.getValue());
+    public Map<String, Object> getClaim(HttpServletRequest req, String keyName) {
+        return getClaim(req, keyName, TokenType.ACCESS_TOKEN.getValue());
     }
 
     public Map<String, Object> getPermissions(HttpServletRequest req) {
@@ -397,7 +393,7 @@ public class KindeClientSDK {
         return response;
     }
 
-    public Map<String, Object> getPermission(HttpServletRequest req,String permission) {
+    public Map<String, Object> getPermission(HttpServletRequest req, String permission) {
         Map<String, Object> allClaims = getClaims(req);
         List<String> permissions = (List<String>) allClaims.get("permissions");
 
@@ -409,54 +405,54 @@ public class KindeClientSDK {
 
     public Map<String, Object> getOrganization(HttpServletRequest req) {
         Map<String, Object> response = new HashMap<>();
-        response.put("orgCode", getClaim(req,"org_code").get("value"));
+        response.put("orgCode", getClaim(req, "org_code").get("value"));
         return response;
     }
 
     public Map<String, Object> getUserOrganizations(HttpServletRequest req) {
         Map<String, Object> response = new HashMap<>();
-        response.put("orgCodes", getClaim(req,"org_codes", TokenType.ID_TOKEN.getValue()).get("value"));
+        response.put("orgCodes", getClaim(req, "org_codes", TokenType.ID_TOKEN.getValue()).get("value"));
         return response;
     }
 
-    public Map<String, Object> getBooleanFlag(HttpServletRequest req,String flagName, Object defaultValue) {
+    public Map<String, Object> getBooleanFlag(HttpServletRequest req, String flagName, Object defaultValue) {
         Map<String, Object> options = new HashMap<>();
         options.put("defaultValue", defaultValue);
-        return getFlag(req,flagName, options, "b");
+        return getFlag(req, flagName, options, "b");
     }
 
-    public Map<String, Object> getBooleanFlag(HttpServletRequest req,String flagName) {
-        return getBooleanFlag(req,flagName,null);
+    public Map<String, Object> getBooleanFlag(HttpServletRequest req, String flagName) {
+        return getBooleanFlag(req, flagName, null);
     }
 
-    public Map<String, Object> getStringFlag(HttpServletRequest req,String flagName, Object defaultValue) {
+    public Map<String, Object> getStringFlag(HttpServletRequest req, String flagName, Object defaultValue) {
         Map<String, Object> options = new HashMap<>();
         options.put("defaultValue", defaultValue);
-        return getFlag(req,flagName, options, "s");
+        return getFlag(req, flagName, options, "s");
     }
 
-    public Map<String, Object> getStringFlag(HttpServletRequest req,String flagName) {
-        return getStringFlag(req,flagName,null);
+    public Map<String, Object> getStringFlag(HttpServletRequest req, String flagName) {
+        return getStringFlag(req, flagName, null);
     }
 
-    public Map<String, Object> getIntegerFlag(HttpServletRequest req,String flagName, Object defaultValue) {
+    public Map<String, Object> getIntegerFlag(HttpServletRequest req, String flagName, Object defaultValue) {
         Map<String, Object> options = new HashMap<>();
         options.put("defaultValue", defaultValue);
-        return getFlag(req,flagName, options, "i");
+        return getFlag(req, flagName, options, "i");
     }
 
-    public Map<String, Object> getIntegerFlag(HttpServletRequest req,String flagName) {
-        return getIntegerFlag(req,flagName,null);
+    public Map<String, Object> getIntegerFlag(HttpServletRequest req, String flagName) {
+        return getIntegerFlag(req, flagName, null);
     }
 
-    public Map<String, Object> getFlag(HttpServletRequest req,String flagName, Map<String, Object> options, String flagType) {
+    public Map<String, Object> getFlag(HttpServletRequest req, String flagName, Map<String, Object> options, String flagType) {
 
 //        if (options==null){
 //            options=new HashMap<>();
 //        }
 
         boolean isUsedDefault = false;
-        Map<String, Object> flag = getFeatureFlags(req,flagName);
+        Map<String, Object> flag = getFeatureFlags(req, flagName);
 
 //        if (flag == null) {
         if (flag == null || flag.isEmpty()) {
@@ -466,7 +462,7 @@ public class KindeClientSDK {
             flag.put("t", flagType);
         }
 
-        if (!flag.containsKey("v") || flag.get("v")==null) {
+        if (!flag.containsKey("v") || flag.get("v") == null) {
             throw new IllegalArgumentException("This flag '" + flagName + "' was not found, and no default value has been provided");
         }
 
@@ -486,16 +482,16 @@ public class KindeClientSDK {
         return result;
     }
 
-    public Map<String, Object> getFlag(HttpServletRequest req,String flagName){
-        return getFlag(req,flagName,new HashMap<>(),null);
+    public Map<String, Object> getFlag(HttpServletRequest req, String flagName) {
+        return getFlag(req, flagName, new HashMap<>(), null);
     }
 
-    public Map<String, Object> getFlag(HttpServletRequest req,String flagName, Map<String, Object> options){
-        return getFlag(req,flagName,options,null);
+    public Map<String, Object> getFlag(HttpServletRequest req, String flagName, Map<String, Object> options) {
+        return getFlag(req, flagName, options, null);
     }
 
-    public Map<String, Object> getFlag(HttpServletRequest req,String flagName, String flagType){
-        return getFlag(req,flagName,new HashMap<>(),flagType);
+    public Map<String, Object> getFlag(HttpServletRequest req, String flagName, String flagType) {
+        return getFlag(req, flagName, new HashMap<>(), flagType);
     }
 
 //    public function __get($key)
@@ -507,21 +503,21 @@ public class KindeClientSDK {
 //        return $this->$key;
 //    }
 
-    private Map<String, Object> getFeatureFlags(HttpServletRequest req,String name) {
-        Map<String, Object> flags = (Map<String, Object>) getClaim(req,"feature_flags").get("value");
+    private Map<String, Object> getFeatureFlags(HttpServletRequest req, String name) {
+        Map<String, Object> flags = (Map<String, Object>) getClaim(req, "feature_flags").get("value");
 
-        if (name != null && flags !=null && !flags.isEmpty()) {
+        if (name != null && flags != null && !flags.isEmpty()) {
             return (Map<String, Object>) flags.get(name);
         }
 
         return flags;
     }
 
-    private Map<String, Object> getFeatureFlags(HttpServletRequest req){
-        return getFeatureFlags(req,null);
+    private Map<String, Object> getFeatureFlags(HttpServletRequest req) {
+        return getFeatureFlags(req, null);
     }
 
-    private Object fetchToken(HttpServletResponse resp,MultiValueMap<String, String> formParams) {
+    private Object fetchToken(HttpServletResponse resp, MultiValueMap<String, String> formParams) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -536,7 +532,7 @@ public class KindeClientSDK {
         );
 
         Object token = response.getBody();
-        storage.setToken(resp,token);
+        storage.setToken(resp, token);
         Map<String, Object> tokenMap = null;
         if (token instanceof Map) {
             // Convert tokenObject to Map
@@ -551,17 +547,17 @@ public class KindeClientSDK {
                     Map.Entry<String, JsonNode> field = fields.next();
                     tokenMap.put(field.getKey(), field.getValue().asText());
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
         }
         // Cleaning
-        storage.removeItem(resp,StorageEnums.CODE_VERIFIER.getValue());
-        storage.removeItem(resp,StorageEnums.STATE.getValue());
+        storage.removeItem(resp, StorageEnums.CODE_VERIFIER.getValue());
+        storage.removeItem(resp, StorageEnums.STATE.getValue());
         return tokenMap;
     }
 
-    public boolean isAuthenticated(HttpServletRequest req,HttpServletResponse resp) {
+    public boolean isAuthenticated(HttpServletRequest req, HttpServletResponse resp) {
         long timeExpired = storage.getExpiredAt(req);
         boolean authenticated = timeExpired > System.currentTimeMillis() / 1000;
 
@@ -579,7 +575,7 @@ public class KindeClientSDK {
                 formParams.add("grant_type", "refresh_token");
                 formParams.add("refresh_token", refreshToken);
 
-                Map<String,Object> token =(Map<String, Object>) fetchToken(resp,formParams);
+                Map<String, Object> token = (Map<String, Object>) fetchToken(resp, formParams);
                 if (token != null && (int) token.get("expires_in") > 0) {
                     return true;
                 }
@@ -591,7 +587,7 @@ public class KindeClientSDK {
         return false;
     }
 
-    public Map<String, Object> getClaims(HttpServletRequest req,String tokenType) {
+    public Map<String, Object> getClaims(HttpServletRequest req, String tokenType) {
 //        if (tokenType==null){
 //            tokenType=TokenType.ACCESS_TOKEN.getValue();
 //        }
@@ -608,8 +604,8 @@ public class KindeClientSDK {
         return Utils.parseJWT(token);
     }
 
-    public Map<String, Object> getClaims(HttpServletRequest req){
-        return getClaims(req,TokenType.ACCESS_TOKEN.getValue());
+    public Map<String, Object> getClaims(HttpServletRequest req) {
+        return getClaims(req, TokenType.ACCESS_TOKEN.getValue());
     }
 
     private void cleanStorage(HttpServletResponse response) {
@@ -624,7 +620,7 @@ public class KindeClientSDK {
         return req.isSecure() ? "https" : "http";
     }
 
-    private void checkStateAuthentication(HttpServletRequest req,String stateServer) {
+    private void checkStateAuthentication(HttpServletRequest req, String stateServer) {
         String storageOAuthState = storage.getState(req);
 
         if (storageOAuthState == null || storageOAuthState.equals("") || !stateServer.equals(storageOAuthState)) {

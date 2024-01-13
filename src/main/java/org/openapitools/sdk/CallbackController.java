@@ -1,19 +1,19 @@
 package org.openapitools.sdk;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.openapitools.sdk.enums.StorageEnums;
 import org.openapitools.sdk.storage.Storage;
 import org.openapitools.sdk.utils.Utils;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.client.RestTemplate;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -21,18 +21,16 @@ import java.util.Map;
 public class CallbackController {
 
 
-
-
     private KindeClientSDK kindeClientSDK;
 
     private Storage storage;
 
     public CallbackController(KindeClientSDK kindeClientSDK) {
-        this.kindeClientSDK=kindeClientSDK;
+        this.kindeClientSDK = kindeClientSDK;
         this.storage = this.kindeClientSDK.getStorage();
     }
 
-//    @GetMapping("/api/auth/kinde_callback")
+    //    @GetMapping("/api/auth/kinde_callback")
     public RedirectView callback(
             String code,
             String state,
@@ -51,13 +49,13 @@ public class CallbackController {
                 body.add("client_id", kindeClientSDK.getClientId());
                 body.add("client_secret", kindeClientSDK.getClientSecret());
                 body.add("code", code);
-                if(kindeClientSDK.getGrantType().equals("authorization_code_flow_pkce")){
+                if (kindeClientSDK.getGrantType().equals("authorization_code_flow_pkce")) {
 //                  body.add("code_verifier", codeVerifierCookie);
                     String codeVerifier = storage.getCodeVerifier(request);
                     body.add("grant_type", "authorization_code");
-                    body.add("code_verifier",codeVerifier);
-                }else{
-                    body.add("scope",kindeClientSDK.getScopes());
+                    body.add("code_verifier", codeVerifier);
+                } else {
+                    body.add("scope", kindeClientSDK.getScopes());
                     body.add("grant_type", kindeClientSDK.getGrantType());
                 }
                 body.add("redirect_uri", kindeClientSDK.getLogoutRedirectUri() + "/api/auth/kinde_callback");
@@ -72,10 +70,10 @@ public class CallbackController {
                 );
 
                 Object data_ = responseEntity.getBody();
-                Map<String, Object> data=(Map<String, Object>) data_;
+                Map<String, Object> data = (Map<String, Object>) data_;
                 String accessToken = (String) data.get("access_token");
 
-                Map<String, Object> payload=Utils.parseJWT(accessToken);
+                Map<String, Object> payload = Utils.parseJWT(accessToken);
                 boolean isAudienceValid = true;
 //                if (audience != null && !audience.toString().equals("") && !audience.toString().equals("[]")) {
 //                    String payloadAudience = payload.get("aud").toString();
@@ -84,8 +82,8 @@ public class CallbackController {
                 if (
                         payload.get("iss").equals(kindeClientSDK.getDomain()) &&
 //                        payload.get("alg").equals("RS256") &&
-                        isAudienceValid &&
-                        (long) (Integer) payload.get("exp") > System.currentTimeMillis() / 1000L
+                                isAudienceValid &&
+                                (long) (Integer) payload.get("exp") > System.currentTimeMillis() / 1000L
                 ) {
 
                     String newKey = "kinde" + '_' + StorageEnums.TOKEN.getValue();
@@ -99,7 +97,7 @@ public class CallbackController {
                     cookie.setSecure(true);
                     cookie.setHttpOnly(true);
                     response.addCookie(cookie);
-                }else{
+                } else {
                     System.out.println("One or more of the claims were not verified.");
                 }
             } catch (Exception e) {
@@ -114,7 +112,7 @@ public class CallbackController {
 //            return new RedirectView("");
         } else {
 
-            String logoutUrl=UriComponentsBuilder.fromHttpUrl(kindeClientSDK.getLogoutEndpoint())
+            String logoutUrl = UriComponentsBuilder.fromHttpUrl(kindeClientSDK.getLogoutEndpoint())
                     .queryParam("redirect", kindeClientSDK.getLogoutRedirectUri())
                     .build()
                     .toUriString();

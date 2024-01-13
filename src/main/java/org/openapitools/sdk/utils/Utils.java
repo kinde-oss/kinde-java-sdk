@@ -3,18 +3,18 @@ package org.openapitools.sdk.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.sdk.enums.AdditionalParameters;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Utils {
     public static Map<String, String> listType = new HashMap<>();
+
     static {
         listType.put("s", "string");
         listType.put("i", "integer");
@@ -125,7 +125,8 @@ public class Utils {
             byte[] decodedBytes = Base64.getDecoder().decode(encodedPayload);
             String decodedPayload = new String(decodedBytes);
 //            return new ObjectMapper().readValue(decodedPayload, HashMap.class);
-            return new ObjectMapper().readValue(decodedPayload, new TypeReference<Map<String,Object>>(){});
+            return new ObjectMapper().readValue(decodedPayload, new TypeReference<Map<String, Object>>() {
+            });
         } catch (Exception e) {
             return null;
         }
@@ -149,7 +150,7 @@ public class Utils {
 //    }
 
     public static Map<String, Object> checkAdditionalParameters(Map<String, Object> additionalParameters) {
-        if (additionalParameters==null || additionalParameters.isEmpty()) {
+        if (additionalParameters == null || additionalParameters.isEmpty()) {
             return new HashMap<>();
         }
         Map<String, String> additionalParametersValid = AdditionalParameters.ADDITIONAL_PARAMETER;
@@ -170,7 +171,7 @@ public class Utils {
     public static Map<String, Object> addAdditionalParameters(Map<String, Object> target, Map<String, Object> additionalParameters) {
         Map<String, Object> newAdditionalParameters = checkAdditionalParameters(additionalParameters);
         Map<String, Object> mutableTarget = new HashMap<>(target);
-        if (newAdditionalParameters!=null && !newAdditionalParameters.isEmpty()) {
+        if (newAdditionalParameters != null && !newAdditionalParameters.isEmpty()) {
             mutableTarget.putAll(newAdditionalParameters);
         }
         return mutableTarget;

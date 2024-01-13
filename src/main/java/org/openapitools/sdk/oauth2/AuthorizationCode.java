@@ -1,15 +1,15 @@
 package org.openapitools.sdk.oauth2;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.openapitools.sdk.KindeClientSDK;
 import org.openapitools.sdk.enums.GrantType;
-import org.openapitools.sdk.utils.Utils;
 import org.openapitools.sdk.storage.Storage;
+import org.openapitools.sdk.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,13 +23,13 @@ public class AuthorizationCode {
         this.storage = storage;
     }
 
-    public RedirectView authenticate(HttpServletResponse response,KindeClientSDK clientSDK,String startPage, Map<String, Object> additionalParameters) {
+    public RedirectView authenticate(HttpServletResponse response, KindeClientSDK clientSDK, String startPage, Map<String, Object> additionalParameters) {
 //        if (additionalParameters==null){
 //            additionalParameters=new HashMap<>();
 //        }
 
         String state = Utils.randomString();
-        storage.setState(response,state);
+        storage.setState(response, state);
 
 //        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 //        queryParams.add("client_id", clientSDK.getClientId());
@@ -64,7 +64,7 @@ public class AuthorizationCode {
 //        return new ModelAndView(redirectView);
     }
 
-    public RedirectView authenticate(HttpServletResponse response,KindeClientSDK clientSDK,String startPage){
-        return authenticate(response,clientSDK,startPage,new HashMap<>());
+    public RedirectView authenticate(HttpServletResponse response, KindeClientSDK clientSDK, String startPage) {
+        return authenticate(response, clientSDK, startPage, new HashMap<>());
     }
 }
