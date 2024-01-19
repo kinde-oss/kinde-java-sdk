@@ -8,7 +8,7 @@
     <url>https://github.com/kinde-oss/kinde-java-sdk/</url>
     <description>Kinde Java SDK</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
