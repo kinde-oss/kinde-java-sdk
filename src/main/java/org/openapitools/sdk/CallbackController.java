@@ -60,7 +60,7 @@ public class CallbackController {
                     body.add("scope",kindeClientSDK.getScopes());
                     body.add("grant_type", kindeClientSDK.getGrantType());
                 }
-                body.add("redirect_uri", kindeClientSDK.getLogoutRedirectUri() + "/api/auth/kinde_callback");
+                body.add("redirect_uri", kindeClientSDK.getRedirectUri());
 
                 HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
 
