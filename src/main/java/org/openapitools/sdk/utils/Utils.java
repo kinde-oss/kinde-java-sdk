@@ -104,12 +104,6 @@ public class Utils {
         }
     }
 
-    public static boolean validateURL(String url) {
-        String pattern = "https?://(?:w{1,3}\\.)?[^\\s.]+(?:\\.[a-z]+)*(?::\\d+)?(?![^<]*(?:<\\/?\\w+>|\\/?>))";
-//        return Pattern.matches(pattern,url);
-        return url.matches(pattern);
-    }
-
     public static Map<String, Object> parseJWT(String token) {
         try {
 
