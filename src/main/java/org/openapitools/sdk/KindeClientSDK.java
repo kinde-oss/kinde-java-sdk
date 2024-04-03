@@ -118,16 +118,10 @@ public class KindeClientSDK {
         if (domain == null || domain.isEmpty()) {
             throw new IllegalArgumentException("Please provide domain");
         }
-        if (!Utils.validateURL(domain)) {
-            throw new IllegalArgumentException("Please provide valid domain");
-        }
         this.domain = domain;
 
         if (redirectUri == null || redirectUri.isEmpty()) {
             throw new IllegalArgumentException("Please provide redirect_uri");
-        }
-        if (!Utils.validateURL(redirectUri)) {
-            throw new IllegalArgumentException("Please provide valid redirect_uri");
         }
         this.redirectUri = redirectUri;
 
@@ -148,9 +142,6 @@ public class KindeClientSDK {
 
         if (logoutRedirectUri == null || logoutRedirectUri.isEmpty()) {
             throw new IllegalArgumentException("Please provide logout_redirect_uri");
-        }
-        if (!Utils.validateURL(logoutRedirectUri)) {
-            throw new IllegalArgumentException("Please provide valid logout_redirect_uri");
         }
 
         if (additionalParameters==null){
