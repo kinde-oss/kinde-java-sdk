@@ -92,23 +92,20 @@ public class BaseStorage {
         return "";
     }
 
-    public static void setItem(HttpServletResponse response,String key, String value, int expiresOrOptions, String path, String domain, boolean secure, boolean httpOnly) {
+    public static void setItem(HttpServletResponse response, String key, String value, int expiresOrOptions, String path, String domain) {
         String newKey = getKey(key);
         Cookie cookie = new Cookie(newKey, value);
         cookie.setMaxAge(expiresOrOptions);
         cookie.setPath(path);
         cookie.setDomain(domain);
-        cookie.setSecure(secure);
-        cookie.setHttpOnly(httpOnly);
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
     }
 
-    public static void setItem(HttpServletResponse response,String key, String value){
-        setItem(response,key,value,0,"","",true,false);
-    }
-
-    public static void setItem(HttpServletResponse response,String key, String value, int expiresOrOptions){
-        setItem(response,key,value,expiresOrOptions,"","",true,false);
+    public static void setItem(HttpServletResponse response, String key, String value, int expiresOrOptions){
+        setItem(response, key, value, expiresOrOptions, "", "");
     }
 
     public static void removeItem(HttpServletResponse response, String key) {
