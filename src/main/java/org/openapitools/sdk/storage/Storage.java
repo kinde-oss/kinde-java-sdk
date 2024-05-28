@@ -87,7 +87,7 @@ public class Storage extends BaseStorage {
     }
 
     public static Long getTokenTimeToLive() {
-        return tokenTimeToLive != null ? tokenTimeToLive : System.currentTimeMillis() + 3600 * 24 * 15 * 1000; // Live in 15 days
+        return tokenTimeToLive != null ? tokenTimeToLive : 3600 * 24 * 15; // Live in 15 days
     }
 
     public static void setTokenTimeToLive(Long tokenTTL) {
