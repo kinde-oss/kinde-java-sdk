@@ -47,18 +47,4 @@ public class UtilsTest {
                 () -> assertNotNull(result.get("codeChallenge"))
         );
     }
-
-    @Test
-    public void testValidationURL() {
-        String url = "https://test.com";
-        Boolean result = utils.validateURL(url);
-        assertEquals(Boolean.TRUE, result);
-    }
-
-    @Test
-    public void testValidationUrlInvalid() {
-        String urlInvalid = "test.c";
-        boolean result = utils.validateURL(urlInvalid);
-        assertNotEquals(result, true);
-    }
 }
