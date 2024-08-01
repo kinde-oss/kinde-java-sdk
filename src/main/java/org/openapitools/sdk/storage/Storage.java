@@ -87,7 +87,7 @@ public class Storage extends BaseStorage {
     }
 
     public static Long getTokenTimeToLive() {
-        return tokenTimeToLive != null ? tokenTimeToLive : System.currentTimeMillis() + 3600 * 24 * 15 * 1000; // Live in 15 days
+        return tokenTimeToLive != null ? tokenTimeToLive : 3600 * 24 * 15; // Live in 15 days
     }
 
     public static void setTokenTimeToLive(Long tokenTTL) {
@@ -99,7 +99,7 @@ public class Storage extends BaseStorage {
     }
 
     public static void setState( HttpServletResponse response,String newState) {
-        setItem(response,StorageEnums.STATE.getValue(), newState,(int) ((long) (System.currentTimeMillis() + 3600 *2 )));
+        setItem(response,StorageEnums.STATE.getValue(), newState, 3600 * 2); // 2 hours
         // set expiration time for state
     }
 
@@ -108,7 +108,7 @@ public class Storage extends BaseStorage {
     }
 
     public static void setCodeVerifier(HttpServletResponse response,String newCodeVerifier) {
-        setItem(response,StorageEnums.CODE_VERIFIER.getValue(), newCodeVerifier,(int) ((long) (System.currentTimeMillis() + 3600 *2 )));
+        setItem(response,StorageEnums.CODE_VERIFIER.getValue(), newCodeVerifier, 3600 * 2); // 2 hours
         // set expiration time for code verifier
     }
 
