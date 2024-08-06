@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage extends BaseStorage {
 
-    private static final int MAX_AGE_15_DAYS = 3600 * 24 * 15;
-    private static final int MAX_AGE_2_HOURS = 3600 * 2;
+    public static final int MAX_AGE_15_DAYS = 3600 * 24 * 15;
+    public static final int MAX_AGE_2_HOURS = 3600 * 2;
 
     private static Storage instance;
 
