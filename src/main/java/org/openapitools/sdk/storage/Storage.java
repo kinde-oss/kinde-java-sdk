@@ -14,10 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage extends BaseStorage {
 
-
+    public static final int MAX_AGE_15_DAYS = 3600 * 24 * 15;
+    public static final int MAX_AGE_2_HOURS = 3600 * 2;
 
     private static Storage instance;
-    private static Long tokenTimeToLive;
 
     private static final Map<String, String> storageMap = new ConcurrentHashMap<>();
 
@@ -62,7 +62,7 @@ public class Storage extends BaseStorage {
             }
         }
 
-        setItem(response,StorageEnums.TOKEN.getValue(), tok, getTokenTimeToLive().intValue());
+        setItem(response,StorageEnums.TOKEN.getValue(), tok, MAX_AGE_15_DAYS);
     }
 
     public static String getAccessToken(HttpServletRequest request) {
@@ -86,20 +86,12 @@ public class Storage extends BaseStorage {
         return accessToken != null ? ((Integer) Utils.parseJWT(accessToken).get("exp")).longValue() : 0L;
     }
 
-    public static Long getTokenTimeToLive() {
-        return tokenTimeToLive != null ? tokenTimeToLive : System.currentTimeMillis() + 3600 * 24 * 15 * 1000; // Live in 15 days
-    }
-
-    public static void setTokenTimeToLive(Long tokenTTL) {
-        tokenTimeToLive = tokenTTL;
-    }
-//
     public static String getState(HttpServletRequest request) {
         return getItem(request,StorageEnums.STATE.getValue());
     }
 
     public static void setState( HttpServletResponse response,String newState) {
-        setItem(response,StorageEnums.STATE.getValue(), newState,(int) ((long) (System.currentTimeMillis() + 3600 *2 )));
+        setItem(response,StorageEnums.STATE.getValue(), newState,MAX_AGE_2_HOURS );
         // set expiration time for state
     }
 
@@ -108,7 +100,7 @@ public class Storage extends BaseStorage {
     }
 
     public static void setCodeVerifier(HttpServletResponse response,String newCodeVerifier) {
-        setItem(response,StorageEnums.CODE_VERIFIER.getValue(), newCodeVerifier,(int) ((long) (System.currentTimeMillis() + 3600 *2 )));
+        setItem(response,StorageEnums.CODE_VERIFIER.getValue(), newCodeVerifier,MAX_AGE_2_HOURS);
         // set expiration time for code verifier
     }
 
