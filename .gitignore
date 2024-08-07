@@ -9,6 +9,7 @@ node_modules/
 # Compiled output
 dist/
 build/
+target/
 coverage/
 
 # Generated at runtime
