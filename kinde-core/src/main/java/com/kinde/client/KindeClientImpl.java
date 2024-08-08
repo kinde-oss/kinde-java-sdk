@@ -15,6 +15,7 @@ public class KindeClientImpl implements KindeClient {
 
     public KindeClientImpl(Map<String, Object> parameters) {
         this.parameters = parameters;
+
     }
 
     @Override
@@ -31,4 +32,5 @@ public class KindeClientImpl implements KindeClient {
     public KindTokenFactory initTokenFactory() {
         return new KindTokenFactoryImpl(this);
     }
+
 }
