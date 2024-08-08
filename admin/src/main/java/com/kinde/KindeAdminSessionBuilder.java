@@ -1,5 +1,7 @@
 package com.kinde;
 
+import com.kinde.admin.KindeAdminSessionImpl;
+
 public class KindeAdminSessionBuilder {
 
     private KindeClient kindeClient;
@@ -17,5 +19,8 @@ public class KindeAdminSessionBuilder {
         return this;
     }
 
+    public KindeAdminSession build() {
+        return new KindeAdminSessionImpl(kindeClient);
+    }
 
 }
