@@ -9,21 +9,8 @@ import com.kinde.token.KindeToken;
 
 public class KindeSessionGuiceModule  extends AbstractModule {
 
-    private KindeToken accessToken;
-
-    public KindeSessionGuiceModule(KindeToken accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    @Provides
-    @KindeAnnotations.AccessToken
-    public KindeToken provideAccessToken() {
-        return accessToken;
-    }
-
-
     @Override
     protected void configure() {
-        bind(KindeClientSession.class).to(KindeClientAccessTokenSessionImpl.class);
+        bind(KindeClientSession.class).to(KindeClientSessionImpl.class);
     }
 }

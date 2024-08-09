@@ -4,6 +4,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+
+
 /**
  * Unit test for simple App.
  */
@@ -31,8 +33,14 @@ public class AppTest
     /**
      * Rigourous Test :-)
      */
-    public void testApp()
-    {
-        assertTrue( true );
+    public void testApp() {
+        System.out.println("Test the kinde builder");
+        KindeClient kindeClient = KindeClientBuilder
+                .builder()
+                    .domain("<replace with host>")
+                    .clientId("<replace with client>")
+                    .clientSecret("<replace with secret>")
+                .build();
+
     }
 }

@@ -14,4 +14,9 @@ public class KindeClientAccessTokenSessionImpl implements KindeClientSession {
     public KindeClientAccessTokenSessionImpl(@KindeAnnotations.AccessToken KindeToken accessToken) {
         this.accessToken = accessToken;
     }
+
+    @Override
+    public String getValue() {
+        return "";
+    }
 }

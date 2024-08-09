@@ -10,4 +10,9 @@ public class KindeClientSessionImpl implements KindeClientSession {
     public KindeClientSessionImpl() {
 
     }
+
+    @Override
+    public String getValue() {
+        return "";
+    }
 }
