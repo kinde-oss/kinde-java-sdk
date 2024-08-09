@@ -5,6 +5,9 @@ import com.kinde.client.OidcMetaData;
 import com.kinde.guice.KindeAnnotations;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+import lombok.SneakyThrows;
+
+import java.net.URL;
 
 public class OidcMetaDataImpl implements OidcMetaData {
 
@@ -21,5 +24,11 @@ public class OidcMetaDataImpl implements OidcMetaData {
 
     public OIDCProviderMetadata getOpMetadata() {
         return this.opMetadata;
+    }
+
+    @Override
+    @SneakyThrows
+    public URL getJwkUrl() {
+        return this.opMetadata.getJWKSetURI().toURL();
     }
 }

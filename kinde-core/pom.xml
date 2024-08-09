@@ -46,22 +46,58 @@
       <version>1.18.34</version>
       <scope>provided</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.15</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.0</version>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.10</version> <!-- Replace with the latest version -->
         <executions>
           <execution>
-            <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>post-unit-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
             </goals>
             <configuration>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>jackofall</shadedClassifierName> <!-- Any name that makes sense -->
+              <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
+              <dataFile>${project.build.directory}/jacoco/jacoco.exec</dataFile>
+              <reportFormats>
+                <format>HTML</format>
+                <format>XML</format>
+              </reportFormats>
+              <append>true</append>
+              <skip>false</skip>
+              <includes>
+                <include>com/kinde/**</include>
+              </includes>
+              <excludes>
+                <exclude>com/google/inject/**/*.class</exclude>
+                <exclude>javax/inject/**/*.class</exclude>
+                <exclude>org/springframework/**/*.class</exclude>
+                <exclude>**/generated/**</exclude>
+                <exclude>**/thirdparty/**</exclude>
+                <!-- Add more excludes if necessary -->
+              </excludes>
             </configuration>
           </execution>
         </executions>

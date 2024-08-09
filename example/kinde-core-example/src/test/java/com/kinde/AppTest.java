@@ -37,10 +37,10 @@ public class AppTest
         System.out.println("Test the kinde builder");
         KindeClient kindeClient = KindeClientBuilder
                 .builder()
-                    .domain("<replace with host>")
-                    .clientId("<replace with client>")
-                    .clientSecret("<replace with secret>")
+                    .domain("set")
+                    .clientId("set")
+                    .clientSecret("set")
                 .build();
-
+        KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
     }
 }
