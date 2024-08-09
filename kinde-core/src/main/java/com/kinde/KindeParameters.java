@@ -1,6 +1,6 @@
 package com.kinde;
 
-public enum KindParameters {
+public enum KindeParameters {
     DOMAIN("DOMAIN"),
     REDIRECT_URI("REDIRECT_URI"),
     LOGOUT_REDIRECT_URI("LOGOUT_REDIRECT_URI"),
@@ -19,7 +19,7 @@ public enum KindParameters {
     private final String value;
 
     // Private constructor to initialize the enum constants
-    private KindParameters(String value) {
+    private KindeParameters(String value) {
         this.value = value;
     }
 
@@ -29,8 +29,8 @@ public enum KindParameters {
     }
 
     // Method to get the enum constant by string value
-    public static KindParameters fromValue(String value) {
-        for (KindParameters constant : KindParameters.values()) {
+    public static KindeParameters fromValue(String value) {
+        for (KindeParameters constant : KindeParameters.values()) {
             if (constant.value.equals(value)) {
                 return constant;
             }

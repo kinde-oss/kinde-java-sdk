@@ -29,68 +29,68 @@ public class KindeClientBuilder {
 
 
     public KindeClientBuilder domain(String domain) {
-        this.parameters.put(KindParameters.DOMAIN.getValue(),domain);
+        this.parameters.put(KindeParameters.DOMAIN.getValue(),domain);
         return this;
     }
 
     public KindeClientBuilder redirectUri(String redirectUri) {
-        this.parameters.put(KindParameters.REDIRECT_URI.getValue(),redirectUri);
+        this.parameters.put(KindeParameters.REDIRECT_URI.getValue(),redirectUri);
         return this;
     }
 
     public KindeClientBuilder logoutRedirectUri(String logoutRedirectUri) {
-        this.parameters.put(KindParameters.LOGOUT_REDIRECT_URI.getValue(),logoutRedirectUri);
+        this.parameters.put(KindeParameters.LOGOUT_REDIRECT_URI.getValue(),logoutRedirectUri);
         return this;
     }
 
     public KindeClientBuilder openidEndpoint(String openidEndpoint) {
-        this.parameters.put(KindParameters.OPENID_ENDPOINT.getValue(),openidEndpoint);
+        this.parameters.put(KindeParameters.OPENID_ENDPOINT.getValue(),openidEndpoint);
         return this;
     }
 
     public KindeClientBuilder authorizationEndpoint(String authorizationEndpoint) {
-        this.parameters.put(KindParameters.AUTHORIZATION_ENDPOINT.getValue(),authorizationEndpoint);
+        this.parameters.put(KindeParameters.AUTHORIZATION_ENDPOINT.getValue(),authorizationEndpoint);
         return this;
     }
 
     public KindeClientBuilder tokenEndpoint(String tokenEndpoint) {
-        this.parameters.put(KindParameters.TOKEN_ENDPOINT.getValue(),tokenEndpoint);
+        this.parameters.put(KindeParameters.TOKEN_ENDPOINT.getValue(),tokenEndpoint);
         return this;
     }
 
     public KindeClientBuilder logoutEndpoint(String logoutEndpoint) {
-        this.parameters.put(KindParameters.TOKEN_ENDPOINT.getValue(),logoutEndpoint);
+        this.parameters.put(KindeParameters.TOKEN_ENDPOINT.getValue(),logoutEndpoint);
         return this;
     }
 
     public KindeClientBuilder clientId(String clientId) {
-        this.parameters.put(KindParameters.CLIENT_ID.getValue(),clientId);
+        this.parameters.put(KindeParameters.CLIENT_ID.getValue(),clientId);
         return this;
     }
 
     public KindeClientBuilder clientSecret(String clientSecret) {
-        this.parameters.put(KindParameters.CLIENT_SECRET.getValue(),clientSecret);
+        this.parameters.put(KindeParameters.CLIENT_SECRET.getValue(),clientSecret);
         return this;
     }
 
     public KindeClientBuilder grantType(String grantType) {
-        this.parameters.put(KindParameters.GRANT_TYPE.getValue(),grantType);
+        this.parameters.put(KindeParameters.GRANT_TYPE.getValue(),grantType);
         return this;
     }
 
     public KindeClientBuilder scopes(String domain) {
-        this.parameters.put(KindParameters.SCOPES.getValue(), Arrays.asList(domain.split(",")));
+        this.parameters.put(KindeParameters.SCOPES.getValue(), Arrays.asList(domain.split(",")));
         return this;
     }
 
     public KindeClientBuilder addScope(String scope) {
-        List.class.cast(this.parameters.computeIfAbsent(KindParameters.SCOPES.getValue(), k -> new ArrayList<String>()))
+        List.class.cast(this.parameters.computeIfAbsent(KindeParameters.SCOPES.getValue(), k -> new ArrayList<String>()))
                 .add(scope);
         return this;
     }
 
     public KindeClientBuilder protocol(String protocol) {
-        this.parameters.put(KindParameters.PROTOCOL.getValue(),protocol);
+        this.parameters.put(KindeParameters.PROTOCOL.getValue(),protocol);
         return this;
     }
 
@@ -98,9 +98,9 @@ public class KindeClientBuilder {
     public KindeClient build() {
         Set keys = this.parameters.keySet();
         if (!keys.containsAll(
-                Arrays.asList(KindParameters.CLIENT_ID.getValue(),
-                        KindParameters.CLIENT_SECRET.getValue(),
-                        KindParameters.DOMAIN.getValue()))) {
+                Arrays.asList(KindeParameters.CLIENT_ID.getValue(),
+                        KindeParameters.CLIENT_SECRET.getValue(),
+                        KindeParameters.DOMAIN.getValue()))) {
             throw new InvalidParameterException("The required parameters were not set");
         }
         // create a child injector for the scope of this client

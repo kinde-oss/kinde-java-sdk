@@ -16,4 +16,8 @@ public class KindeAnnotations {
     @Qualifier
     @Retention(RUNTIME)
     public @interface ClientConfigDomain {}
+
+    @Qualifier
+    @Retention(RUNTIME)
+    public @interface AccessToken {}
 }

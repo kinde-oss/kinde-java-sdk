@@ -1,6 +1,5 @@
 package com.kinde;
 
-import com.kinde.token.IDToken;
 import com.kinde.token.KindeToken;
 
 public interface KindeClient {
@@ -25,5 +24,5 @@ public interface KindeClient {
      *
      * @return
      */
-    KindTokenFactory tokenFactory();
+    KindeTokenFactory tokenFactory();
 }

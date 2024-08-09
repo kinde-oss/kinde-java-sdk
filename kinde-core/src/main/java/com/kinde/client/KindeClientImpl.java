@@ -2,11 +2,11 @@ package com.kinde.client;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.kinde.KindTokenFactory;
+import com.kinde.KindeTokenFactory;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientSession;
-import com.kinde.session.KindeClientSessionImpl;
-import com.kinde.token.KindTokenFactoryImpl;
+import com.kinde.session.KindeSessionGuiceModule;
+import com.kinde.token.KindeTokenFactoryImpl;
 import com.kinde.token.KindeToken;
 
 public class KindeClientImpl implements KindeClient {
@@ -21,17 +21,17 @@ public class KindeClientImpl implements KindeClient {
 
     @Override
     public KindeClientSession initClientSession(KindeToken accessToken) {
-        return this.injector.getInstance(KindeClientSession.class);
+        return this.injector.createChildInjector(new KindeSessionGuiceModule(accessToken)).getInstance(KindeClientSession.class);
     }
 
     @Override
     public KindeClientSession clientSession() {
-        return new KindeClientSessionImpl(this);
+        return this.injector.getInstance(KindeClientSession.class);
     }
 
     @Override
-    public KindTokenFactory tokenFactory() {
-        return new KindTokenFactoryImpl(this);
+    public KindeTokenFactory tokenFactory() {
+        return this.injector.getInstance(KindeTokenFactory.class);
     }
 
 }

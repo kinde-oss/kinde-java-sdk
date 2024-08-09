@@ -4,7 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-public class KindParametersTest
+public class KindeParametersTest
         extends TestCase {
 
     /**
@@ -12,7 +12,7 @@ public class KindParametersTest
      *
      * @param testName name of the test case
      */
-    public KindParametersTest( String testName )
+    public KindeParametersTest(String testName )
     {
         super( testName );
     }
@@ -22,15 +22,15 @@ public class KindParametersTest
      */
     public static Test suite()
     {
-        return new TestSuite( KindParametersTest.class );
+        return new TestSuite( KindeParametersTest.class );
     }
 
     /**
      * Rigourous Test :-)
      */
     public void testKindParameterConstants() {
-        String domain1 = KindParameters.DOMAIN.getValue();
-        String domain2 = KindParameters.DOMAIN.getValue();
+        String domain1 = KindeParameters.DOMAIN.getValue();
+        String domain2 = KindeParameters.DOMAIN.getValue();
         assertTrue( domain1.equals(domain2) );
     }
 }
