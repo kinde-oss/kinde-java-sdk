@@ -1,35 +1,36 @@
 package com.kinde.client;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.kinde.KindTokenFactory;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientSession;
-import com.kinde.session.KindClientSessionImpl;
+import com.kinde.session.KindeClientSessionImpl;
 import com.kinde.token.KindTokenFactoryImpl;
 import com.kinde.token.KindeToken;
 
-import java.util.Map;
-
 public class KindeClientImpl implements KindeClient {
 
-    private Map<String, Object> parameters;
+    private final Injector injector;
 
-    public KindeClientImpl(Map<String, Object> parameters) {
-        this.parameters = parameters;
-
+    @Inject
+    public KindeClientImpl(Injector injector) {
+        this.injector = injector;
+        OidcMetaData oidcMetaData = this.injector.getInstance(OidcMetaData.class);
     }
 
     @Override
     public KindeClientSession initClientSession(KindeToken accessToken) {
-        return new KindClientSessionImpl(this);
+        return this.injector.getInstance(KindeClientSession.class);
     }
 
     @Override
-    public KindeClientSession initClientSession() {
-        return new KindClientSessionImpl(this);
+    public KindeClientSession clientSession() {
+        return new KindeClientSessionImpl(this);
     }
 
     @Override
-    public KindTokenFactory initTokenFactory() {
+    public KindTokenFactory tokenFactory() {
         return new KindTokenFactoryImpl(this);
     }
 

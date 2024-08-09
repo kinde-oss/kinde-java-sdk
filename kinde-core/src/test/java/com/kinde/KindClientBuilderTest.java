@@ -1,5 +1,8 @@
 package com.kinde;
 
+import com.kinde.client.KindeClientGuiceTestModule;
+import com.kinde.guice.KindeEnvironmentSingleton;
+import com.kinde.guice.KindeGuiceSingleton;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -15,6 +18,8 @@ public class KindClientBuilderTest
     public KindClientBuilderTest( String testName )
     {
         super( testName );
+        KindeGuiceSingleton.getInstance(new KindeClientGuiceTestModule());
+        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
     }
 
     /**
@@ -28,10 +33,11 @@ public class KindClientBuilderTest
     /**
      * Rigourous Test :-)
      */
-    public void testBuilder() {
+    public void testBuilderBasic() {
         KindeClientBuilder kindeClientBuilder1 = KindeClientBuilder.builder();
         KindeClientBuilder kindeClientBuilder2 = KindeClientBuilder.builder();
         assertTrue( kindeClientBuilder1 != kindeClientBuilder2 );
         KindeClient kindeClient = kindeClientBuilder1.domain("test").clientId("test").clientSecret("test").build();
+        assertTrue( kindeClient != null );
     }
 }

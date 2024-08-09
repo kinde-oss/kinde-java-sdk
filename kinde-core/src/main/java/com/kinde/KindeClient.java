@@ -17,7 +17,7 @@ public interface KindeClient {
      *
      * @return
      */
-    KindeClientSession initClientSession();
+    KindeClientSession clientSession();
 
 
     /**
@@ -25,5 +25,5 @@ public interface KindeClient {
      *
      * @return
      */
-    KindTokenFactory initTokenFactory();
+    KindTokenFactory tokenFactory();
 }

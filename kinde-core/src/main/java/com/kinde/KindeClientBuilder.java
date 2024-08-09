@@ -1,6 +1,8 @@
 package com.kinde;
 
-import com.kinde.client.KindeClientImpl;
+import com.google.inject.Injector;
+import com.kinde.client.KindeClientGuiceModule;
+import com.kinde.guice.KindeGuiceSingleton;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -101,6 +103,8 @@ public class KindeClientBuilder {
                         KindParameters.DOMAIN.getValue()))) {
             throw new InvalidParameterException("The required parameters were not set");
         }
-        return new KindeClientImpl(this.parameters);
+        // create a child injector for the scope of this client
+        Injector injector = KindeGuiceSingleton.getInstance().getInjector().createChildInjector(new KindeClientGuiceModule(this.parameters));
+        return injector.getInstance(KindeClient.class);
     }
 }
