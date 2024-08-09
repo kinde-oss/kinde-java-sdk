@@ -7,6 +7,7 @@ import com.kinde.KindeTokenFactory;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.AccessToken;
+import com.kinde.token.TestKeyGenerator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
