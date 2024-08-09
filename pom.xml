@@ -17,7 +17,7 @@
   </dependencies>
   <modules>
     <module>kinde-core</module>
-    <module>admin</module>
+    <module>management</module>
     <module>j2ee</module>
     <module>springboot</module>
   </modules>

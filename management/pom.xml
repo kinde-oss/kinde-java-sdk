@@ -21,7 +21,7 @@
     </properties>
 
     <groupId>com.kinde</groupId>
-    <artifactId>admin</artifactId>
+    <artifactId>management</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>admin</name>
