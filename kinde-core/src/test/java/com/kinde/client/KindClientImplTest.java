@@ -51,7 +51,7 @@ public class KindClientImplTest
     public void testClientToken() {
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
-        KindeClientSession kindeClientSession = kindeClient.initClientSession(AccessToken.init("TEST"));
+        KindeClientSession kindeClientSession = kindeClient.initClientSession(AccessToken.init("TEST",true));
     }
 
     /**

@@ -3,18 +3,24 @@ package com.kinde.token;
 public class IDToken implements KindeToken {
 
     private String token;
+    private boolean valid;
 
-    private IDToken(String token) {
+    private IDToken(String token, boolean valid) {
         this.token = token;
+        this.valid = valid;
     }
 
     @Override
     public boolean valid() {
-        return true;
+        return this.valid;
     }
 
-    public static KindeToken init(String token) {
-        return new IDToken(token);
+    public String token() {
+        return this.token;
+    }
+
+    public static KindeToken init(String token, boolean valid) {
+        return new IDToken(token,valid);
     }
 
 }
