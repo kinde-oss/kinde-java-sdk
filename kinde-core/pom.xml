@@ -93,6 +93,7 @@
               <excludes>
                 <exclude>com/google/inject/**/*.class</exclude>
                 <exclude>javax/inject/**/*.class</exclude>
+                <exclude>com/kinde/client/oidc/*.class</exclude>
                 <exclude>org/springframework/**/*.class</exclude>
                 <exclude>**/generated/**</exclude>
                 <exclude>**/thirdparty/**</exclude>
