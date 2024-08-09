@@ -37,7 +37,6 @@ public class KindeClientGuiceModule extends AbstractModule {
     protected void configure() {
         bind(KindeClient.class).to(KindeClientImpl.class);
         if (KindeEnvironmentSingleton.getInstance().getState() == KindeEnvironmentSingleton.State.ACTIVE) {
-            System.out.println("Load this stuff");
             bind(OidcMetaData.class).to(OidcMetaDataImpl.class);
         }
     }
