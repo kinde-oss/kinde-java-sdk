@@ -28,8 +28,6 @@ public class OidcMetaDataImplTest
     public OidcMetaDataImplTest(String testName )
     {
         super( testName );
-        KindeGuiceSingleton.getInstance(new KindeClientGuiceTestModule());
-        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
     }
 
     /**
