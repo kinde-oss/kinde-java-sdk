@@ -133,4 +133,13 @@ public class KindeParametersTest
         assertTrue( value1.equals(value3) );
     }
 
+    public void testKindParametersInvalidType() {
+        try {
+            KindeParameters.fromValue("INVALID_VALUE").getValue();
+            fail("Expected an exception");
+        } catch (Exception ex) {
+            // ignore
+        }
+    }
+
 }

@@ -7,6 +7,7 @@ import com.kinde.KindeTokenFactory;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.AccessToken;
+import com.kinde.token.RefreshToken;
 import com.kinde.token.TestKeyGenerator;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -52,6 +53,18 @@ public class KindClientImplTest
     public void testClientToken() {
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
+        try {
+            kindeClient.initClientSession(RefreshToken.init("TEST", true));
+            fail("The test failes as an exception is expected");
+        } catch (Exception ex) {
+            // ignore
+        }
+        try {
+            kindeClient.initClientSession(AccessToken.init("TEST",false));
+            fail("The test failes as an exception is expected");
+        } catch (Exception ex) {
+            // ignore
+        }
         KindeClientSession kindeClientSession = kindeClient.initClientSession(AccessToken.init("TEST",true));
     }
 
