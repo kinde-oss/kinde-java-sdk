@@ -16,7 +16,6 @@ import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import lombok.SneakyThrows;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.net.URI;
 import java.net.URL;
@@ -87,6 +86,6 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public UserInfo retrieveUserInfo() {
-        throw new NotImplementedException();
+        throw new RuntimeException("Not Implemented");
     }
 }
