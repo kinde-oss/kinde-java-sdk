@@ -2,6 +2,7 @@ package com.kinde;
 
 import com.google.inject.Injector;
 import com.kinde.client.KindeClientGuiceModule;
+import com.kinde.config.KindeParameters;
 import com.kinde.guice.KindeGuiceSingleton;
 
 import java.security.InvalidParameterException;

@@ -1,6 +1,5 @@
 package com.kinde.token;
 
-import com.kinde.KindeParameters;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

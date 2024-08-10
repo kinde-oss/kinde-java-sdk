@@ -1,5 +1,6 @@
 package com.kinde;
 
+import com.kinde.config.KindeParameters;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

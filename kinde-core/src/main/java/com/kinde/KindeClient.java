@@ -13,14 +13,14 @@ public interface KindeClient {
     KindeClientSession initClientSession(KindeToken accessToken);
 
     /**
-     *
+     * Return an instance of the
      * @return
      */
     KindeClientSession clientSession();
 
 
     /**
-     *
+     * Return an instance of the token factory
      *
      * @return
      */

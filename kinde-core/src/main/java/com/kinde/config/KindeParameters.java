@@ -1,4 +1,4 @@
-package com.kinde;
+package com.kinde.config;
 
 public enum KindeParameters {
     DOMAIN("DOMAIN"),
