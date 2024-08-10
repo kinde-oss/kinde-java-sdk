@@ -3,7 +3,7 @@ package com.kinde.token;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 
-import java.util.Set;
+import java.util.List;
 
 public class IDToken implements KindeToken {
 
@@ -34,7 +34,7 @@ public class IDToken implements KindeToken {
         return signedJWT.getJWTClaimsSet().getClaim(key);
     }
 
-    public Set<String> getPermissions() {
-        return (Set<String>) getClaim("permissions");
+    public List<String> getPermissions() {
+        return (List<String>) getClaim("permissions");
     }
 }

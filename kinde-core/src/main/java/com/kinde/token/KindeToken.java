@@ -1,7 +1,7 @@
 package com.kinde.token;
 
 
-import java.util.Set;
+import java.util.List;
 
 public interface KindeToken {
 
@@ -11,5 +11,5 @@ public interface KindeToken {
 
     Object getClaim(String key);
 
-    Set<String> getPermissions();
+    List<String> getPermissions();
 }
