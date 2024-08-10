@@ -8,6 +8,7 @@ import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.guice.KindeAnnotations;
 import com.kinde.token.KindeToken;
+import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
@@ -82,5 +83,10 @@ public class KindeClientSessionImpl implements KindeClientSession {
                 .build();
 
         return request.toURI().toURL();
+    }
+
+    @Override
+    public UserInfo retrieveUserInfo() {
+        throw new NotImplementedException();
     }
 }

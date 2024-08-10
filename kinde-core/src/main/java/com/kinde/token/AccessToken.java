@@ -1,5 +1,10 @@
 package com.kinde.token;
 
+import com.nimbusds.jwt.SignedJWT;
+import lombok.SneakyThrows;
+
+import java.util.Set;
+
 public class AccessToken implements KindeToken {
 
     private String token;
@@ -21,5 +26,15 @@ public class AccessToken implements KindeToken {
 
     public static KindeToken init(String token,boolean valid) {
         return new AccessToken(token,valid);
+    }
+
+    @SneakyThrows
+    public Object getClaim(String key) {
+        SignedJWT signedJWT = SignedJWT.parse(this.token);
+        return signedJWT.getJWTClaimsSet().getClaim(key);
+    }
+
+    public Set<String> getPermissions() {
+        return (Set<String>) getClaim("permissions");
     }
 }

@@ -1,5 +1,10 @@
 package com.kinde.token;
 
+import com.nimbusds.jwt.SignedJWT;
+import lombok.SneakyThrows;
+
+import java.util.Set;
+
 public class RefreshToken implements KindeToken {
 
     private String token;
@@ -23,4 +28,13 @@ public class RefreshToken implements KindeToken {
         return new RefreshToken(token,valid);
     }
 
+    @SneakyThrows
+    public Object getClaim(String key) {
+        SignedJWT signedJWT = SignedJWT.parse(this.token);
+        return signedJWT.getJWTClaimsSet().getClaim(key);
+    }
+
+    public Set<String> getPermissions() {
+        return (Set<String>) getClaim("permissions");
+    }
 }

@@ -4,7 +4,9 @@ import com.google.inject.Inject;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.guice.KindeAnnotations;
+import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
+import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.AccessTokenResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
@@ -13,8 +15,12 @@ import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.openid.connect.sdk.UserInfoRequest;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import lombok.SneakyThrows;
 
 import java.net.URI;
@@ -61,5 +67,36 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
         return Arrays.asList(
                 com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true),
                 com.kinde.token.RefreshToken.init(successResponse.getTokens().getRefreshToken().getValue(),true));
+    }
+
+
+    @Override
+    @SneakyThrows
+    public UserInfo retrieveUserInfo() {
+        if (!(this.kindeToken instanceof AccessToken)) {
+            throw new IllegalArgumentException("Expected an access token to be present.");
+        }
+        URI userInfoEndpoint;    // The UserInfoEndpoint of the OpenID provider
+        BearerAccessToken token = new BearerAccessToken(this.kindeToken.token()); // The access token
+
+// Make the request
+        HTTPResponse httpResponse = new UserInfoRequest(this.oidcMetaData.getOpMetadata().getUserInfoEndpointURI(), token)
+                .toHTTPRequest()
+                .send();
+
+// Parse the response
+        UserInfoResponse userInfoResponse = UserInfoResponse.parse(httpResponse);
+
+        if (! userInfoResponse.indicatesSuccess()) {
+            // The request failed, e.g. due to invalid or expired token
+            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getCode());
+            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getDescription());
+            return null;
+        }
+
+// Extract the claims
+        com.nimbusds.openid.connect.sdk.claims.UserInfo userInfo = userInfoResponse.toSuccessResponse().getUserInfo();
+
+        return new UserInfo();
     }
 }
