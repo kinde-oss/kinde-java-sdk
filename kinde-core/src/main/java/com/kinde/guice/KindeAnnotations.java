@@ -19,5 +19,9 @@ public class KindeAnnotations {
 
     @Qualifier
     @Retention(RUNTIME)
-    public @interface AccessToken {}
+    public @interface KindeToken {}
+
+    @Qualifier
+    @Retention(RUNTIME)
+    public @interface KindeCode {}
 }

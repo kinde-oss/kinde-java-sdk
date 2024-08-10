@@ -7,6 +7,7 @@ import com.kinde.KindeTokenFactory;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.AccessToken;
+import com.kinde.token.IDToken;
 import com.kinde.token.RefreshToken;
 import com.kinde.token.TestKeyGenerator;
 import junit.framework.Test;
@@ -54,7 +55,7 @@ public class KindClientImplTest
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
         try {
-            kindeClient.initClientSession(RefreshToken.init("TEST", true));
+            kindeClient.initClientSession(IDToken.init("TEST", true));
             fail("The test failes as an exception is expected");
         } catch (Exception ex) {
             // ignore
@@ -66,6 +67,27 @@ public class KindClientImplTest
             // ignore
         }
         KindeClientSession kindeClientSession = kindeClient.initClientSession(AccessToken.init("TEST",true));
+    }
+
+    /**
+     * Rigourous Test :-)
+     */
+    public void testClientCode() {
+        KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
+                .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
+        try {
+            kindeClient.initClientSession((String)null);
+            fail("The test failes as an exception is expected");
+        } catch (Exception ex) {
+            // ignore
+        }
+        try {
+            kindeClient.initClientSession("");
+            fail("The test failes as an exception is expected");
+        } catch (Exception ex) {
+            // ignore
+        }
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("1234");
     }
 
     /**

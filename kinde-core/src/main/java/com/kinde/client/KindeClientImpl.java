@@ -6,12 +6,10 @@ import com.kinde.KindeTokenFactory;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientSession;
 import com.kinde.config.KindeConfig;
-import com.kinde.session.KindeSessionAccessTokenGuiceModule;
+import com.kinde.session.KindeSessionCodeGuiceModule;
+import com.kinde.session.KindeSessionKindeTokenGuiceModule;
 import com.kinde.session.KindeSessionGuiceModule;
-import com.kinde.token.AccessToken;
-import com.kinde.token.KindeTokenFactoryImpl;
-import com.kinde.token.KindeToken;
-import com.kinde.token.KindeTokenGuiceModule;
+import com.kinde.token.*;
 
 import java.security.InvalidParameterException;
 
@@ -32,13 +30,21 @@ public class KindeClientImpl implements KindeClient {
     }
 
     @Override
-    public KindeClientSession initClientSession(KindeToken accessToken) {
-        if (!(accessToken instanceof AccessToken)) {
-            throw new InvalidParameterException("Must pass in an AccessToken this is a : " + accessToken.getClass().getName());
-        } else if (!accessToken.valid()) {
+    public KindeClientSession initClientSession(String code) {
+        if (code == null || code.isEmpty()) {
+            throw new InvalidParameterException("The code must be provided and cannot be left blank.");
+        }
+        return this.injector.createChildInjector(new KindeSessionCodeGuiceModule(code)).getInstance(KindeClientSession.class);
+    }
+
+    @Override
+    public KindeClientSession initClientSession(KindeToken kindeToken) {
+        if (!(kindeToken instanceof AccessToken) && !(kindeToken instanceof RefreshToken)) {
+            throw new InvalidParameterException("Must pass in either an AccessToken or a RefreshToken this is a : " + kindeToken.getClass().getName());
+        } else if (!kindeToken.valid()) {
             throw new InvalidParameterException("The token is not valid");
         }
-        return this.injector.createChildInjector(new KindeSessionAccessTokenGuiceModule(accessToken)).getInstance(KindeClientSession.class);
+        return this.injector.createChildInjector(new KindeSessionKindeTokenGuiceModule(kindeToken)).getInstance(KindeClientSession.class);
     }
 
     @Override
