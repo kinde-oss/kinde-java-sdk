@@ -7,5 +7,7 @@ import java.nio.file.Path;
 public interface TestKeyGenerator {
     Path regenerateKey();
 
+    Path getTmpPath();
+
     JWK getJWK();
 }

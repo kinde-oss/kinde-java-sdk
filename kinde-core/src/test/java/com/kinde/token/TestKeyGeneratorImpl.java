@@ -1,5 +1,7 @@
 package com.kinde.token;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.nimbusds.jose.jwk.*;
 import lombok.SneakyThrows;
 
@@ -13,7 +15,13 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.UUID;
 
+@Singleton
 public class TestKeyGeneratorImpl implements TestKeyGenerator{
+
+    private Path tmpPath;
+    private JWK jwk;
+
+    @Inject
     public TestKeyGeneratorImpl() {
         System.out.println("The test key generator has been started");
     }
@@ -21,13 +29,13 @@ public class TestKeyGeneratorImpl implements TestKeyGenerator{
     @Override
     @SneakyThrows
     public Path regenerateKey() {
-        Path tempFilePath = Files.createTempFile(null, ".jwks");
+        this.tmpPath = Files.createTempFile(null, ".jwks");
         KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
         gen.initialize(2048);
         KeyPair keyPair = gen.generateKeyPair();
 
         // Convert to JWK format
-        JWK jwk = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
+        this.jwk = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
                 .privateKey((RSAPrivateKey)keyPair.getPrivate())
                 .keyUse(KeyUse.SIGNATURE)
                 .keyID(UUID.randomUUID().toString())
@@ -36,16 +44,21 @@ public class TestKeyGeneratorImpl implements TestKeyGenerator{
         JWKSet jwkSet = new JWKSet(jwk);
 
         // Step 4: Write the JSON string to the temporary file
-        try (FileWriter writer = new FileWriter(tempFilePath.toFile())) {
+        try (FileWriter writer = new FileWriter(this.tmpPath.toFile())) {
             writer.write(jwkSet.toJSONObject().toString());
         }
 
-        return tempFilePath;
+        return this.tmpPath;
+    }
+
+    @Override
+    public Path getTmpPath() {
+        return this.tmpPath;
     }
 
     @Override
     public JWK getJWK() {
-        return null;
+        return this.jwk;
     }
 
 

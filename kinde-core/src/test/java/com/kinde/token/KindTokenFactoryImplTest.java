@@ -40,10 +40,33 @@ public class KindTokenFactoryImplTest
     /**
      * Rigourous Test :-)
      */
-    public void testToken() {
+    public void testAccessToken() {
         TestTokenGenerator testTokenGenerator = KindeGuiceSingleton.getInstance().getInjector().getInstance(TestTokenGenerator.class);
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
         KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
+        KindeToken kindeToken = kindeTokenFactory.parse(testTokenGenerator.generateAccessToken());
+        assertTrue( kindeToken instanceof AccessToken );
+        assertTrue( kindeToken.valid() );
+    }
+
+    public void testIdToken() {
+        TestTokenGenerator testTokenGenerator = KindeGuiceSingleton.getInstance().getInjector().getInstance(TestTokenGenerator.class);
+        KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
+                .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
+        KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
+        KindeToken kindeToken = kindeTokenFactory.parse(testTokenGenerator.generateIdToken());
+        assertTrue( kindeToken instanceof IDToken );
+        assertTrue( kindeToken.valid() );
+    }
+
+    public void testRefreshToken() {
+        TestTokenGenerator testTokenGenerator = KindeGuiceSingleton.getInstance().getInjector().getInstance(TestTokenGenerator.class);
+        KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
+                .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
+        KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
+        KindeToken kindeToken = kindeTokenFactory.parse(testTokenGenerator.generateRefreshToken());
+        assertTrue( kindeToken instanceof RefreshToken );
+        assertTrue( kindeToken.valid() );
     }
 }
