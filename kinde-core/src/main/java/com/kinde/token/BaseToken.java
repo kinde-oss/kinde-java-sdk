@@ -4,6 +4,7 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 
 import java.util.List;
+import java.util.Map;
 
 public class BaseToken implements KindeToken {
 
@@ -49,20 +50,24 @@ public class BaseToken implements KindeToken {
 
     @Override
     public String getStringFlag(String key) {
-        return "";
+        return (String)getFlagClaims().get(key);
     }
 
     @Override
     public Integer getIntegerFlag(String key) {
-        return 0;
+        return (Integer) getFlagClaims().get(key);
     }
 
     @Override
     public Boolean getBooleanFlag(String key) {
-        return null;
+        return (Boolean) getFlagClaims().get(key);
     }
 
-    List<String> getFlags() {
+    private Map<String,Object> getFlagClaims() {
+        return ((Map<String,Object>)getClaim("feature_flags"));
+    }
+
+    public List<String> getFlags() {
         return (List<String>) getClaim("feature_flags");
     }
 }
