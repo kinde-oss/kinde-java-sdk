@@ -45,7 +45,10 @@ public class KindeClientSessionImpl implements KindeClientSession {
         Secret clientSecret = new Secret(this.kindeConfig.clientSecret());
         ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 
-        Scope scope = new Scope(this.kindeConfig.scopes().toArray(new String[0]));
+        Scope scope = new Scope();
+        if (this.kindeConfig.scopes() != null && !this.kindeConfig.scopes().isEmpty()) {
+            scope = new Scope(this.kindeConfig.scopes().toArray(new String[0]));
+        }
 
         URI tokenEndpoint = this.oidcMetaData.getOpMetadata().getTokenEndpointURI();
 

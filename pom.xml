@@ -20,5 +20,6 @@
     <module>management</module>
     <module>j2ee</module>
     <module>springboot</module>
+    <module>example/kinde-core-example</module>
   </modules>
 </project>
