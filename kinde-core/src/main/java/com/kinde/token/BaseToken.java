@@ -9,10 +9,13 @@ public class BaseToken implements KindeToken {
 
     private String token;
     private boolean valid;
+    private SignedJWT signedJWT;
 
+    @SneakyThrows
     protected BaseToken(String token, boolean valid) {
         this.token = token;
         this.valid = valid;
+        signedJWT = SignedJWT.parse(this.token);
     }
 
     @Override
@@ -25,19 +28,19 @@ public class BaseToken implements KindeToken {
     }
 
     @Override
+    @SneakyThrows
     public String getUser() {
-        return "";
+        return this.signedJWT.getJWTClaimsSet().getSubject();
     }
 
     @Override
-    public String getOrganisation() {
-        return "";
+    public List<String> getOrganisations() {
+        return (List<String>)this.getClaim("org_codes");
     }
 
     @SneakyThrows
     public Object getClaim(String key) {
-        SignedJWT signedJWT = SignedJWT.parse(this.token);
-        return signedJWT.getJWTClaimsSet().getClaim(key);
+        return this.signedJWT.getJWTClaimsSet().getClaim(key);
     }
 
     public List<String> getPermissions() {

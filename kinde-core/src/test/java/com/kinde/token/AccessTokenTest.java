@@ -1,5 +1,6 @@
 package com.kinde.token;
 
+import com.kinde.token.jwt.JwtGenerator;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -41,42 +42,17 @@ public class AccessTokenTest
      * Rigourous Test :-)
      */
     public void testAccessToken() throws Exception {
-        KindeToken kindeToken1 = AccessToken.init("test",false);
-        assertTrue( kindeToken1.token().equals("test") );
+        String tokenStr = JwtGenerator.generateAccessToken();
+        KindeToken kindeToken1 = AccessToken.init(tokenStr,false);
+        assertTrue( kindeToken1.token().equals(tokenStr) );
         assertTrue( kindeToken1.valid() == false );
 
-        KindeToken kindeToken2 = AccessToken.init("test2",true);
-        assertTrue( kindeToken2.token().equals("test2") );
+        String tokenStr2 = JwtGenerator.generateAccessToken();
+        KindeToken kindeToken2 = AccessToken.init(tokenStr2,true);
+        assertTrue( kindeToken2.token().equals(tokenStr2) );
         assertTrue( kindeToken2.valid() );
 
-        // generate a new signed token
-        RSAKey rsaJWK = new RSAKeyGenerator(2048)
-                .keyID("123")
-                .generate();
-        RSAKey rsaPublicJWK = rsaJWK.toPublicJWK();
-
-        JWSSigner signer = new RSASSASigner(rsaJWK);
-
-        Date now = new Date();
-
-        JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
-                .issuer("https://openid.net")
-                .subject("alice")
-                .audience(Arrays.asList("https://kinde.com"))
-                .expirationTime(new Date(now.getTime() + 1000*60*10)) // expires in 10 minutes
-                .notBeforeTime(now)
-                .issueTime(now)
-                .claim("permissions",Arrays.asList("test1","test1"))
-                .jwtID(UUID.randomUUID().toString())
-                .build();
-
-        SignedJWT signedJWT = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaJWK.getKeyID()).build(),
-                jwtClaims);
-
-        signedJWT.sign(signer);
-        String tokenString = signedJWT.serialize();
-
+        String tokenString = JwtGenerator.generateAccessToken();
         System.out.println(tokenString);
 
         KindeToken kindeToken4 = AccessToken.init(tokenString,true);

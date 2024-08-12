@@ -11,7 +11,7 @@ public interface KindeToken {
 
     String getUser();
 
-    String getOrganisation();
+    List<String> getOrganisations();
 
     Object getClaim(String key);
 

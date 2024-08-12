@@ -65,6 +65,7 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
         return Arrays.asList(
+                com.kinde.token.IDToken.init(successResponse.getTokens().toOIDCTokens().getIDTokenString(),true),
                 com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true),
                 com.kinde.token.RefreshToken.init(successResponse.getTokens().getRefreshToken().getValue(),true));
     }
@@ -79,12 +80,10 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
         URI userInfoEndpoint;    // The UserInfoEndpoint of the OpenID provider
         BearerAccessToken token = new BearerAccessToken(this.kindeToken.token()); // The access token
 
-// Make the request
         HTTPResponse httpResponse = new UserInfoRequest(this.oidcMetaData.getOpMetadata().getUserInfoEndpointURI(), token)
                 .toHTTPRequest()
                 .send();
 
-// Parse the response
         UserInfoResponse userInfoResponse = UserInfoResponse.parse(httpResponse);
 
         if (! userInfoResponse.indicatesSuccess()) {
@@ -94,9 +93,6 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
             return null;
         }
 
-// Extract the claims
-        com.nimbusds.openid.connect.sdk.claims.UserInfo userInfo = userInfoResponse.toSuccessResponse().getUserInfo();
-
-        return new UserInfo();
+        return new UserInfo(userInfoResponse.toSuccessResponse().getUserInfo());
     }
 }

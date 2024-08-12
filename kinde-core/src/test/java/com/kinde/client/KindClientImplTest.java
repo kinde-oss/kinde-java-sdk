@@ -10,6 +10,7 @@ import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
 import com.kinde.token.RefreshToken;
 import com.kinde.token.TestKeyGenerator;
+import com.kinde.token.jwt.JwtGenerator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -66,7 +67,7 @@ public class KindClientImplTest
         } catch (Exception ex) {
             // ignore
         }
-        KindeClientSession kindeClientSession = kindeClient.initClientSession(AccessToken.init("TEST",true));
+        KindeClientSession kindeClientSession = kindeClient.initClientSession(AccessToken.init(JwtGenerator.generateAccessToken(),true));
     }
 
     /**

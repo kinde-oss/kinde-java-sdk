@@ -1,5 +1,6 @@
 package com.kinde.token;
 
+import com.kinde.token.jwt.JwtGenerator;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -40,43 +41,18 @@ public class RefreshTokenTest
     /**
      * Rigourous Test :-)
      */
-    public void testAccessToken() throws Exception {
-        KindeToken kindeToken1 = RefreshToken.init("test",false);
-        assertTrue( kindeToken1.token().equals("test") );
+    public void testRefreshToken() throws Exception {
+        String token1 = JwtGenerator.refreshToken();
+        KindeToken kindeToken1 = RefreshToken.init(token1,false);
+        assertTrue( kindeToken1.token().equals(token1) );
         assertTrue( kindeToken1.valid() == false );
 
-        KindeToken kindeToken2 = RefreshToken.init("test2",true);
-        assertTrue( kindeToken2.token().equals("test2") );
+        String token2 = JwtGenerator.refreshToken();
+        KindeToken kindeToken2 = RefreshToken.init(token2,true);
+        assertTrue( kindeToken2.token().equals(token2) );
         assertTrue( kindeToken2.valid() );
 
-        // generate a new signed token
-        RSAKey rsaJWK = new RSAKeyGenerator(2048)
-                .keyID("123")
-                .generate();
-        RSAKey rsaPublicJWK = rsaJWK.toPublicJWK();
-
-        JWSSigner signer = new RSASSASigner(rsaJWK);
-
-        Date now = new Date();
-
-        JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
-                .issuer("https://openid.net")
-                .subject("alice")
-                .audience(Arrays.asList("https://kinde.com"))
-                .expirationTime(new Date(now.getTime() + 1000*60*10)) // expires in 10 minutes
-                .notBeforeTime(now)
-                .issueTime(now)
-                .claim("permissions",Arrays.asList("test1","test1"))
-                .jwtID(UUID.randomUUID().toString())
-                .build();
-
-        SignedJWT signedJWT = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaJWK.getKeyID()).build(),
-                jwtClaims);
-
-        signedJWT.sign(signer);
-        String tokenString = signedJWT.serialize();
-
+        String tokenString = JwtGenerator.refreshToken();
         System.out.println(tokenString);
 
         KindeToken kindeToken4 = RefreshToken.init(tokenString,true);
