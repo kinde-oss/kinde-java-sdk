@@ -1,6 +1,7 @@
 package com.kinde.config;
 
 import com.kinde.KindeClientBuilder;
+import com.kinde.authorization.AuthorizationType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +28,7 @@ public interface KindeConfig {
 
     String clientSecret();
 
-    String grantType();
+    AuthorizationType grantType();
 
     List<String> scopes();
 

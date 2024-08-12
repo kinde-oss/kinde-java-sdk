@@ -53,7 +53,6 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
         return Arrays.asList(
-                com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true),
-                com.kinde.token.RefreshToken.init(successResponse.getTokens().getRefreshToken().getValue(),true));
+                com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true));
     }
 }

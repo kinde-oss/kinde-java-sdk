@@ -69,15 +69,18 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     @SneakyThrows
-    public URL authorizationUrl(AuthorizationType authorizationType) {
+    public URL authorizationUrl() {
         URI authzEndpoint = this.oidcMetaData.getOpMetadata().getAuthorizationEndpointURI();
         ClientID clientID = new ClientID(this.kindeConfig.clientId());
-        Scope scope = new Scope(this.kindeConfig.scopes().toArray(new String[0]));
+        Scope scope = new Scope();
+        if (this.kindeConfig.scopes() != null && !this.kindeConfig.scopes().isEmpty()) {
+            scope = new Scope(this.kindeConfig.scopes().toArray(new String[0]));
+        }
         URI callback = new URI(this.kindeConfig.redirectUri());
         State state = new State();
 
         AuthorizationRequest request = new AuthorizationRequest.Builder(
-                new ResponseType(authorizationType == AuthorizationType.CODE ? ResponseType.Value.CODE : ResponseType.Value.TOKEN), clientID)
+                new ResponseType(this.kindeConfig.grantType() == AuthorizationType.CODE ? ResponseType.Value.CODE : ResponseType.Value.TOKEN), clientID)
                 .scope(scope)
                 .state(state)
                 .redirectionURI(callback)

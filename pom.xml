@@ -21,5 +21,6 @@
     <module>j2ee</module>
     <module>springboot</module>
     <module>example/kinde-core-example</module>
+    <module>example/kinde-j2ee-app</module>
   </modules>
 </project>

@@ -1,5 +1,6 @@
 package com.kinde.config;
 
+import com.kinde.authorization.AuthorizationType;
 import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
 import junit.framework.Test;
@@ -46,7 +47,7 @@ public class KindeConfigImplTest
         parameters.put(KindeParameters.LOGOUT_ENDPOINT.getValue(),"test-logout-endpoint");
         parameters.put(KindeParameters.CLIENT_ID.getValue(),"test-client-id");
         parameters.put(KindeParameters.CLIENT_SECRET.getValue(),"test-client-secret");
-        parameters.put(KindeParameters.GRANT_TYPE.getValue(),"test-grant-types");
+        parameters.put(KindeParameters.GRANT_TYPE.getValue(), AuthorizationType.CODE);
         parameters.put(KindeParameters.SCOPES.getValue(), Arrays.asList("test-grant-types1","test-grant-types2"));
         parameters.put(KindeParameters.PROTOCOL.getValue(),"test-protocol");
         parameters.put("long value",new Long(10));
@@ -61,7 +62,7 @@ public class KindeConfigImplTest
         assertTrue( kindeConfig.logoutEndpoint().equals("test-logout-endpoint") );
         assertTrue( kindeConfig.clientId().equals("test-client-id") );
         assertTrue( kindeConfig.clientSecret().equals("test-client-secret") );
-        assertTrue( kindeConfig.grantType().equals("test-grant-types") );
+        assertTrue( kindeConfig.grantType() == AuthorizationType.CODE );
         assertTrue( kindeConfig.scopes().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
         assertTrue( kindeConfig.protocol().equals("test-protocol") );
 

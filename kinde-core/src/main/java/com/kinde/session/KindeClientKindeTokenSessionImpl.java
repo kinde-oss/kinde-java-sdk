@@ -66,8 +66,8 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
         return Arrays.asList(
                 com.kinde.token.IDToken.init(successResponse.getTokens().toOIDCTokens().getIDTokenString(),true),
-                com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true),
-                com.kinde.token.RefreshToken.init(successResponse.getTokens().getRefreshToken().getValue(),true));
+                com.kinde.token.AccessToken.init(successResponse.getTokens().toOIDCTokens().getAccessToken().getValue(),true),
+                com.kinde.token.RefreshToken.init(successResponse.getTokens().toOIDCTokens().getRefreshToken().getValue(),true));
     }
 
 

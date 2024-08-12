@@ -1,6 +1,7 @@
 package com.kinde;
 
 import com.google.inject.Injector;
+import com.kinde.authorization.AuthorizationType;
 import com.kinde.client.KindeClientGuiceModule;
 import com.kinde.config.KindeParameters;
 import com.kinde.guice.KindeGuiceSingleton;
@@ -74,8 +75,8 @@ public class KindeClientBuilder {
         return this;
     }
 
-    public KindeClientBuilder grantType(String grantType) {
-        this.parameters.put(KindeParameters.GRANT_TYPE.getValue(),grantType);
+    public KindeClientBuilder grantType(AuthorizationType authorizationType) {
+        this.parameters.put(KindeParameters.GRANT_TYPE.getValue(),authorizationType);
         return this;
     }
 

@@ -2,6 +2,7 @@ package com.kinde.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.kinde.authorization.AuthorizationType;
 import com.kinde.guice.KindeAnnotations;
 
 import java.util.List;
@@ -63,8 +64,8 @@ public class KindeConfigImpl implements KindeConfig {
     }
 
     @Override
-    public String grantType() {
-        return (String)this.parameters.get(KindeParameters.GRANT_TYPE.getValue());
+    public AuthorizationType grantType() {
+        return (AuthorizationType)this.parameters.get(KindeParameters.GRANT_TYPE.getValue());
     }
 
     @Override

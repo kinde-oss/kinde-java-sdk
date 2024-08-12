@@ -12,7 +12,7 @@ public interface KindeClientSession {
 
     List<KindeToken> retrieveTokens();
 
-    URL authorizationUrl(AuthorizationType authorizationType);
+    URL authorizationUrl();
 
     UserInfo retrieveUserInfo();
 }
