@@ -41,9 +41,6 @@ public class AppTest
         System.out.println("Test the kinde builder");
         KindeClient kindeClient = KindeClientBuilder
                 .builder()
-                    .domain("replace")
-                    .clientId("replace")
-                    .clientSecret("replace")
                 .build();
         KindeClientSession kindeClientSession = kindeClient.clientSession();
         List<KindeToken> tokens = kindeClientSession.retrieveTokens();

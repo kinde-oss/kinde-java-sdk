@@ -5,10 +5,13 @@ import com.kinde.authorization.AuthorizationType;
 import com.kinde.client.KindeClientGuiceModule;
 import com.kinde.config.KindeParameters;
 import com.kinde.guice.KindeGuiceSingleton;
+import io.github.cdimascio.dotenv.Dotenv;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.InvalidParameterException;
 import java.util.*;
 
+@Slf4j
 public class KindeClientBuilder {
 
     private Map<String, Object> parameters;
@@ -18,19 +21,19 @@ public class KindeClientBuilder {
      */
     private KindeClientBuilder() {
         this.parameters = new HashMap<>();
-        Map<String,String> env = System.getenv();
-        setParameterFromEnvironmental(KindeParameters.DOMAIN,env);
-        setParameterFromEnvironmental(KindeParameters.REDIRECT_URI,env);
-        setParameterFromEnvironmental(KindeParameters.LOGOUT_REDIRECT_URI,env);
-        setParameterFromEnvironmental(KindeParameters.OPENID_ENDPOINT,env);
-        setParameterFromEnvironmental(KindeParameters.AUTHORIZATION_ENDPOINT,env);
-        setParameterFromEnvironmental(KindeParameters.TOKEN_ENDPOINT,env);
-        setParameterFromEnvironmental(KindeParameters.LOGOUT_ENDPOINT,env);
-        setParameterFromEnvironmental(KindeParameters.CLIENT_ID,env);
-        setParameterFromEnvironmental(KindeParameters.CLIENT_SECRET,env);
-        setParameterFromEnvironmental(KindeParameters.GRANT_TYPE,env);
-        setParameterFromEnvironmental(KindeParameters.SCOPES,env);
-        setParameterFromEnvironmental(KindeParameters.PROTOCOL,env);
+        Dotenv dotenv = Dotenv.load();
+        setParameterFromEnvironmental(KindeParameters.DOMAIN,dotenv);
+        setParameterFromEnvironmental(KindeParameters.REDIRECT_URI,dotenv);
+        setParameterFromEnvironmental(KindeParameters.LOGOUT_REDIRECT_URI,dotenv);
+        setParameterFromEnvironmental(KindeParameters.OPENID_ENDPOINT,dotenv);
+        setParameterFromEnvironmental(KindeParameters.AUTHORIZATION_ENDPOINT,dotenv);
+        setParameterFromEnvironmental(KindeParameters.TOKEN_ENDPOINT,dotenv);
+        setParameterFromEnvironmental(KindeParameters.LOGOUT_ENDPOINT,dotenv);
+        setParameterFromEnvironmental(KindeParameters.CLIENT_ID,dotenv);
+        setParameterFromEnvironmental(KindeParameters.CLIENT_SECRET,dotenv);
+        setParameterFromEnvironmental(KindeParameters.GRANT_TYPE,dotenv);
+        setParameterFromEnvironmental(KindeParameters.SCOPES,dotenv);
+        setParameterFromEnvironmental(KindeParameters.PROTOCOL,dotenv);
     }
 
     /**
@@ -123,9 +126,11 @@ public class KindeClientBuilder {
         return injector.getInstance(KindeClient.class);
     }
 
-    private void setParameterFromEnvironmental(KindeParameters parameters,Map<String,String> env) {
-        if (env.containsKey(parameters.getValue())) {
-            this.parameters.put(parameters.getValue(),parameters.getMapper().apply(env.get(parameters.getValue())));
+    private void setParameterFromEnvironmental(KindeParameters parameters,Dotenv dotenv) {
+        log.debug("Before setting the parameters: {}",dotenv.get(parameters.getValue()));
+        if (dotenv.get(parameters.getValue()) != null) {
+            log.info("Set the parameter: {}",parameters.getValue());
+            this.parameters.put(parameters.getValue(),parameters.getMapper().apply(dotenv.get(parameters.getValue())));
         }
     }
 }
