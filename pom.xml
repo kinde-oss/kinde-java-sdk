@@ -18,7 +18,7 @@
   <modules>
     <module>kinde-core</module>
     <module>management</module>
-    <module>j2ee</module>
+    <module>kinde-j2ee</module>
     <module>springboot</module>
     <module>example/kinde-core-example</module>
     <module>example/kinde-j2ee-app</module>

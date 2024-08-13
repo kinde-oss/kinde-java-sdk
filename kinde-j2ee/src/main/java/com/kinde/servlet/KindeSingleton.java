@@ -1,14 +1,10 @@
-package com.kinde;
+package com.kinde.servlet;
 
+import com.kinde.KindeClient;
+import com.kinde.KindeClientBuilder;
 import com.kinde.authorization.AuthorizationType;
 
 public class KindeSingleton {
-
-    private static final String CLIENT_ID = "replace";
-    private static final String CLIENT_SECRET = "replace";
-    private static final String DOMAIN = "replace";
-    private static final String REDIRECT_URI = "replace";
-
 
     private static KindeSingleton instance;
     private KindeClient kindeClient;
@@ -16,10 +12,6 @@ public class KindeSingleton {
     private KindeSingleton() {
         this.kindeClient = KindeClientBuilder
                 .builder()
-                .domain(DOMAIN)
-                .clientId(CLIENT_ID)
-                .clientSecret(CLIENT_SECRET)
-                .redirectUri(REDIRECT_URI)
                 .grantType(AuthorizationType.CODE)
                 .build();
     }

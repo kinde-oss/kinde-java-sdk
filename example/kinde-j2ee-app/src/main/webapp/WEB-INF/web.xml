@@ -5,15 +5,15 @@
          http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
   <servlet>
-    <servlet-name>LoginServlet</servlet-name>
-    <servlet-class>com.kinde.LoginServlet</servlet-class>
+    <servlet-name>KindeLoginServlet</servlet-name>
+    <servlet-class>com.kinde.servlet.KindeLoginServlet</servlet-class>
   </servlet>
   <servlet>
     <servlet-name>ProtectedResourceServlet</servlet-name>
     <servlet-class>com.kinde.ProtectedResourceServlet</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>LoginServlet</servlet-name>
+    <servlet-name>KindeLoginServlet</servlet-name>
     <url-pattern>/login</url-pattern>
   </servlet-mapping>
   <servlet-mapping>

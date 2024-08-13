@@ -1,4 +1,4 @@
-package com.kinde;
+package com.kinde.servlet;
 
 import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
@@ -9,11 +9,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
 import java.io.IOException;
 import java.util.List;
 
-public class LoginServlet extends HttpServlet {
+public class KindeLoginServlet extends HttpServlet {
 
 
     @Override

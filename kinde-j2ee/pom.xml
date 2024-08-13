@@ -10,7 +10,7 @@
 
 
   <groupId>com.kinde</groupId>
-  <artifactId>j2ee</artifactId>
+  <artifactId>kinde-j2ee</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>j2ee</name>
@@ -63,6 +63,10 @@
       <version>5.0.0</version>
       <scope>provided</scope>
     </dependency>
-
+    <dependency>
+      <groupId>io.github.cdimascio</groupId>
+      <artifactId>dotenv-java</artifactId>
+      <version>3.0.0</version>
+    </dependency>
   </dependencies>
 </project>
