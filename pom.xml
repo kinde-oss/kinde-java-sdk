@@ -22,5 +22,6 @@
     <module>springboot</module>
     <module>example/kinde-core-example</module>
     <module>example/kinde-j2ee-app</module>
+    <module>example/springboot-pkce-client-example</module>
   </modules>
 </project>
