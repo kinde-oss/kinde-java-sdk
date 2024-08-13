@@ -18,6 +18,19 @@ public class KindeClientBuilder {
      */
     private KindeClientBuilder() {
         this.parameters = new HashMap<>();
+        Map<String,String> env = System.getenv();
+        setParameterFromEnvironmental(KindeParameters.DOMAIN,env);
+        setParameterFromEnvironmental(KindeParameters.REDIRECT_URI,env);
+        setParameterFromEnvironmental(KindeParameters.LOGOUT_REDIRECT_URI,env);
+        setParameterFromEnvironmental(KindeParameters.OPENID_ENDPOINT,env);
+        setParameterFromEnvironmental(KindeParameters.AUTHORIZATION_ENDPOINT,env);
+        setParameterFromEnvironmental(KindeParameters.TOKEN_ENDPOINT,env);
+        setParameterFromEnvironmental(KindeParameters.LOGOUT_ENDPOINT,env);
+        setParameterFromEnvironmental(KindeParameters.CLIENT_ID,env);
+        setParameterFromEnvironmental(KindeParameters.CLIENT_SECRET,env);
+        setParameterFromEnvironmental(KindeParameters.GRANT_TYPE,env);
+        setParameterFromEnvironmental(KindeParameters.SCOPES,env);
+        setParameterFromEnvironmental(KindeParameters.PROTOCOL,env);
     }
 
     /**
@@ -108,5 +121,11 @@ public class KindeClientBuilder {
         // create a child injector for the scope of this client
         Injector injector = KindeGuiceSingleton.getInstance().getInjector().createChildInjector(new KindeClientGuiceModule(this.parameters));
         return injector.getInstance(KindeClient.class);
+    }
+
+    private void setParameterFromEnvironmental(KindeParameters parameters,Map<String,String> env) {
+        if (env.containsKey(parameters.getValue())) {
+            this.parameters.put(parameters.getValue(),parameters.getMapper().apply(env.get(parameters.getValue())));
+        }
     }
 }
