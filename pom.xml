@@ -20,8 +20,21 @@
     <module>management</module>
     <module>kinde-j2ee</module>
     <module>springboot</module>
-    <module>example/kinde-core-example</module>
-    <module>example/kinde-j2ee-app</module>
-    <module>example/springboot-pkce-client-example</module>
+    <module>playground/kinde-core-example</module>
+    <module>playground/kinde-j2ee-app</module>
+    <module>playground/springboot-pkce-client-example</module>
   </modules>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.10.1</version> <!-- You can use the latest version -->
+        <configuration>
+          <source>17</source> <!-- Specify your desired Java version -->
+          <target>17</target> <!-- Specify your desired Java version -->
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
