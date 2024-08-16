@@ -128,7 +128,7 @@ Run these exports before running your service.
 export KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
 export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
 export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
-export KINDE_REDIRECT_URI=<replace> # the redirect URL
+export KINDE_REDIRECT_URI=openid # the open id
 ```
 ##### By .env file config
 Place this .env file in the directory from which you run your service.
@@ -137,7 +137,7 @@ KINDE_DOMAIN=https://<replace>.kinde.com
 KINDE_CLIENT_ID=<replace>
 KINDE_CLIENT_SECRET=<replace>
 KINDE_REDIRECT_URI=<replace>
-KINDE_SCOPES=
+KINDE_SCOPES=openid
 ```
 ##### Programmatic configuration
 If you want to pass in configuration programmatically the KindeClientBuilder supports this use the following approach.
@@ -148,6 +148,7 @@ KindeClient kindeClient = KindeClientBuilder
         .clientId("<replace>")
         .clientSecret("<replace>")
         .redirectUri("replace")
+        .addScope("openid")
         .build();
 ```
 
@@ -158,17 +159,25 @@ KindeClient kindeClient = KindeClientBuilder
         .builder()
         .build();
 KindeClientSession kindeClientSession = kindeClient.clientSession();
-URL authorizationURL = kindeClientSession.authorizationUrl(); 
+AuthorizationUrl authorizationURL = kindeClientSession.authorizationUrl();
+```
+The AuthorizationUrl contains the url and CodeVerify information. If using a code grant the code verify needs to be stored for the redirct call. This can be done using the J2EE session. Here is an example
+```java
+req.getSession().setAttribute("AuthorizationUrl",authorizationUrl);
+resp.sendRedirect(authorizationUrl.getUrl().toString());
 ```
 
-##### Java code to generate the redirect URL
-In order to validate the code and retrieve the appropriate tokens.
+##### Code to request tokens upon redirect
+If it is a code auth then the AuthorizationUrl needs to be retrieved.
+```java
+AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute("AuthorizationUrl");
+```
+The token request looks like the following.
 ```java
 KindeClient kindeClient = KindeClientBuilder
         .builder()
         .build();
-KindeClientSession kindeClientSession = kindeClient.clientSession();
-URL authorizationURL = kindeClientSession.authorizationUrl(); 
+List<KindeToken> tokens = kindeClient.getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
 ```
 
 ## Publishing
