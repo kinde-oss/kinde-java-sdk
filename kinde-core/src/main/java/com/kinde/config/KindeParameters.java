@@ -2,6 +2,8 @@ package com.kinde.config;
 
 import com.kinde.authorization.AuthorizationType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -16,7 +18,7 @@ public enum KindeParameters {
     CLIENT_ID("KINDE_CLIENT_ID",val->(String)val),
     CLIENT_SECRET("KINDE_CLIENT_SECRET",val->(String)val),
     GRANT_TYPE("KINDE_GRANT_TYPE",val->AuthorizationType.fromValue(val)),
-    SCOPES("KINDE_SCOPES",val->(List<String>)val),
+    SCOPES("KINDE_SCOPES",val->val instanceof String? new ArrayList(Arrays.asList(((String)val).split(","))) : (List)val),
     PROTOCOL("KINDE_PROTOCOL",val->(String)val);
 
 

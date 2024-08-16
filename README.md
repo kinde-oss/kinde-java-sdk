@@ -137,6 +137,7 @@ KINDE_DOMAIN=https://<replace>.kinde.com
 KINDE_CLIENT_ID=<replace>
 KINDE_CLIENT_SECRET=<replace>
 KINDE_REDIRECT_URI=<replace>
+KINDE_SCOPES=
 ```
 ##### Programmatic configuration
 If you want to pass in configuration programmatically the KindeClientBuilder supports this use the following approach.
