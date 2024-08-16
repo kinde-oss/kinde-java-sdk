@@ -77,18 +77,18 @@ public class KindClientImplTest
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
         try {
-            kindeClient.initClientSession((String)null);
+            kindeClient.initClientSession((String)null,null);
             fail("The test failes as an exception is expected");
         } catch (Exception ex) {
             // ignore
         }
         try {
-            kindeClient.initClientSession("");
+            kindeClient.initClientSession("",null);
             fail("The test failes as an exception is expected");
         } catch (Exception ex) {
             // ignore
         }
-        KindeClientSession kindeClientSession = kindeClient.initClientSession("1234");
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("1234",null);
     }
 
     /**

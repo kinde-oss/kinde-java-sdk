@@ -43,6 +43,7 @@ public class AppTest
                 .builder()
                 .build();
         KindeClientSession kindeClientSession = kindeClient.clientSession();
+        System.out.println(kindeClientSession.authorizationUrl());
         List<KindeToken> tokens = kindeClientSession.retrieveTokens();
         KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
         kindeTokenFactory.parse(tokens.get(0).token());

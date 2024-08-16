@@ -1,5 +1,6 @@
 package com.kinde.servlet;
 
+import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
 import com.kinde.token.KindeToken;
@@ -8,10 +9,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 public class KindeLoginServlet extends HttpServlet {
 
 
@@ -20,11 +23,14 @@ public class KindeLoginServlet extends HttpServlet {
         String code = req.getParameter("code");
         if (code == null) {
             // Redirect to the OAuth provider's authorization page
-            resp.sendRedirect(KindeSingleton.getInstance().getKindeClient().clientSession().authorizationUrl().toString());
+            AuthorizationUrl authorizationUrl = KindeSingleton.getInstance().getKindeClient().clientSession().authorizationUrl();
+            req.getSession().setAttribute("AuthorizationUrl",authorizationUrl);
+            resp.sendRedirect(authorizationUrl.getUrl().toString());
         } else {
             // Exchange the authorization code for an access token
             try {
-                List<KindeToken> tokens = KindeSingleton.getInstance().getKindeClient().initClientSession(code).retrieveTokens();
+                AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute("AuthorizationUrl");
+                List<KindeToken> tokens = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
 
                 tokens.stream().filter(token->token instanceof AccessToken).forEach(token->req.getSession().setAttribute("access_token",token.token()));
                 tokens.stream().filter(token->token instanceof IDToken).forEach(token->req.getSession().setAttribute("id_token",token.token()));

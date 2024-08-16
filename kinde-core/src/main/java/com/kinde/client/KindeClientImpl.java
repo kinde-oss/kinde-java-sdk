@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.kinde.KindeTokenFactory;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientSession;
+import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.config.KindeConfig;
 import com.kinde.session.KindeSessionCodeGuiceModule;
 import com.kinde.session.KindeSessionKindeTokenGuiceModule;
@@ -30,11 +31,11 @@ public class KindeClientImpl implements KindeClient {
     }
 
     @Override
-    public KindeClientSession initClientSession(String code) {
+    public KindeClientSession initClientSession(String code, AuthorizationUrl authorizationUrl) {
         if (code == null || code.isEmpty()) {
             throw new InvalidParameterException("The code must be provided and cannot be left blank.");
         }
-        return this.injector.createChildInjector(new KindeSessionCodeGuiceModule(code)).getInstance(KindeClientSession.class);
+        return this.injector.createChildInjector(new KindeSessionCodeGuiceModule(code,authorizationUrl)).getInstance(KindeClientSession.class);
     }
 
     @Override

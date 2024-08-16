@@ -1,5 +1,6 @@
 package com.kinde;
 
+import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.token.KindeToken;
 
 public interface KindeClient {
@@ -10,7 +11,7 @@ public interface KindeClient {
      * @param code The code from the server, used by the server to validate and generate a new
      * @return
      */
-    KindeClientSession initClientSession(String code);
+    KindeClientSession initClientSession(String code, AuthorizationUrl authorizationUrl);
 
     /**
      * This is a client session for a given access token provided by an end user.

@@ -3,6 +3,7 @@ package com.kinde.session;
 import com.google.inject.Inject;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
+import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.KindeClientImpl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
@@ -15,6 +16,9 @@ import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import lombok.SneakyThrows;
 
 import java.net.URI;
@@ -69,7 +73,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     @SneakyThrows
-    public URL authorizationUrl() {
+    public AuthorizationUrl authorizationUrl() {
         URI authzEndpoint = this.oidcMetaData.getOpMetadata().getAuthorizationEndpointURI();
         ClientID clientID = new ClientID(this.kindeConfig.clientId());
         Scope scope = new Scope();
@@ -79,15 +83,27 @@ public class KindeClientSessionImpl implements KindeClientSession {
         URI callback = new URI(this.kindeConfig.redirectUri());
         State state = new State();
 
-        AuthorizationRequest request = new AuthorizationRequest.Builder(
-                new ResponseType(this.kindeConfig.grantType() == AuthorizationType.CODE ? ResponseType.Value.CODE : ResponseType.Value.TOKEN), clientID)
-                .scope(scope)
-                .state(state)
-                .redirectionURI(callback)
-                .endpointURI(authzEndpoint)
-                .build();
-
-        return request.toURI().toURL();
+        if (this.kindeConfig.grantType() == AuthorizationType.CODE) {
+            CodeVerifier codeVerifier = new CodeVerifier(); // Random 43-character string
+            AuthorizationRequest request = new AuthorizationRequest.Builder(
+                    new ResponseType(this.kindeConfig.grantType() == AuthorizationType.CODE ? ResponseType.Value.CODE : ResponseType.Value.TOKEN), clientID)
+                    .scope(scope)
+                    .state(state)
+                    .redirectionURI(callback)
+                    .endpointURI(authzEndpoint)
+                    .codeChallenge(codeVerifier,CodeChallengeMethod.S256)
+                    .build();
+            return new AuthorizationUrl(request.toURI().toURL(),codeVerifier);
+        } else {
+            AuthorizationRequest request = new AuthorizationRequest.Builder(
+                    new ResponseType(this.kindeConfig.grantType() == AuthorizationType.CODE ? ResponseType.Value.CODE : ResponseType.Value.TOKEN), clientID)
+                    .scope(scope)
+                    .state(state)
+                    .redirectionURI(callback)
+                    .endpointURI(authzEndpoint)
+                    .build();
+            return new AuthorizationUrl(request.toURI().toURL(),null);
+        }
     }
 
     @Override

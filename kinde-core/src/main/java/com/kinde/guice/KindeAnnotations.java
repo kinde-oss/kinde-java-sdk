@@ -24,4 +24,8 @@ public class KindeAnnotations {
     @Qualifier
     @Retention(RUNTIME)
     public @interface KindeCode {}
+
+    @Qualifier
+    @Retention(RUNTIME)
+    public @interface AuthorizationUrl {}
 }

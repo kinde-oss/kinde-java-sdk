@@ -13,6 +13,7 @@ public class KindeSingleton {
         this.kindeClient = KindeClientBuilder
                 .builder()
                 .grantType(AuthorizationType.CODE)
+                .addScope("openid")
                 .build();
     }
 

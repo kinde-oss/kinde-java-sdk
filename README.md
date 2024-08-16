@@ -14,8 +14,24 @@ Furthermore, the SDK package includes sub-packages for enums, OAuth2, storage, a
 
 These components collectively make up the SDK, and you should make any necessary modifications or enhancements within the respective files to maintain and extend the SDK's functionality.
 
+### Project Dependancies
 
-### Initial set up
+#### Maven
+In order to use this SDK include following POM dependancy.
+```xml
+    <dependency>
+      <groupId>com.kinde</groupId>
+      <artifactId>kinde-core</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+```
+#### Gradle
+In order to use the SDK with a Gradle build process please use the following dependancy.
+```groovy
+    configuration('com.kinde:kinde-core:2.0.0')
+```
+
+### Building the SDK from Source
 
 1. Clone the repository to your machine:
 
@@ -41,19 +57,117 @@ For details on integrating this SDK into your project, head over to the [Kinde d
 
 Maven will automatically download the dependency from your local repository and make it available in your project.
 
-### Project Setup
-Setup the following environment variables
+### Library Usage
 
+#### Setup the following environment variables
+The following basic environmental variables are required at a mimimum for connecting to Kinde. This will enable the development of a M2M client service.
+```shell
+export KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
+export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
+export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
 ```
-export KINDE_DOMAIN=https://<replace>.kinde.com
-export KINDE_CLIENT_ID=<replace>
-export KINDE_CLIENT_SECRET=<replace>
-```
-
-If you deploying the playground j2ee project in tomcat the following are required.
-```
-export KINDE_REDIRECT_URI=http://localhost:8080/login
+If a user login is to be validated against Kinde a redirect uri must be provided. 
+```shell
 export KINDE_REDIRECT_URI=http://localhost:8080/kinde-j2ee-app/login
+```
+The redirect URI/URL used post successfull login. It is the URL that the PKCE client CODE will be set to. A query parameter of ?code='value' must be processed
+
+#### Setup .env environmental files.
+The Kinde library supports .env files. The must be located in the directory from which the application is executed.
+```shell
+KINDE_DOMAIN=https://<replace>.kinde.com
+KINDE_CLIENT_ID=<replace>
+KINDE_CLIENT_SECRET=<replace>
+KINDE_REDIRECT_URI=http://localhost:8080/kinde-j2ee-app/login
+```
+
+#### Server Example
+In order to make a M2M server token request onto Kinde first setup the appropriate environmental variables
+##### By shell export
+Run these exports before running your service.
+```shell
+export KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
+export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
+export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
+```
+##### By .env file config
+Place this .env file in the directory from which you run your service.
+```shell
+KINDE_DOMAIN=https://<replace>.kinde.com
+KINDE_CLIENT_ID=<replace>
+KINDE_CLIENT_SECRET=<replace>
+```
+##### Programmatic configuration
+If you want to pass in configuration programmatically the KindeClientBuilder supports this use the following approach.
+```java
+KindeClient kindeClient = KindeClientBuilder
+        .builder()
+        .domain("<replace>")
+        .clientId("<replace>")
+        .clientSecret("<replace>")
+        .build();
+```
+
+##### Java Code to retrieve a M2M token.
+The example below details how to implement a server level token request. This is needed for M2M communication and authorization.
+```java
+KindeClient kindeClient = KindeClientBuilder
+        .builder()
+        .build();
+KindeClientSession kindeClientSession = kindeClient.clientSession();
+List<KindeToken> tokens = kindeClientSession.retrieveTokens();
+        
+```
+
+### User Code Authorization Example (PKCE)
+Inorder to authenticate a user on a client the appropriate configuration must be in place.
+
+##### By shell export
+Run these exports before running your service.
+```shell
+export KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
+export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
+export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
+export KINDE_REDIRECT_URI=<replace> # the redirect URL
+```
+##### By .env file config
+Place this .env file in the directory from which you run your service.
+```shell
+KINDE_DOMAIN=https://<replace>.kinde.com
+KINDE_CLIENT_ID=<replace>
+KINDE_CLIENT_SECRET=<replace>
+KINDE_REDIRECT_URI=<replace>
+```
+##### Programmatic configuration
+If you want to pass in configuration programmatically the KindeClientBuilder supports this use the following approach.
+```java
+KindeClient kindeClient = KindeClientBuilder
+        .builder()
+        .domain("<replace>")
+        .clientId("<replace>")
+        .clientSecret("<replace>")
+        .redirectUri("replace")
+        .build();
+```
+
+##### Java code to generate the redirect URL
+Before the PKCE code can be processed a user must be direct to Kinde to login. The client library can generate this URL as follows
+```java
+KindeClient kindeClient = KindeClientBuilder
+        .builder()
+        .build();
+KindeClientSession kindeClientSession = kindeClient.clientSession();
+URL authorizationURL = kindeClientSession.authorizationUrl(); 
+```
+
+##### Java code to generate the redirect URL
+In order to validate the code and retrieve the appropriate tokens.
+```java
+KindeClient kindeClient = KindeClientBuilder
+        .builder()
+        .build();
+KindeClientSession kindeClientSession = kindeClient.clientSession();
+URL authorizationURL = kindeClientSession.authorizationUrl(); 
 ```
 
 ## Publishing
