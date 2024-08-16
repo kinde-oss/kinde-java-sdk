@@ -17,7 +17,7 @@
   </dependencies>
   <modules>
     <module>kinde-core</module>
-    <module>management</module>
+    <module>kinde-management</module>
     <module>kinde-j2ee</module>
     <module>springboot</module>
     <module>playground/kinde-core-example</module>

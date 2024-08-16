@@ -21,10 +21,10 @@
     </properties>
 
     <groupId>com.kinde</groupId>
-    <artifactId>management</artifactId>
+    <artifactId>kinde-management</artifactId>
     <packaging>jar</packaging>
     <version>2.0.0</version>
-    <name>admin</name>
+    <name>kinde-management</name>
     <url>http://maven.apache.org</url>
     <dependencies>
         <!-- dependencies are needed for the client being generated -->
