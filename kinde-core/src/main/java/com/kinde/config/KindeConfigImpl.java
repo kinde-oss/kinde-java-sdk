@@ -78,6 +78,10 @@ public class KindeConfigImpl implements KindeConfig {
         return (String)this.parameters.get(KindeParameters.PROTOCOL.getValue());
     }
 
+    public List<String> audience() {
+        return (List<String>)this.parameters.get(KindeParameters.AUDIENCE.getValue());
+    }
+
     @Override
     public Map<String, Object> parameters() {
         return this.parameters;

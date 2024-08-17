@@ -23,9 +23,7 @@ import lombok.SneakyThrows;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class KindeClientSessionImpl implements KindeClientSession {
 
@@ -55,14 +53,20 @@ public class KindeClientSessionImpl implements KindeClientSession {
         }
 
         URI tokenEndpoint = this.oidcMetaData.getOpMetadata().getTokenEndpointURI();
-
-        TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, scope);
+        TokenRequest request = null;
+        if (this.kindeConfig.audience() !=null && !this.kindeConfig.audience().isEmpty()) {
+            HashMap<String,List<String>> customParameters = new HashMap<>();
+            customParameters.put("audience",this.kindeConfig.audience());
+            request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, scope,null, customParameters);
+        } else {
+            request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, scope);
+        }
 
         TokenResponse response = TokenResponse.parse(request.toHTTPRequest().send());
 
         if (! response.indicatesSuccess()) {
             // We got an error response...
-            TokenErrorResponse errorResponse = response.toErrorResponse();
+            throw new Exception(response.toErrorResponse().toString());
         }
 
         AccessTokenResponse successResponse = response.toSuccessResponse();

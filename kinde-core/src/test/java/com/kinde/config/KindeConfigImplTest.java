@@ -50,6 +50,7 @@ public class KindeConfigImplTest
         parameters.put(KindeParameters.GRANT_TYPE.getValue(), AuthorizationType.CODE);
         parameters.put(KindeParameters.SCOPES.getValue(), Arrays.asList("test-grant-types1","test-grant-types2"));
         parameters.put(KindeParameters.PROTOCOL.getValue(),"test-protocol");
+        parameters.put(KindeParameters.AUDIENCE.getValue(), Arrays.asList("test-grant-types1","test-grant-types2"));
         parameters.put("long value",new Long(10));
         KindeConfigImpl kindeConfig = new KindeConfigImpl(parameters);
 
@@ -65,6 +66,7 @@ public class KindeConfigImplTest
         assertTrue( kindeConfig.grantType() == AuthorizationType.CODE );
         assertTrue( kindeConfig.scopes().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
         assertTrue( kindeConfig.protocol().equals("test-protocol") );
+        assertTrue( kindeConfig.audience().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
 
         assertTrue(kindeConfig.getLongValue("long value") == 10);
         assertTrue(kindeConfig.getStringValue(KindeParameters.DOMAIN.getValue()).equals("test-domain"));

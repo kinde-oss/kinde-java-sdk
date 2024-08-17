@@ -1,6 +1,7 @@
 package com.kinde;
 
 import com.kinde.authorization.AuthorizationUrl;
+import com.kinde.config.KindeConfig;
 import com.kinde.token.KindeToken;
 
 public interface KindeClient {
@@ -34,4 +35,12 @@ public interface KindeClient {
      * @return
      */
     KindeTokenFactory tokenFactory();
+
+
+    /**
+     * The configuration for this client.
+     *
+     * @return KindeConfig object
+     */
+    KindeConfig kindeConfig();
 }

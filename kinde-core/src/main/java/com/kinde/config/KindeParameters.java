@@ -19,7 +19,8 @@ public enum KindeParameters {
     CLIENT_SECRET("KINDE_CLIENT_SECRET",val->(String)val),
     GRANT_TYPE("KINDE_GRANT_TYPE",val->AuthorizationType.fromValue(val)),
     SCOPES("KINDE_SCOPES",val->val instanceof String? new ArrayList(Arrays.asList(((String)val).split(","))) : (List)val),
-    PROTOCOL("KINDE_PROTOCOL",val->(String)val);
+    PROTOCOL("KINDE_PROTOCOL",val->(String)val),
+    AUDIENCE("KINDE_AUDIENCE",val->val instanceof String? new ArrayList(Arrays.asList(((String)val).split(","))) : (List)val);
 
 
     // Field to store the string value

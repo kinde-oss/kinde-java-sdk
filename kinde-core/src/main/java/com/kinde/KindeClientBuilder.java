@@ -34,6 +34,7 @@ public class KindeClientBuilder {
         setParameterFromEnvironmental(KindeParameters.GRANT_TYPE,dotenv);
         setParameterFromEnvironmental(KindeParameters.SCOPES,dotenv);
         setParameterFromEnvironmental(KindeParameters.PROTOCOL,dotenv);
+        setParameterFromEnvironmental(KindeParameters.AUDIENCE,dotenv);
     }
 
     /**
@@ -96,8 +97,8 @@ public class KindeClientBuilder {
         return this;
     }
 
-    public KindeClientBuilder scopes(String domain) {
-        this.parameters.put(KindeParameters.SCOPES.getValue(), Arrays.asList(domain.split(",")));
+    public KindeClientBuilder scopes(String scope) {
+        this.parameters.put(KindeParameters.SCOPES.getValue(), Arrays.asList(scope.split(",")));
         return this;
     }
 
@@ -109,6 +110,17 @@ public class KindeClientBuilder {
 
     public KindeClientBuilder protocol(String protocol) {
         this.parameters.put(KindeParameters.PROTOCOL.getValue(),protocol);
+        return this;
+    }
+
+    public KindeClientBuilder audience(String audiences) {
+        this.parameters.put(KindeParameters.AUDIENCE.getValue(), Arrays.asList(audiences.split(",")));
+        return this;
+    }
+
+    public KindeClientBuilder addAudience(String audience) {
+        List.class.cast(this.parameters.computeIfAbsent(KindeParameters.AUDIENCE.getValue(), k -> new ArrayList<String>()))
+                .add(audience);
         return this;
     }
 

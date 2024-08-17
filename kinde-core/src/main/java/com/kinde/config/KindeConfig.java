@@ -34,6 +34,8 @@ public interface KindeConfig {
 
     String protocol();
 
+    List<String> audience();
+
     Map<String, Object> parameters();
 
     String getStringValue(String key);

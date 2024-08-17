@@ -58,4 +58,9 @@ public class KindeClientImpl implements KindeClient {
         return this.injector.createChildInjector(new KindeTokenGuiceModule()).getInstance(KindeTokenFactory.class);
     }
 
+    @Override
+    public KindeConfig kindeConfig() {
+        return this.kindeConfig;
+    }
+
 }
