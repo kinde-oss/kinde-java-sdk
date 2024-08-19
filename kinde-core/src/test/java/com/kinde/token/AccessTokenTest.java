@@ -53,10 +53,10 @@ public class AccessTokenTest
         assertTrue( kindeToken2.valid() );
 
         String tokenString = JwtGenerator.generateAccessToken();
-        System.out.println(tokenString);
 
         KindeToken kindeToken4 = AccessToken.init(tokenString,true);
 
-        System.out.println(kindeToken4.getPermissions());
+        assertNotNull(tokenString);
+        assertNotNull(kindeToken4.getPermissions());
     }
 }
