@@ -180,6 +180,9 @@ KindeClient kindeClient = KindeClientBuilder
 List<KindeToken> tokens = kindeClient.getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
 ```
 
+## Migration
+[Follow the migration guide](./MIGRATION.md)
+
 ## Publishing
 
 The core team handles publishing.
