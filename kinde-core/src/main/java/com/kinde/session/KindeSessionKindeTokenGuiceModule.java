@@ -11,6 +11,9 @@ public class KindeSessionKindeTokenGuiceModule extends AbstractModule {
     private KindeToken kindeToken;
 
     public KindeSessionKindeTokenGuiceModule(KindeToken kindeToken) {
+        if (kindeToken == null) {
+            throw new IllegalArgumentException("kindeToken cannot be null");
+        }
         this.kindeToken = kindeToken;
     }
 

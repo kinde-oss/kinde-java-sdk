@@ -53,10 +53,10 @@ public class RefreshTokenTest
         assertTrue( kindeToken2.valid() );
 
         String tokenString = JwtGenerator.refreshToken();
-        System.out.println(tokenString);
 
         KindeToken kindeToken4 = RefreshToken.init(tokenString,true);
 
-        System.out.println(kindeToken4.getPermissions());
+        assertNotNull(tokenString);
+        assertNotNull(kindeToken4.getPermissions());
     }
 }
