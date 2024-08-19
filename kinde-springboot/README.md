@@ -19,6 +19,6 @@ PKCE authentication is a crucial part of securing OAuth 2.0 flows, and our libra
 
 While we continue to build out these features, we encourage you to explore our PKCE example in the playground. It offers a practical demonstration of how to implement PKCE authentication with our library.
 
-[Explore the PKCE Example](./playground/springboot-pkce-client-example)
+[Explore the PKCE Example](../playground/springboot-pkce-client-example)
 
 Stay tuned for more updates!
