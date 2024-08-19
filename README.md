@@ -14,7 +14,7 @@ Furthermore, the SDK package includes sub-packages for enums, OAuth2, storage, a
 
 These components collectively make up the SDK, and you should make any necessary modifications or enhancements within the respective files to maintain and extend the SDK's functionality.
 
-### Project Dependancies
+### Project Dependencies
 
 #### Maven
 In order to use this SDK include following POM dependancy.
@@ -120,7 +120,7 @@ List<KindeToken> tokens = kindeClientSession.retrieveTokens();
 ```
 
 ### User Code Authorization Example (PKCE)
-Inorder to authenticate a user on a client the appropriate configuration must be in place.
+In order to authenticate a user on a client the appropriate configuration must be in place.
 
 ##### By shell export
 Run these exports before running your service.
@@ -153,7 +153,7 @@ KindeClient kindeClient = KindeClientBuilder
 ```
 
 ##### Java code to generate the redirect URL
-Before the PKCE code can be processed a user must be direct to Kinde to login. The client library can generate this URL as follows
+Before the PKCE code can be processed, a user must be directed to Kinde to log in. The client library can generate this URL as follows
 ```java
 KindeClient kindeClient = KindeClientBuilder
         .builder()

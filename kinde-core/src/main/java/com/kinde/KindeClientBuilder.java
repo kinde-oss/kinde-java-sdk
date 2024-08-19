@@ -78,7 +78,7 @@ public class KindeClientBuilder {
     }
 
     public KindeClientBuilder logoutEndpoint(String logoutEndpoint) {
-        this.parameters.put(KindeParameters.TOKEN_ENDPOINT.getValue(),logoutEndpoint);
+        this.parameters.put(KindeParameters.LOGOUT_ENDPOINT.getValue(),logoutEndpoint);
         return this;
     }
 
