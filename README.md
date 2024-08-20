@@ -17,7 +17,9 @@ These components collectively make up the SDK, and you should make any necessary
 ### Project Dependencies
 
 #### Maven
-In order to use this SDK include following POM dependancy.
+
+To use this SDK, include the following POM dependency.
+
 ```xml
     <dependency>
       <groupId>com.kinde</groupId>
@@ -25,8 +27,11 @@ In order to use this SDK include following POM dependancy.
       <version>2.0.0</version>
     </dependency>
 ```
+
 #### Gradle
-In order to use the SDK with a Gradle build process please use the following dependancy.
+
+To use the SDK with a Gradle build process, please use the following dependency.
+
 ```groovy
     configuration('com.kinde:kinde-core:2.0.0')
 ```
@@ -60,20 +65,27 @@ Maven will automatically download the dependency from your local repository and 
 ### Library Usage
 
 #### Setup the following environment variables
-The following basic environmental variables are required at a mimimum for connecting to Kinde. This will enable the development of a M2M client service.
+
+The following basic environmental variables are required at a minimum for connecting to Kinde. This will enable the development of an M2M client service.
+
 ```shell
 export KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
 export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
 export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
 ```
+
 If a user login is to be validated against Kinde a redirect uri must be provided. 
+
 ```shell
 export KINDE_REDIRECT_URI=http://localhost:8080/kinde-j2ee-app/login
 ```
+
 The redirect URI/URL used post successfull login. It is the URL that the PKCE client CODE will be set to. A query parameter of ?code='value' must be processed
 
 #### Setup .env environmental files.
+
 The Kinde library supports .env files. The must be located in the directory from which the application is executed.
+
 ```shell
 KINDE_DOMAIN=https://<replace>.kinde.com
 KINDE_CLIENT_ID=<replace>
@@ -82,22 +94,30 @@ KINDE_REDIRECT_URI=http://localhost:8080/kinde-j2ee-app/login
 ```
 
 #### Server Example
-In order to make a M2M server token request onto Kinde first setup the appropriate environmental variables
+
+To make an M2M server token request onto Kinde, first set up the appropriate environmental variables
+
 ##### By shell export
+
 Run these exports before running your service.
+
 ```shell
 export KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
 export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
 export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
 ```
+
 ##### By .env file config
+
 Place this .env file in the directory from which you run your service.
+
 ```shell
 KINDE_DOMAIN=https://<replace>.kinde.com
 KINDE_CLIENT_ID=<replace>
 KINDE_CLIENT_SECRET=<replace>
 ```
 ##### Programmatic configuration
+
 If you want to pass in configuration programmatically the KindeClientBuilder supports this use the following approach.
 ```java
 KindeClient kindeClient = KindeClientBuilder
@@ -120,6 +140,7 @@ List<KindeToken> tokens = kindeClientSession.retrieveTokens();
 ```
 
 ### User Code Authorization Example (PKCE)
+
 In order to authenticate a user on a client the appropriate configuration must be in place.
 
 ##### By shell export

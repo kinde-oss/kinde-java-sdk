@@ -2,14 +2,19 @@
 
 ## V 1.0.0 to V 2.0.0
 
-The original implementation was based on Spring Boot controllers. It provided a controller that could be instanciated in line and then invoked to perform the PCKE authentication. Version 2.0.0 implementats a core Oauth and OpenID library. This library provides a rich set of functions, from token management all the way through to OpenID authentication.
+The original implementation was based on Spring Boot controllers. It provided a controller that could be instantiated inline and then invoked to perform the PKCE authentication. Version 2.0.0 implements a core OAuth and OpenID library. This library provides a rich set of functions, from token management to OpenID authentication.
 
 ### Version 1.0.0 Implementation
-Setup the client requires a programtic configuration. The below is performed through spring injection.
+Setting up the client requires a programmatic configuration. The following is performed through Spring injection.
 
 #### Programmatic Configuration
 ```java
-this.kindeClientSDK=new KindeClientSDK(
+// all values are injected as follow
+@Value("${kinde.host}")
+public String domain;
+
+// initialize the Kinde sdk
+this.kindeClientSDK = new KindeClientSDK(
         domain,
         redirectUri,
         clientId,
@@ -18,15 +23,17 @@ this.kindeClientSDK=new KindeClientSDK(
         logoutRedirectUri);
 ```
 
-#### Invoking the inline controller to authenticate the callback.
+#### Invoking the inline controller to authenticate the callback
 ```java
 // Invoke the callback
 RedirectView redirectView=new CallbackController(this.kindeClientSDK).callback(code,state,response,request);
 ```
-The callback is responsible for setting up the kinde_token. Which is the 15 day token and is maintained on the clients browser.
+
+The callback is responsible for setting up the kinde_token, which is the 15-day token and is maintained on the client's browser.
 
 ### Version 2.0.0 Implementation
-As of Version 2.0.0 this approach ash change significantly. Configuration is now provided either through, environmental, .env configuration or programmtic.
+
+As of Version 2.0.0, this approach has changed significantly. Configuration is now provided through environmental variables, .env files, or programmatic methods.
 
 #### Environmental Configuration
 Shell configuration
@@ -68,7 +75,7 @@ req.getSession().setAttribute("AuthorizationUrl",authorizationUrl);
 resp.sendRedirect(authorizationUrl.getUrl().toString());
 ```
 
-#### Processing the response.
+#### Processing the response
 Processing the login response.
 ```java
 AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute("AuthorizationUrl");
