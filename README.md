@@ -84,7 +84,7 @@ The redirect URI/URL used post successfull login. It is the URL that the PKCE cl
 
 #### Setup .env environmental files.
 
-The Kinde library supports .env files. The must be located in the directory from which the application is executed.
+The Kinde library supports .env files. They must be located in the directory from which the application is executed.
 
 ```shell
 KINDE_DOMAIN=https://<replace>.kinde.com
