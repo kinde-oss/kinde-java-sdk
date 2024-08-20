@@ -141,7 +141,7 @@ List<KindeToken> tokens = kindeClientSession.retrieveTokens();
 
 ### User Code Authorization Example (PKCE)
 
-In order to authenticate a user on a client the appropriate configuration must be in place.
+To authenticate a user on a client, the appropriate configuration must be in place.
 
 ##### By shell export
 Run these exports before running your service.
