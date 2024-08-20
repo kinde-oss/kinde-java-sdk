@@ -21,6 +21,7 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import lombok.SneakyThrows;
 
 import java.net.URI;
@@ -64,10 +65,16 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
-        return Arrays.asList(
-                com.kinde.token.IDToken.init(successResponse.getTokens().toOIDCTokens().getIDTokenString(),true),
-                com.kinde.token.AccessToken.init(successResponse.getTokens().toOIDCTokens().getAccessToken().getValue(),true),
-                com.kinde.token.RefreshToken.init(successResponse.getTokens().toOIDCTokens().getRefreshToken().getValue(),true));
+        if (successResponse.getTokens() instanceof OIDCTokens) {
+            OIDCTokens oidcTokens = successResponse.getTokens().toOIDCTokens();
+            return Arrays.asList(
+                    com.kinde.token.IDToken.init(oidcTokens.getIDTokenString(), true),
+                    com.kinde.token.AccessToken.init(oidcTokens.getAccessToken().getValue(), true),
+                    com.kinde.token.RefreshToken.init(oidcTokens.getRefreshToken().getValue(), true));
+        } else {
+            return Arrays.asList(
+                    com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true));
+        }
     }
 
 
