@@ -144,15 +144,20 @@ List<KindeToken> tokens = kindeClientSession.retrieveTokens();
 To authenticate a user on a client, the appropriate configuration must be in place.
 
 ##### By shell export
+
 Run these exports before running your service.
+
 ```shell
 export KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
 export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
 export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
 export KINDE_REDIRECT_URI=openid # the open id
 ```
+
 ##### By .env file config
+
 Place this .env file in the directory from which you run your service.
+
 ```shell
 KINDE_DOMAIN=https://<replace>.kinde.com
 KINDE_CLIENT_ID=<replace>
