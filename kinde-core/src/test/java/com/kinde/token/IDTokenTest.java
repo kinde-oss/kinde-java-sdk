@@ -1,47 +1,18 @@
 package com.kinde.token;
 
 import com.kinde.token.jwt.JwtGenerator;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.UUID;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class IDTokenTest
-        extends TestCase {
 
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public IDTokenTest(String testName )
-    {
-        super( testName );
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( IDTokenTest.class );
-    }
+public class IDTokenTest {
 
     /**
      * Rigourous Test :-)
      */
-    public void testIDToken() throws Exception {
+    @Test
+    public void testIDTokenTest() throws Exception {
         String token1 = JwtGenerator.generateIDToken();
         KindeToken kindeToken1 = IDToken.init(token1,false);
         assertTrue( kindeToken1.token().equals(token1) );

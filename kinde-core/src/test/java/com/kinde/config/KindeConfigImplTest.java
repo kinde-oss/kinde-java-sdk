@@ -3,40 +3,24 @@ package com.kinde.config;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
-import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class KindeConfigImplTest
-        extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public KindeConfigImplTest(String testName )
-    {
-        super( testName );
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( KindeConfigImplTest.class );
-    }
+public class KindeConfigImplTest{
 
     /**
      * Rigourous Test :-)
      */
-    public void testKindeConfig() {
+    @Test
+    public void testKindeConfigTest() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(KindeParameters.DOMAIN.getValue(),"test-domain");
         parameters.put(KindeParameters.REDIRECT_URI.getValue(),"test-redirect-uri");
@@ -51,25 +35,25 @@ public class KindeConfigImplTest
         parameters.put(KindeParameters.SCOPES.getValue(), Arrays.asList("test-grant-types1","test-grant-types2"));
         parameters.put(KindeParameters.PROTOCOL.getValue(),"test-protocol");
         parameters.put(KindeParameters.AUDIENCE.getValue(), Arrays.asList("test-grant-types1","test-grant-types2"));
-        parameters.put("long value",new Long(10));
-        KindeConfigImpl kindeConfig = new KindeConfigImpl(parameters);
+        parameters.put("long value",Long.valueOf(10));
+        KindeConfigImpl kindeConfigImpl = new KindeConfigImpl(parameters);
 
-        assertTrue( kindeConfig.domain().equals("test-domain") );
-        assertTrue( kindeConfig.redirectUri().equals("test-redirect-uri") );
-        assertTrue( kindeConfig.logoutRedirectUri().equals("test-logout-redirect-uri") );
-        assertTrue( kindeConfig.openidEndpoint().equals("test-openid-endpoint") );
-        assertTrue( kindeConfig.authorizationEndpoint().equals("test-authorization-endpoint") );
-        assertTrue( kindeConfig.tokenEndpoint().equals("test-token-endpoint") );
-        assertTrue( kindeConfig.logoutEndpoint().equals("test-logout-endpoint") );
-        assertTrue( kindeConfig.clientId().equals("test-client-id") );
-        assertTrue( kindeConfig.clientSecret().equals("test-client-secret") );
-        assertTrue( kindeConfig.grantType() == AuthorizationType.CODE );
-        assertTrue( kindeConfig.scopes().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
-        assertTrue( kindeConfig.protocol().equals("test-protocol") );
-        assertTrue( kindeConfig.audience().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
+        assertTrue( kindeConfigImpl.domain().equals("test-domain") );
+        assertTrue( kindeConfigImpl.redirectUri().equals("test-redirect-uri") );
+        assertTrue( kindeConfigImpl.logoutRedirectUri().equals("test-logout-redirect-uri") );
+        assertTrue( kindeConfigImpl.openidEndpoint().equals("test-openid-endpoint") );
+        assertTrue( kindeConfigImpl.authorizationEndpoint().equals("test-authorization-endpoint") );
+        assertTrue( kindeConfigImpl.tokenEndpoint().equals("test-token-endpoint") );
+        assertTrue( kindeConfigImpl.logoutEndpoint().equals("test-logout-endpoint") );
+        assertTrue( kindeConfigImpl.clientId().equals("test-client-id") );
+        assertTrue( kindeConfigImpl.clientSecret().equals("test-client-secret") );
+        assertTrue( kindeConfigImpl.grantType() == AuthorizationType.CODE );
+        assertTrue( kindeConfigImpl.scopes().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
+        assertTrue( kindeConfigImpl.protocol().equals("test-protocol") );
+        assertTrue( kindeConfigImpl.audience().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
 
-        assertTrue(kindeConfig.getLongValue("long value") == 10);
-        assertTrue(kindeConfig.getStringValue(KindeParameters.DOMAIN.getValue()).equals("test-domain"));
-        assertTrue(kindeConfig.getValue(KindeParameters.DOMAIN.getValue()).equals("test-domain"));
+        assertTrue(kindeConfigImpl.getLongValue("long value") == 10);
+        assertTrue(kindeConfigImpl.getStringValue(KindeParameters.DOMAIN.getValue()).equals("test-domain"));
+        assertTrue(kindeConfigImpl.getValue(KindeParameters.DOMAIN.getValue()).equals("test-domain"));
     }
 }

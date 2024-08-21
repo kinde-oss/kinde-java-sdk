@@ -33,7 +33,7 @@ public class KindClientBuilderTest
     /**
      * Rigourous Test :-)
      */
-    public void testBuilderBasic() {
+    public void testBuilderBasicTest() {
         KindeClientBuilder kindeClientBuilder1 = KindeClientBuilder.builder();
         KindeClientBuilder kindeClientBuilder2 = KindeClientBuilder.builder();
         assertTrue( kindeClientBuilder1 != kindeClientBuilder2 );

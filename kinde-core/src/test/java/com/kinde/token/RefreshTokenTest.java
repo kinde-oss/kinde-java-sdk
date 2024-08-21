@@ -1,47 +1,18 @@
 package com.kinde.token;
 
 import com.kinde.token.jwt.JwtGenerator;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.UUID;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RefreshTokenTest
-        extends TestCase {
-
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public RefreshTokenTest(String testName )
-    {
-        super( testName );
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( RefreshTokenTest.class );
-    }
+public class RefreshTokenTest {
 
     /**
      * Rigourous Test :-)
      */
-    public void testRefreshToken() throws Exception {
+    @Test
+    public void testRefreshTokenTest() throws Exception {
         String token1 = JwtGenerator.refreshToken();
         KindeToken kindeToken1 = RefreshToken.init(token1,false);
         assertTrue( kindeToken1.token().equals(token1) );

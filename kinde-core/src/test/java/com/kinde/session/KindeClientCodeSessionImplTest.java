@@ -10,9 +10,7 @@ import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.oidc.OidcMetaDataImplTest;
 import com.kinde.token.RefreshToken;
 import com.kinde.token.jwt.JwtGenerator;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
@@ -20,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class KindeClientCodeSessionImplTest {
 
-    private WireMockServer wireMockServer;
+    private static WireMockServer wireMockServer;
 
-    @BeforeEach
-    public void setUp() {
+    @BeforeAll
+    public static void setUp() {
         wireMockServer = new WireMockServer(8089); // you can specify the port
         wireMockServer.start();
         WireMock.configureFor("localhost", 8089);
@@ -72,13 +70,13 @@ public class KindeClientCodeSessionImplTest {
     }
 
 
-    @AfterEach
-    public void tearDown() {
+    @AfterAll
+    public static void tearDown() {
         wireMockServer.stop();
     }
 
     @Test
-    public void testCodeResponseTokenRequest() {
+    public void testCodeResponseTokenRequestTest() {
         KindeClient kindeClient = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
                 .clientId("test")
@@ -104,7 +102,7 @@ public class KindeClientCodeSessionImplTest {
     }
 
     @Test
-    public void testcClientTokenRequest() {
+    public void testcClientTokenRequestTest() {
         KindeClient kindeClient = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
                 .clientId("test")
@@ -130,7 +128,7 @@ public class KindeClientCodeSessionImplTest {
     }
 
     @Test
-    public void testTokenRequest() {
+    public void testTokenRequestTest() {
         KindeClient kindeClient = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
                 .clientId("test")

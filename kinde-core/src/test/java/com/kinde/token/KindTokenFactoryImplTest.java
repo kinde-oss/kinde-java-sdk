@@ -6,23 +6,17 @@ import com.kinde.client.KindeClientGuiceModule;
 import com.kinde.client.KindeClientGuiceTestModule;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-public class KindTokenFactoryImplTest
-        extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public KindTokenFactoryImplTest(String testName )
-    {
-        super( testName );
+public class KindTokenFactoryImplTest {
+
+    @BeforeEach
+    public void setup() {
         KindeGuiceSingleton.getInstance(
                 new KindeClientGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
@@ -30,17 +24,10 @@ public class KindTokenFactoryImplTest
     }
 
     /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( KindTokenFactoryImplTest.class );
-    }
-
-    /**
      * Rigourous Test :-)
      */
-    public void testAccessToken() {
+    @Test
+    public void testAccessTokenTest() {
         TestTokenGenerator testTokenGenerator = KindeGuiceSingleton.getInstance().getInjector().getInstance(TestTokenGenerator.class);
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
@@ -50,7 +37,8 @@ public class KindTokenFactoryImplTest
         assertTrue( kindeToken.valid() );
     }
 
-    public void testIdToken() {
+    @Test
+    public void testIdTokenTest() {
         TestTokenGenerator testTokenGenerator = KindeGuiceSingleton.getInstance().getInjector().getInstance(TestTokenGenerator.class);
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
@@ -60,7 +48,8 @@ public class KindTokenFactoryImplTest
         assertTrue( kindeToken.valid() );
     }
 
-    public void testRefreshToken() {
+    @Test
+    public void testRefreshTokenTest() {
         TestTokenGenerator testTokenGenerator = KindeGuiceSingleton.getInstance().getInjector().getInstance(TestTokenGenerator.class);
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);

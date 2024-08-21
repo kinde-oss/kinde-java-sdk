@@ -1,48 +1,32 @@
 package com.kinde.client;
 
 import com.kinde.KindeClient;
-import com.kinde.KindeClientBuilder;
 import com.kinde.KindeClientSession;
 import com.kinde.KindeTokenFactory;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
-import com.kinde.token.RefreshToken;
-import com.kinde.token.TestKeyGenerator;
 import com.kinde.token.jwt.JwtGenerator;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-public class KindClientImplTest
-        extends TestCase {
+import static org.junit.jupiter.api.Assertions.fail;
 
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public KindClientImplTest(String testName )
-    {
-        super( testName );
+public class KindClientImplTest {
+
+    @BeforeEach
+    public void setup() {
         KindeGuiceSingleton.getInstance(new KindeClientGuiceTestModule());
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
     }
 
     /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( KindClientImplTest.class );
-    }
-
-    /**
      * Rigourous Test :-)
      */
+    @Test
     public void testClient() {
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
@@ -52,7 +36,8 @@ public class KindClientImplTest
     /**
      * Rigourous Test :-)
      */
-    public void testClientToken() {
+    @Test
+    public void testClientTokenTest() {
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
         try {
@@ -73,7 +58,8 @@ public class KindClientImplTest
     /**
      * Rigourous Test :-)
      */
-    public void testClientCode() {
+    @Test
+    public void testClientCodeTest() {
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
         try {
@@ -94,6 +80,7 @@ public class KindClientImplTest
     /**
      * Rigourous Test :-)
      */
+    @Test
     public void testToken() {
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
