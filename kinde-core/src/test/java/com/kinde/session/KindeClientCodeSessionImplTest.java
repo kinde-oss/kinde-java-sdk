@@ -7,7 +7,10 @@ import com.kinde.KindeClientBuilder;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
+import com.kinde.client.KindeClientGuiceTestModule;
 import com.kinde.client.oidc.OidcMetaDataImplTest;
+import com.kinde.guice.KindeEnvironmentSingleton;
+import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.RefreshToken;
 import com.kinde.token.jwt.JwtGenerator;
 import org.junit.jupiter.api.*;
@@ -18,10 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class KindeClientCodeSessionImplTest {
 
-    private static WireMockServer wireMockServer;
+    private WireMockServer wireMockServer;
 
-    @BeforeAll
-    public static void setUp() {
+    @BeforeEach
+    public void setUp() {
+        KindeGuiceSingleton.init();
+        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.ACTIVE);
         wireMockServer = new WireMockServer(8089); // you can specify the port
         wireMockServer.start();
         WireMock.configureFor("localhost", 8089);
@@ -70,8 +75,8 @@ public class KindeClientCodeSessionImplTest {
     }
 
 
-    @AfterAll
-    public static void tearDown() {
+    @AfterEach
+    public void tearDown() {
         wireMockServer.stop();
     }
 

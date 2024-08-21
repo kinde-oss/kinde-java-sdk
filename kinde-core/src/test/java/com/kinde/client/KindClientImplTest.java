@@ -19,7 +19,7 @@ public class KindClientImplTest {
 
     @BeforeEach
     public void setup() {
-        KindeGuiceSingleton.getInstance(new KindeClientGuiceTestModule());
+        KindeGuiceSingleton.init(new KindeClientGuiceTestModule());
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
     }
 

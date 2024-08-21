@@ -17,7 +17,7 @@ public class KindTokenFactoryImplTest {
 
     @BeforeEach
     public void setup() {
-        KindeGuiceSingleton.getInstance(
+        KindeGuiceSingleton.init(
                 new KindeClientGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);

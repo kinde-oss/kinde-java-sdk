@@ -3,36 +3,28 @@ package com.kinde;
 import com.kinde.client.KindeClientGuiceTestModule;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class KindClientBuilderTest
-        extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class KindClientBuilderTest {
 
     /**
      * Create the test case
      *
-     * @param testName name of the test case
      */
-    public KindClientBuilderTest( String testName )
+    @BeforeEach
+    public void setUp()
     {
-        super( testName );
-        KindeGuiceSingleton.getInstance(new KindeClientGuiceTestModule());
+        KindeGuiceSingleton.init(new KindeClientGuiceTestModule());
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( KindClientBuilderTest.class );
     }
 
     /**
      * Rigourous Test :-)
      */
+    @Test
     public void testBuilderBasicTest() {
         KindeClientBuilder kindeClientBuilder1 = KindeClientBuilder.builder();
         KindeClientBuilder kindeClientBuilder2 = KindeClientBuilder.builder();

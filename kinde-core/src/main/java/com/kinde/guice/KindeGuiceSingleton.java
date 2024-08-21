@@ -14,6 +14,13 @@ public class KindeGuiceSingleton {
         this.injector = Guice.createInjector(modules);
     }
 
+    public static synchronized KindeGuiceSingleton init(Module... modules) {
+        if (instance == null) {
+            instance = new KindeGuiceSingleton(modules);
+        }
+        return instance;
+    }
+
     public static synchronized KindeGuiceSingleton getInstance(Module... modules) {
         if (instance == null) {
             instance = new KindeGuiceSingleton(modules);
