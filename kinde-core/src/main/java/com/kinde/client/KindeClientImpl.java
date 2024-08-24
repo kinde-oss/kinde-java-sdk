@@ -33,7 +33,7 @@ public class KindeClientImpl implements KindeClient {
     @Override
     public KindeClientSession initClientSession(String code, AuthorizationUrl authorizationUrl) {
         if (code == null || code.isEmpty()) {
-            throw new InvalidParameterException("The code must be provided and cannot be left blank.");
+            throw new InvalidParameterException("The code must be provided and cannot be left empty.");
         }
         return this.injector.createChildInjector(new KindeSessionCodeGuiceModule(code,authorizationUrl)).getInstance(KindeClientSession.class);
     }
