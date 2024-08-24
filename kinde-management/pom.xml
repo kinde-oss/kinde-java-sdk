@@ -158,6 +158,7 @@
 
                             <!-- override the default library to jersey2 -->
                             <library>jersey2</library>
+                            <skipValidateSpec>true</skipValidateSpec>
                         </configuration>
                     </execution>
                 </executions>
