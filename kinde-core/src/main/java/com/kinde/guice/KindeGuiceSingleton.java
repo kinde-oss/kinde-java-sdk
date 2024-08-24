@@ -15,9 +15,7 @@ public class KindeGuiceSingleton {
     }
 
     public static synchronized KindeGuiceSingleton init(Module... modules) {
-        if (instance == null) {
-            instance = new KindeGuiceSingleton(modules);
-        }
+        instance = new KindeGuiceSingleton(modules);
         return instance;
     }
 
