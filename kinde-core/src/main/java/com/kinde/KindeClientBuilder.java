@@ -17,7 +17,7 @@ public class KindeClientBuilder {
     private Map<String, Object> parameters;
 
     /**
-     * Private constructor to prevent new initiation
+     * Private constructor to prevent new instantiation
      */
     private KindeClientBuilder() {
         this.parameters = new HashMap<>();
