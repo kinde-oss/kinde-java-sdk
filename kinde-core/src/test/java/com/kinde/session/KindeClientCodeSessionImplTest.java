@@ -19,6 +19,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+
 public class KindeClientCodeSessionImplTest {
 
     private WireMockServer wireMockServer;
@@ -105,6 +108,11 @@ public class KindeClientCodeSessionImplTest {
         KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
         assertTrue(kindeClientSession2.retrieveTokens().size()>0);
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
+
+        assertNotNull(kindeClient);
+        assertNotNull(kindeClientSession);
+        assertNotNull(kindeClient2);
+        assertNotNull(kindeClientSession2);
     }
 
     @Test
@@ -130,7 +138,10 @@ public class KindeClientCodeSessionImplTest {
         KindeClientSession kindeClientSession2 = kindeClient2.clientSession();
         assertTrue(kindeClientSession2.retrieveTokens().size()>0);
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
-
+        assertNotNull(kindeClient);
+        assertNotNull(kindeClientSession);
+        assertNotNull(kindeClient2);
+        assertNotNull(kindeClientSession2);
     }
 
     @Test
@@ -156,5 +167,9 @@ public class KindeClientCodeSessionImplTest {
         KindeClientSession kindeClientSession2 =  kindeClient2.initClientSession(RefreshToken.init(JwtGenerator.refreshToken(),true));
         assertTrue(kindeClientSession2.retrieveTokens().size()>0);
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
+        assertNotNull(kindeClient);
+        assertNotNull(kindeClientSession);
+        assertNotNull(kindeClient2);
+        assertNotNull(kindeClientSession2);
     }
 }
