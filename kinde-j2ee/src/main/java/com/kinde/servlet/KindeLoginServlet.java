@@ -17,6 +17,7 @@ import java.util.List;
 @Slf4j
 public class KindeLoginServlet extends HttpServlet {
 
+    public final static String AUTHORIZATION_URL = "AuthorizationUrl";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -24,12 +25,12 @@ public class KindeLoginServlet extends HttpServlet {
         if (code == null) {
             // Redirect to the OAuth provider's authorization page
             AuthorizationUrl authorizationUrl = KindeSingleton.getInstance().getKindeClient().clientSession().authorizationUrl();
-            req.getSession().setAttribute("AuthorizationUrl",authorizationUrl);
+            req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
         } else {
             // Exchange the authorization code for an access token
             try {
-                AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute("AuthorizationUrl");
+                AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
                 List<KindeToken> tokens = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
 
                 tokens.stream().filter(token->token instanceof AccessToken).forEach(token->req.getSession().setAttribute("access_token",token.token()));
