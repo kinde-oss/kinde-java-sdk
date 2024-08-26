@@ -14,13 +14,12 @@ import java.util.*;
 @Slf4j
 public class KindeClientBuilder {
 
-    private Map<String, Object> parameters;
+    private Map<String, Object> parameters = new HashMap<>();
 
     /**
-     * Private constructor to prevent new initiation
+     * Private constructor to prevent new instantiation
      */
     private KindeClientBuilder() {
-        this.parameters = new HashMap<>();
         Dotenv dotenv = Dotenv.load();
         setParameterFromEnvironmental(KindeParameters.DOMAIN,dotenv);
         setParameterFromEnvironmental(KindeParameters.REDIRECT_URI,dotenv);

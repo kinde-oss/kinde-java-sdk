@@ -33,19 +33,24 @@ public class KindeClientImpl implements KindeClient {
     @Override
     public KindeClientSession initClientSession(String code, AuthorizationUrl authorizationUrl) {
         if (code == null || code.isEmpty()) {
-            throw new InvalidParameterException("The code must be provided and cannot be left blank.");
+            throw new InvalidParameterException("The code must be provided and cannot be left empty.");
         }
         return this.injector.createChildInjector(new KindeSessionCodeGuiceModule(code,authorizationUrl)).getInstance(KindeClientSession.class);
     }
 
     @Override
     public KindeClientSession initClientSession(KindeToken kindeToken) {
+        validateToken(kindeToken);
+        return this.injector.createChildInjector(new KindeSessionKindeTokenGuiceModule(kindeToken)).getInstance(KindeClientSession.class);
+    }
+
+    private void validateToken(KindeToken kindeToken) {
         if (!(kindeToken instanceof AccessToken) && !(kindeToken instanceof RefreshToken)) {
             throw new InvalidParameterException("Must pass in either an AccessToken or a RefreshToken this is a : " + kindeToken.getClass().getName());
-        } else if (!kindeToken.valid()) {
+        }
+        if (!kindeToken.valid()) {
             throw new InvalidParameterException("The token is not valid");
         }
-        return this.injector.createChildInjector(new KindeSessionKindeTokenGuiceModule(kindeToken)).getInstance(KindeClientSession.class);
     }
 
     @Override

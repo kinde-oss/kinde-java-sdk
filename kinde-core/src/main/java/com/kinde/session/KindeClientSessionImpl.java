@@ -8,6 +8,7 @@ import com.kinde.client.KindeClientImpl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.guice.KindeAnnotations;
+import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
 import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.*;
@@ -72,7 +73,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
         return Arrays.asList(
-                com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true));
+                AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true));
     }
 
     @Override

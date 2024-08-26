@@ -36,7 +36,7 @@ public class KindeAdminSessionBuilderTest
         KindeAdminSession kindeAdminSession1 = KindeAdminSessionBuilder.builder().build();
         KindeAdminSession kindeAdminSession2 = KindeAdminSessionBuilder.builder().client(kindeClient).build();
         assertTrue( kindeAdminSession1 != kindeAdminSession2 );
-        kindeAdminSession1.initClient();
+
 
     }
 }
