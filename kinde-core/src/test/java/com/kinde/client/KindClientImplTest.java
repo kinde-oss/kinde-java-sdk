@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class KindClientImplTest {
@@ -53,7 +54,10 @@ public class KindClientImplTest {
             // ignore
         }
         KindeClientSession kindeClientSession = kindeClient.initClientSession(AccessToken.init(JwtGenerator.generateAccessToken(),true));
+        assertNotNull(kindeClient);
+        assertNotNull(kindeClientSession);
     }
+
 
     /**
      * Rigourous Test :-)
@@ -75,6 +79,8 @@ public class KindClientImplTest {
             // ignore
         }
         KindeClientSession kindeClientSession = kindeClient.initClientSession("1234",null);
+        assertNotNull(kindeClient);
+        assertNotNull(kindeClientSession);
     }
 
     /**
@@ -85,5 +91,7 @@ public class KindClientImplTest {
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
         KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
+        assertNotNull(kindeClient);
+        assertNotNull(kindeTokenFactory);
     }
 }

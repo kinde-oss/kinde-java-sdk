@@ -2,6 +2,7 @@ package com.kinde.config;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -133,8 +134,8 @@ public class KindeParametersTest{
         try {
             KindeParameters.fromValue("INVALID_VALUE").getValue();
             fail("Expected an exception");
-        } catch (Exception ex) {
-            // ignore
+        } catch (IllegalArgumentException ex) {
+            Assert.assertNotNull(ex);
         }
     }
 

@@ -33,8 +33,8 @@ public class AuthorizationTypeTest {
         try {
             AuthorizationType unknown = AuthorizationType.fromValue("UNKNOWN");
             fail("Failing");
-        } catch (Exception ex) {
-            //
+        } catch (IllegalArgumentException ex) {
+            Assert.assertNotNull(ex);
         }
     }
 }
