@@ -3,6 +3,9 @@ package com.kinde.token;
 import com.kinde.token.jwt.JwtGenerator;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -30,5 +33,14 @@ public class IDTokenTest {
         KindeToken kindeToken4 = IDToken.init(tokenString,true);
 
         System.out.println(kindeToken4.getPermissions());
+
+        assertTrue(kindeToken2.getStringFlag("test_str").equals("test_str"));
+        assertTrue(kindeToken2.getIntegerFlag("test_integer").equals(1));
+        assertTrue(kindeToken2.getBooleanFlag("test_boolean").equals(false));
+        assertTrue(((BaseToken)kindeToken2).getFlags() instanceof Map);
+        assertTrue(kindeToken2.getClaim("permissions") != null);
+        assertTrue(kindeToken2.getOrganisations() instanceof List);
+        assertTrue(kindeToken2.getUser().equals("test"));
+
     }
 }

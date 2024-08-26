@@ -10,9 +10,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 public class JwtGenerator {
     @SneakyThrows
@@ -59,6 +57,12 @@ public class JwtGenerator {
 
         Date now = new Date();
 
+        Map<String,Object> featureFlags = new HashMap<>();
+
+        featureFlags.put("test_str","test_str");
+        featureFlags.put("test_integer",Integer.valueOf(1));
+        featureFlags.put("test_boolean",Boolean.valueOf(false));
+
         JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
                 .issuer("https://openid.net")
                 .subject("test")
@@ -67,6 +71,8 @@ public class JwtGenerator {
                 .notBeforeTime(now)
                 .issueTime(now)
                 .claim("permissions",Arrays.asList("test1","test1"))
+                .claim("org_codes",Arrays.asList("test1","test1"))
+                .claim("feature_flags",featureFlags)
                 .jwtID(UUID.randomUUID().toString())
                 .build();
 

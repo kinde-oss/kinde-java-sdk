@@ -55,7 +55,7 @@ public class BaseToken implements KindeToken {
 
     @Override
     public Integer getIntegerFlag(String key) {
-        return (Integer) getFlagClaims().get(key);
+        return getFlagClaims().get(key) != null ? ((Long)getFlagClaims().get(key)).intValue() : null;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class BaseToken implements KindeToken {
         return ((Map<String,Object>)getClaim("feature_flags"));
     }
 
-    public List<String> getFlags() {
-        return (List<String>) getClaim("feature_flags");
+    public Map<String,Object> getFlags() {
+        return (Map<String,Object>) getClaim("feature_flags");
     }
 }
