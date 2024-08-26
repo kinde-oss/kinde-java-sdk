@@ -29,7 +29,20 @@ public class KindClientBuilderTest {
         KindeClientBuilder kindeClientBuilder1 = KindeClientBuilder.builder();
         KindeClientBuilder kindeClientBuilder2 = KindeClientBuilder.builder();
         assertTrue( kindeClientBuilder1 != kindeClientBuilder2 );
-        KindeClient kindeClient = kindeClientBuilder1.domain("test").clientId("test").clientSecret("test").build();
+        KindeClient kindeClient = kindeClientBuilder1
+                .domain("test")
+                .clientId("test")
+                .clientSecret("test")
+                .audience("test")
+                .scopes("test,test2")
+                .logoutRedirectUri("https://kinde.com")
+                .openidEndpoint("https://kinde.com")
+                .openidEndpoint("https://kinde.com")
+                .authorizationEndpoint("https://kinde.com")
+                .tokenEndpoint("https://kinde.com")
+                .logoutEndpoint("https://kinde.com")
+                .protocol("https")
+                .build();
         assertTrue( kindeClient != null );
     }
 }
