@@ -23,9 +23,7 @@ public class KindeEnvironmentSingleton {
     }
 
     public static synchronized KindeEnvironmentSingleton init(State state) {
-        if (instance == null) {
-            instance = new KindeEnvironmentSingleton(state);
-        }
+        instance = new KindeEnvironmentSingleton(state);
         return instance;
     }
 

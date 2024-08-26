@@ -25,7 +25,7 @@ public class KindeClientCodeSessionImplTest {
 
     @BeforeEach
     public void setUp() {
-        KindeGuiceSingleton.init();
+        KindeGuiceSingleton.fin();
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.ACTIVE);
         wireMockServer = new WireMockServer(8089); // you can specify the port
         wireMockServer.start();
@@ -78,6 +78,7 @@ public class KindeClientCodeSessionImplTest {
     @AfterEach
     public void tearDown() {
         wireMockServer.stop();
+        KindeGuiceSingleton.fin();
     }
 
     @Test
