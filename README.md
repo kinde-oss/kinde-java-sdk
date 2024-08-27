@@ -209,6 +209,17 @@ List<KindeToken> tokens = kindeClient.getKindeClient().initClientSession(code,au
 ## Migration
 [Follow the migration guide](./MIGRATION.md)
 
+## Sub Projects
+The Kinde-Java-Sdk is broken down into sub projects as follows:
+
+| Project Name                                   | Description                   |
+|------------------------------------------------|-------------------------------|
+| [kinde-core](kinde-core/README.md)             | The Core implementation       |
+| [kinde-j2ee](kinde-j2ee/README.md)             | The J2EE SDK implementation   |
+| [kinde-management](kinde-management/README.md) | The Management implmentation  |
+| [playground](playground/README.md)             | Example projects to work from |
+
+
 ## Publishing
 
 The core team handles publishing.
