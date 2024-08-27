@@ -128,7 +128,7 @@ KindeClient kindeClient = KindeClientBuilder
         .build();
 ```
 
-##### Java Code to retrieve a M2M token.
+##### Java Code to retrieve an M2M token.
 The example below details how to implement a server level token request. This is needed for M2M communication and authorization.
 ```java
 KindeClient kindeClient = KindeClientBuilder
