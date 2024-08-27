@@ -194,7 +194,7 @@ resp.sendRedirect(authorizationUrl.getUrl().toString());
 ```
 
 ##### Code to request tokens upon redirect
-If it is a code auth then the AuthorizationUrl needs to be retrieved.
+If it is a code auth, then the AuthorizationUrl needs to be retrieved.
 ```java
 AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute("AuthorizationUrl");
 ```
