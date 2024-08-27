@@ -210,7 +210,7 @@ List<KindeToken> tokens = kindeClient.getKindeClient().initClientSession(code,au
 [Follow the migration guide](./MIGRATION.md)
 
 ## Sub Projects
-The Kinde-Java-Sdk is broken down into sub projects as follows:
+The Kinde-Java-Sdk is broken down into subprojects as follows:
 
 | Project Name                                   | Description                   |
 |------------------------------------------------|-------------------------------|
