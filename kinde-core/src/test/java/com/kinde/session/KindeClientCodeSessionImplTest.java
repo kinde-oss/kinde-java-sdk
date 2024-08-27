@@ -11,6 +11,7 @@ import com.kinde.client.KindeClientGuiceTestModule;
 import com.kinde.client.oidc.OidcMetaDataImplTest;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
+import com.kinde.token.AccessToken;
 import com.kinde.token.RefreshToken;
 import com.kinde.token.jwt.JwtGenerator;
 import org.junit.jupiter.api.*;
@@ -73,6 +74,24 @@ public class KindeClientCodeSessionImplTest {
                                         "  \"refresh_token\": \"" + JwtGenerator.refreshToken() + "\",\n" +
                                         "  \"scope\": \"openid profile email\"\n" +
                                         "}")));
+
+        wireMockServer.stubFor(
+                WireMock.get(urlPathMatching("/oauth2/v2/user_profile"))
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("""
+                                  {
+                                  "sub": "1234567890",
+                                  "name": "John Doe",
+                                  "given_name": "John",
+                                  "family_name": "Doe",
+                                  "email": "johndoe@example.com",
+                                  "email_verified": true,
+                                  "picture": "https://example.com/johndoe.jpg",
+                                  "locale": "en-US",
+                                  "updated_at": 1611693980
+                                }
+                """)));
         ///oauth2/token
         System.out.println("Instanciate the wiremock service");
     }
@@ -138,6 +157,7 @@ public class KindeClientCodeSessionImplTest {
         KindeClientSession kindeClientSession2 = kindeClient2.clientSession();
         assertTrue(kindeClientSession2.retrieveTokens().size()>0);
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
+
         assertNotNull(kindeClient);
         assertNotNull(kindeClientSession);
         assertNotNull(kindeClient2);
@@ -164,12 +184,14 @@ public class KindeClientCodeSessionImplTest {
                 .addScope("openid")
                 .addAudience("http://localhost:8089/api")
                 .build();
-        KindeClientSession kindeClientSession2 =  kindeClient2.initClientSession(RefreshToken.init(JwtGenerator.refreshToken(),true));
+        KindeClientSession kindeClientSession2 =  kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
         assertTrue(kindeClientSession2.retrieveTokens().size()>0);
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
         assertNotNull(kindeClient);
         assertNotNull(kindeClientSession);
         assertNotNull(kindeClient2);
         assertNotNull(kindeClientSession2);
+
+        assertTrue(kindeClientSession2.retrieveUserInfo()!=null);
     }
 }
