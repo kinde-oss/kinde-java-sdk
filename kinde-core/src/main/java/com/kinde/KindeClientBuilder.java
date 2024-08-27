@@ -97,7 +97,7 @@ public class KindeClientBuilder {
     }
 
     public KindeClientBuilder scopes(String scope) {
-        this.parameters.put(KindeParameters.SCOPES.getValue(), Arrays.asList(scope.split(",")));
+        this.parameters.put(KindeParameters.SCOPES.getValue(), new ArrayList(Arrays.asList(scope.split(","))));
         return this;
     }
 

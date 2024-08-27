@@ -1,12 +1,15 @@
 package com.kinde.config;
 
+import com.kinde.authorization.AuthorizationType;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class KindeParametersTest{
 
@@ -37,6 +40,7 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_DOMAIN").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.DOMAIN.getMapper().apply("test"));
     }
 
     @Test
@@ -46,6 +50,7 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_REDIRECT_URI").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.REDIRECT_URI.getMapper().apply("test"));
     }
 
     @Test
@@ -55,6 +60,7 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_LOGOUT_REDIRECT_URI").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.LOGOUT_REDIRECT_URI.getMapper().apply("test"));
     }
 
     @Test
@@ -64,6 +70,7 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_OPENID_ENDPOINT").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.OPENID_ENDPOINT.getMapper().apply("test"));
     }
 
     @Test
@@ -73,6 +80,7 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_TOKEN_ENDPOINT").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.TOKEN_ENDPOINT.getMapper().apply("test"));
     }
 
     @Test
@@ -82,6 +90,7 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_LOGOUT_ENDPOINT").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.LOGOUT_ENDPOINT.getMapper().apply("test"));
     }
 
     @Test
@@ -91,6 +100,7 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_CLIENT_ID").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.CLIENT_ID.getMapper().apply("test"));
     }
 
     @Test
@@ -100,6 +110,8 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_CLIENT_SECRET").getValue();
         assertTrue( value1.equals(value3) );
+        KindeParameters.CLIENT_SECRET.getMapper().apply("test");
+        assertEquals("test", KindeParameters.CLIENT_SECRET.getMapper().apply("test"));
     }
 
     @Test
@@ -109,6 +121,7 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_GRANT_TYPE").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals(AuthorizationType.CODE, KindeParameters.GRANT_TYPE.getMapper().apply("CODE"));
     }
 
     @Test
@@ -118,6 +131,21 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_SCOPES").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals(new ArrayList(Arrays.asList(((String)"test1,test2,test3").split(","))),
+                KindeParameters.SCOPES.getMapper().apply("test1,test2,test3"));
+
+        assertEquals(new ArrayList(Arrays.asList(((String)"test1,test2,test3").split(","))),
+                KindeParameters.SCOPES.getMapper().apply(new ArrayList(Arrays.asList(((String)"test1,test2,test3").split(",")))));
+    }
+
+    @Test
+    public void testKindParametersAuthorizationEndpointTest() {
+        String value1 = KindeParameters.AUTHORIZATION_ENDPOINT.getValue();
+        String value2 = KindeParameters.AUTHORIZATION_ENDPOINT.getValue();
+        assertTrue( value1.equals(value2) );
+        String value3 = KindeParameters.fromValue("KINDE_AUTHORIZATION_ENDPOINT").getValue();
+        assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.AUTHORIZATION_ENDPOINT.getMapper().apply("test"));
     }
 
     @Test
@@ -127,6 +155,21 @@ public class KindeParametersTest{
         assertTrue( value1.equals(value2) );
         String value3 = KindeParameters.fromValue("KINDE_PROTOCOL").getValue();
         assertTrue( value1.equals(value3) );
+        assertEquals("test", KindeParameters.PROTOCOL.getMapper().apply("test"));
+    }
+
+    @Test
+    public void testKindParametersAudienceTest() {
+        String value1 = KindeParameters.AUDIENCE.getValue();
+        String value2 = KindeParameters.AUDIENCE.getValue();
+        assertTrue( value1.equals(value2) );
+        String value3 = KindeParameters.fromValue("KINDE_AUDIENCE").getValue();
+        assertTrue( value1.equals(value3) );
+        assertEquals(new ArrayList(Arrays.asList(((String)"test1,test2,test3").split(","))),
+                KindeParameters.AUDIENCE.getMapper().apply("test1,test2,test3"));
+
+        assertEquals(new ArrayList(Arrays.asList(((String)"test1,test2,test3").split(","))),
+                KindeParameters.AUDIENCE.getMapper().apply(new ArrayList(Arrays.asList(((String)"test1,test2,test3").split(",")))));
     }
 
     @Test

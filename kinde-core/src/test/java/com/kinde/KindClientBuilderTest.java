@@ -6,7 +6,10 @@ import com.kinde.guice.KindeGuiceSingleton;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.security.InvalidParameterException;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class KindClientBuilderTest {
 
@@ -35,6 +38,7 @@ public class KindClientBuilderTest {
                 .clientSecret("test")
                 .audience("test")
                 .scopes("test,test2")
+                .addScope("test3")
                 .logoutRedirectUri("https://kinde.com")
                 .openidEndpoint("https://kinde.com")
                 .openidEndpoint("https://kinde.com")
@@ -44,5 +48,15 @@ public class KindClientBuilderTest {
                 .protocol("https")
                 .build();
         assertTrue( kindeClient != null );
+    }
+
+    @Test
+    public void testBuilderInvalidParameterTest() {
+        try {
+            KindeClientBuilder.builder().build();
+            fail("An exception is expected");
+        } catch (InvalidParameterException ex) {
+            // ignore
+        }
     }
 }
