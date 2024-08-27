@@ -118,7 +118,7 @@ KINDE_CLIENT_SECRET=<replace>
 ```
 ##### Programmatic configuration
 
-If you want to pass in configuration programmatically the KindeClientBuilder supports this use the following approach.
+If you want to pass in configuration programmatically, the KindeClientBuilder supports this, use the following approach.
 ```java
 KindeClient kindeClient = KindeClientBuilder
         .builder()
