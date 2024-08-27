@@ -74,7 +74,7 @@ export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
 export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
 ```
 
-If a user login is to be validated against Kinde a redirect uri must be provided. 
+If a user login is to be validated against Kinde, a redirect uri must be provided. 
 
 ```shell
 export KINDE_REDIRECT_URI=http://localhost:8080/kinde-j2ee-app/login
