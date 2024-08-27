@@ -1,8 +1,8 @@
 # Playground
 The playground provides example projects that you can use to start a project of your own or simply test how to use the various components that make up the SDK.
 
-## Playground sub projects
-The following sub projects are included with the playground:
+## Playground subprojects
+The following subprojects are included with the playground:
 
 | Project Name                                                               | Description               |
 |----------------------------------------------------------------------------|---------------------------|
