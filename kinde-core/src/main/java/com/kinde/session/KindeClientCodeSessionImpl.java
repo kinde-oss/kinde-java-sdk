@@ -10,6 +10,7 @@ import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import lombok.SneakyThrows;
@@ -49,8 +50,10 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
         URI tokenEndpoint = this.oidcMetaData.getOpMetadata().getTokenEndpointURI();
 
         TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
+        HTTPRequest httpRequest = request.toHTTPRequest();
+        httpRequest.setHeader("Kinde-SDK","Java/2.0.0");
 
-        TokenResponse response = TokenResponse.parse(request.toHTTPRequest().send());
+        TokenResponse response = TokenResponse.parse(httpRequest.send());
         System.out.println(response.toString());
 
         if (! response.indicatesSuccess()) {

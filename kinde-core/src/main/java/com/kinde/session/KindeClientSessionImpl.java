@@ -15,6 +15,7 @@ import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
@@ -63,7 +64,10 @@ public class KindeClientSessionImpl implements KindeClientSession {
             request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, scope);
         }
 
-        TokenResponse response = TokenResponse.parse(request.toHTTPRequest().send());
+        HTTPRequest httpRequest = request.toHTTPRequest();
+        httpRequest.setHeader("Kinde-SDK","Java/2.0.0");
+
+        TokenResponse response = TokenResponse.parse(httpRequest.send());
 
         if (! response.indicatesSuccess()) {
             // We got an error response...
