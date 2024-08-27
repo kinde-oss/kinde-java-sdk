@@ -64,7 +64,7 @@ Maven will automatically download the dependency from your local repository and 
 
 ### Library Usage
 
-#### Setup the following environment variables
+#### Set up the following environment variables
 
 The following basic environmental variables are required at a minimum for connecting to Kinde. This will enable the development of an M2M client service.
 
