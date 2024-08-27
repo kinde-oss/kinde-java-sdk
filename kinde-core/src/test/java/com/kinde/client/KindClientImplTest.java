@@ -11,6 +11,7 @@ import com.kinde.token.jwt.JwtGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -42,15 +43,15 @@ public class KindClientImplTest {
         KindeClient kindeClient = KindeGuiceSingleton.getInstance().getInjector()
                 .createChildInjector(new KindeClientGuiceModule(new HashMap<>())).getInstance(KindeClient.class);
         try {
-            kindeClient.initClientSession(IDToken.init("TEST", true));
+            kindeClient.initClientSession(IDToken.init(JwtGenerator.generateIDToken(), true));
             fail("The test failes as an exception is expected");
-        } catch (Exception ex) {
+        } catch (InvalidParameterException ex) {
             // ignore
         }
         try {
-            kindeClient.initClientSession(AccessToken.init("TEST",false));
+            kindeClient.initClientSession(AccessToken.init(JwtGenerator.generateAccessToken(),false));
             fail("The test failes as an exception is expected");
-        } catch (Exception ex) {
+        } catch (InvalidParameterException ex) {
             // ignore
         }
         KindeClientSession kindeClientSession = kindeClient.initClientSession(AccessToken.init(JwtGenerator.generateAccessToken(),true));
@@ -93,5 +94,6 @@ public class KindClientImplTest {
         KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
         assertNotNull(kindeClient);
         assertNotNull(kindeTokenFactory);
+        assertNotNull(kindeClient.kindeConfig());
     }
 }
