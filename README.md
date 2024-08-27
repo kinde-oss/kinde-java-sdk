@@ -187,7 +187,7 @@ KindeClient kindeClient = KindeClientBuilder
 KindeClientSession kindeClientSession = kindeClient.clientSession();
 AuthorizationUrl authorizationURL = kindeClientSession.authorizationUrl();
 ```
-The AuthorizationUrl contains the url and CodeVerify information. If using a code grant the code verify needs to be stored for the redirct call. This can be done using the J2EE session. Here is an example
+The AuthorizationUrl contains the url and CodeVerify information. If using a code grant, the code verify needs to be stored for the redirct call. This can be done using the J2EE session. Here is an example
 ```java
 req.getSession().setAttribute("AuthorizationUrl",authorizationUrl);
 resp.sendRedirect(authorizationUrl.getUrl().toString());
