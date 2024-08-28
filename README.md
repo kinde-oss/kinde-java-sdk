@@ -64,7 +64,7 @@ Maven will automatically download the dependency from your local repository and 
 
 ### Library Usage
 
-#### Setup the following environment variables
+#### Set up the following environment variables
 
 The following basic environmental variables are required at a minimum for connecting to Kinde. This will enable the development of an M2M client service.
 
@@ -74,7 +74,7 @@ export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
 export KINDE_CLIENT_SECRET=<replace> # the secret used to authenticate the client against Kinde
 ```
 
-If a user login is to be validated against Kinde a redirect uri must be provided. 
+If a user login is to be validated against Kinde, a redirect uri must be provided. 
 
 ```shell
 export KINDE_REDIRECT_URI=http://localhost:8080/kinde-j2ee-app/login
@@ -118,7 +118,7 @@ KINDE_CLIENT_SECRET=<replace>
 ```
 ##### Programmatic configuration
 
-If you want to pass in configuration programmatically the KindeClientBuilder supports this use the following approach.
+If you want to pass in configuration programmatically, the KindeClientBuilder supports this, use the following approach.
 ```java
 KindeClient kindeClient = KindeClientBuilder
         .builder()
@@ -128,7 +128,7 @@ KindeClient kindeClient = KindeClientBuilder
         .build();
 ```
 
-##### Java Code to retrieve a M2M token.
+##### Java Code to retrieve an M2M token.
 The example below details how to implement a server level token request. This is needed for M2M communication and authorization.
 ```java
 KindeClient kindeClient = KindeClientBuilder
@@ -187,14 +187,14 @@ KindeClient kindeClient = KindeClientBuilder
 KindeClientSession kindeClientSession = kindeClient.clientSession();
 AuthorizationUrl authorizationURL = kindeClientSession.authorizationUrl();
 ```
-The AuthorizationUrl contains the url and CodeVerify information. If using a code grant the code verify needs to be stored for the redirct call. This can be done using the J2EE session. Here is an example
+The AuthorizationUrl contains the url and CodeVerify information. If using a code grant, the code verify needs to be stored for the redirct call. This can be done using the J2EE session. Here is an example
 ```java
 req.getSession().setAttribute("AuthorizationUrl",authorizationUrl);
 resp.sendRedirect(authorizationUrl.getUrl().toString());
 ```
 
 ##### Code to request tokens upon redirect
-If it is a code auth then the AuthorizationUrl needs to be retrieved.
+If it is a code auth, then the AuthorizationUrl needs to be retrieved.
 ```java
 AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute("AuthorizationUrl");
 ```
@@ -210,7 +210,7 @@ List<KindeToken> tokens = kindeClient.getKindeClient().initClientSession(code,au
 [Follow the migration guide](./MIGRATION.md)
 
 ## Sub Projects
-The Kinde-Java-Sdk is broken down into sub projects as follows:
+The Kinde-Java-Sdk is broken down into subprojects as follows:
 
 | Project Name                                   | Description                   |
 |------------------------------------------------|-------------------------------|
