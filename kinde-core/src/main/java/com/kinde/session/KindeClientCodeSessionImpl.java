@@ -5,13 +5,19 @@ import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.guice.KindeAnnotations;
+import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
+import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.openid.connect.sdk.UserInfoRequest;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import lombok.SneakyThrows;
 
@@ -24,6 +30,7 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
 
     private String code;
     private AuthorizationUrl authorizationUrl;
+    private KindeToken kindeToken;
 
     @Inject
     public KindeClientCodeSessionImpl(
@@ -64,13 +71,42 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
         AccessTokenResponse successResponse = response.toSuccessResponse();
         if (successResponse.getTokens() instanceof OIDCTokens) {
             OIDCTokens oidcTokens = successResponse.getTokens().toOIDCTokens();
+            this.kindeToken = com.kinde.token.AccessToken.init(oidcTokens.getAccessToken().getValue(), true);
             return Arrays.asList(
                     com.kinde.token.IDToken.init(oidcTokens.getIDTokenString(), true),
-                    com.kinde.token.AccessToken.init(oidcTokens.getAccessToken().getValue(), true),
+                    this.kindeToken,
                     com.kinde.token.RefreshToken.init(oidcTokens.getRefreshToken().getValue(), true));
         } else {
-            return Arrays.asList(
-                    com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true));
+            this.kindeToken = com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true);
+            return Arrays.asList(kindeToken);
         }
+    }
+
+    @Override
+    @SneakyThrows
+    public UserInfo retrieveUserInfo() {
+        if (this.kindeToken == null) {
+            retrieveTokens();
+        }
+        if (!(this.kindeToken instanceof AccessToken)) {
+            throw new IllegalArgumentException("Expected an access token to be present.");
+        }
+        URI userInfoEndpoint;    // The UserInfoEndpoint of the OpenID provider
+        BearerAccessToken token = new BearerAccessToken(this.kindeToken.token()); // The access token
+
+        HTTPResponse httpResponse = new UserInfoRequest(this.oidcMetaData.getOpMetadata().getUserInfoEndpointURI(), token)
+                .toHTTPRequest()
+                .send();
+
+        UserInfoResponse userInfoResponse = UserInfoResponse.parse(httpResponse);
+
+        if (! userInfoResponse.indicatesSuccess()) {
+            // The request failed, e.g. due to invalid or expired token
+            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getCode());
+            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getDescription());
+            return null;
+        }
+
+        return new UserInfo(userInfoResponse.toSuccessResponse().getUserInfo());
     }
 }

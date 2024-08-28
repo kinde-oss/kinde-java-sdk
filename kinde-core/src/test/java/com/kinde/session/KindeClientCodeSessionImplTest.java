@@ -132,6 +132,11 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(kindeClientSession);
         assertNotNull(kindeClient2);
         assertNotNull(kindeClientSession2);
+
+        assertTrue(kindeClientSession2.retrieveUserInfo()!=null);
+
+        KindeClientSession kindeClientSession3 = kindeClient2.initClientSession("test", null);
+        assertTrue(kindeClientSession3.retrieveUserInfo()!=null);
     }
 
     @Test
