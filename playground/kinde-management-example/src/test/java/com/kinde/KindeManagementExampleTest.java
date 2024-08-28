@@ -12,7 +12,7 @@ import org.openapitools.client.api.ApplicationsApi;
 /**
  * Unit test for simple App.
  */
-public class AppTest 
+public class KindeManagementExampleTest
     extends TestCase
 {
     /**
@@ -20,7 +20,7 @@ public class AppTest
      *
      * @param testName name of the test case
      */
-    public AppTest( String testName )
+    public KindeManagementExampleTest(String testName )
     {
         super( testName );
     }
@@ -30,7 +30,7 @@ public class AppTest
      */
     public static Test suite()
     {
-        return new TestSuite( AppTest.class );
+        return new TestSuite( KindeManagementExampleTest.class );
     }
 
     /**
