@@ -14,6 +14,7 @@ import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.AccessToken;
 import com.kinde.token.RefreshToken;
 import com.kinde.token.jwt.JwtGenerator;
+import com.kinde.user.UserInfo;
 import org.junit.jupiter.api.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -136,7 +137,12 @@ public class KindeClientCodeSessionImplTest {
         assertTrue(kindeClientSession2.retrieveUserInfo()!=null);
 
         KindeClientSession kindeClientSession3 = kindeClient2.initClientSession("test", null);
-        assertTrue(kindeClientSession3.retrieveUserInfo()!=null);
+        UserInfo userInfo = kindeClientSession3.retrieveUserInfo();
+        assertNotNull(userInfo);
+        assertNotNull(userInfo.getEmail());
+        System.out.println(userInfo.getEmail());
+        assertNotNull(userInfo.getSubject());
+        assertNotNull(userInfo.getName());
     }
 
     @Test
@@ -197,6 +203,13 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(kindeClient2);
         assertNotNull(kindeClientSession2);
 
-        assertTrue(kindeClientSession2.retrieveUserInfo()!=null);
+
+        UserInfo userInfo = kindeClientSession2.retrieveUserInfo();
+        assertNotNull(userInfo);
+        assertNotNull(userInfo.getEmail());
+        System.out.println(userInfo.getEmail());
+        assertNotNull(userInfo.getSubject());
+        assertNotNull(userInfo.getName());
+
     }
 }
