@@ -97,6 +97,9 @@ This example gets an ApiClient instance and then creates an ApplicationApi insta
    ApplicationsApi applicationsApi = new ApplicationsApi(apiClient);
    ```
 
+## API
+
+
 ## License
 
 By contributing to Kinde, you agree that your contributions will be licensed under its MIT License.

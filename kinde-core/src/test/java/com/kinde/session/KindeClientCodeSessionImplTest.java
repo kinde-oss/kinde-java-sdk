@@ -141,7 +141,10 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(userInfo);
         assertNotNull(userInfo.getEmail());
         assertNotNull(userInfo.getSubject());
-        assertNotNull(userInfo.getName());
+        assertNotNull(userInfo.getId());
+        assertNotNull(userInfo.getPicture());
+        assertNotNull(userInfo.getGivenName());
+        assertNotNull(userInfo.getFamilyName());
     }
 
     @Test
@@ -207,7 +210,10 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(userInfo);
         assertNotNull(userInfo.getEmail());
         assertNotNull(userInfo.getSubject());
-        assertNotNull(userInfo.getName());
+        assertNotNull(userInfo.getId());
+        assertNotNull(userInfo.getPicture());
+        assertNotNull(userInfo.getGivenName());
+        assertNotNull(userInfo.getFamilyName());
 
     }
 }
