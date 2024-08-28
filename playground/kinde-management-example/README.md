@@ -22,7 +22,7 @@ KINDE_AUDIENCE=https://< replace >.kinde.com/api
 - **KINDE_DOMAIN**: Replace `< replace >` with your specific Kinde domain (e.g., `myapp.kinde.com`).
 - **KINDE_CLIENT_ID**: Replace `< replace >` with your application's client ID, obtainable from the Kinde dashboard.
 - **KINDE_CLIENT_SECRET**: Replace `< replace >` with your application's client secret, also available from the Kinde dashboard.
-- **KINDE_REDIRECT_URI**: Replace `< replace >` with the appropriate URI where Kinde will redirect the user after authentication. This is typically set to `http://localhost:8080/kinde-j2ee-app/login` during testing.
+- **KINDE_REDIRECT_URI**: Replace `< replace >` with the appropriate URI, where Kinde will redirect the user after authentication. This is typically set to `http://localhost:8080/kinde-j2ee-app/login` during testing.
 - **KINDE_GRANT_TYPE**: This should be set to `CODE`, indicating that the application will use the Authorization Code Grant flow.
 - **KINDE_SCOPES**: Typically set to `openid` to request an ID token from the identity provider.
 - **KINDE_AUDIENCE**: Replace `< replace >` with the URL of the API endpoint exposed for your domain. This variable tells Kinde to grant access to the specified API for your client.
