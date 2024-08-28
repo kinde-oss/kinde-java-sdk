@@ -140,7 +140,6 @@ public class KindeClientCodeSessionImplTest {
         UserInfo userInfo = kindeClientSession3.retrieveUserInfo();
         assertNotNull(userInfo);
         assertNotNull(userInfo.getEmail());
-        System.out.println(userInfo.getEmail());
         assertNotNull(userInfo.getSubject());
         assertNotNull(userInfo.getName());
     }
@@ -207,7 +206,6 @@ public class KindeClientCodeSessionImplTest {
         UserInfo userInfo = kindeClientSession2.retrieveUserInfo();
         assertNotNull(userInfo);
         assertNotNull(userInfo.getEmail());
-        System.out.println(userInfo.getEmail());
         assertNotNull(userInfo.getSubject());
         assertNotNull(userInfo.getName());
 
