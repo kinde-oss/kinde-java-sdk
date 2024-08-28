@@ -47,5 +47,12 @@ public class KindeCoreExampleTest
         List<KindeToken> tokens = kindeClientSession.retrieveTokens();
         KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
         kindeTokenFactory.parse(tokens.get(0).token());
+
+        assertNotNull(kindeClient);
+        assertNotNull(kindeClientSession);
+        assertNotNull(tokens);
+        assertFalse(tokens.isEmpty());
+        assertNotNull(kindeTokenFactory);
+        assertNotNull(kindeTokenFactory.parse(tokens.get(0).token()));
     }
 }
