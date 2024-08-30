@@ -35,6 +35,9 @@ public class KindeConfigImplTest{
         parameters.put(KindeParameters.SCOPES.getValue(), Arrays.asList("test-grant-types1","test-grant-types2"));
         parameters.put(KindeParameters.PROTOCOL.getValue(),"test-protocol");
         parameters.put(KindeParameters.AUDIENCE.getValue(), Arrays.asList("test-grant-types1","test-grant-types2"));
+        parameters.put(KindeParameters.HAS_SUCCESS_PAGE.getValue(),true);
+        parameters.put(KindeParameters.LANG.getValue(),"eng");
+        parameters.put(KindeParameters.ORG_CODE.getValue(),"org_code");
         parameters.put("long value",Long.valueOf(10));
         KindeConfigImpl kindeConfigImpl = new KindeConfigImpl(parameters);
 
@@ -51,6 +54,9 @@ public class KindeConfigImplTest{
         assertTrue( kindeConfigImpl.scopes().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
         assertTrue( kindeConfigImpl.protocol().equals("test-protocol") );
         assertTrue( kindeConfigImpl.audience().equals(Arrays.asList("test-grant-types1","test-grant-types2")) );
+        assertTrue( kindeConfigImpl.lang().equals("eng") );
+        assertTrue( kindeConfigImpl.hasSuccessPage().equals(Boolean.TRUE) );
+        assertTrue( kindeConfigImpl.orgCode().equals("org_code") );
 
         assertTrue(kindeConfigImpl.getLongValue("long value") == 10);
         assertTrue(kindeConfigImpl.getStringValue(KindeParameters.DOMAIN.getValue()).equals("test-domain"));

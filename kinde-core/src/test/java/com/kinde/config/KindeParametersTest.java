@@ -173,6 +173,44 @@ public class KindeParametersTest{
     }
 
     @Test
+    public void testKindParametersLangTest() {
+        String value1 = KindeParameters.LANG.getValue();
+        String value2 = KindeParameters.LANG.getValue();
+        assertTrue( value1.equals(value2) );
+        String value3 = KindeParameters.fromValue("KINDE_LANG").getValue();
+        assertTrue( value1.equals(value3) );
+        assertEquals("eng",
+                KindeParameters.LANG.getMapper().apply("eng"));
+
+    }
+
+    @Test
+    public void testKindParametersHasSuccessPageTest() {
+        String value1 = KindeParameters.HAS_SUCCESS_PAGE.getValue();
+        String value2 = KindeParameters.HAS_SUCCESS_PAGE.getValue();
+        assertTrue( value1.equals(value2) );
+        String value3 = KindeParameters.fromValue("KINDE_HAS_SUCCESS_PAGE").getValue();
+        assertTrue( value1.equals(value3) );
+        assertEquals(Boolean.TRUE,
+                KindeParameters.HAS_SUCCESS_PAGE.getMapper().apply(Boolean.TRUE));
+        assertEquals(Boolean.TRUE,
+                KindeParameters.HAS_SUCCESS_PAGE.getMapper().apply("true"));
+
+    }
+
+    @Test
+    public void testKindParametersOrgCodeTest() {
+        String value1 = KindeParameters.ORG_CODE.getValue();
+        String value2 = KindeParameters.ORG_CODE.getValue();
+        assertTrue( value1.equals(value2) );
+        String value3 = KindeParameters.fromValue("KINDE_ORG_CODE").getValue();
+        assertTrue( value1.equals(value3) );
+        assertEquals("org_code",
+                KindeParameters.ORG_CODE.getMapper().apply("org_code"));
+
+    }
+
+    @Test
     public void testKindParametersInvalidTypeTest() {
         try {
             KindeParameters.fromValue("INVALID_VALUE").getValue();

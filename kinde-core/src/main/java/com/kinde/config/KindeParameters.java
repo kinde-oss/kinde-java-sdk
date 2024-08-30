@@ -23,7 +23,7 @@ public enum KindeParameters {
     AUDIENCE("KINDE_AUDIENCE",(Function<Object, List<String>>)val->val instanceof String? new ArrayList(Arrays.asList(((String)val).split(","))) : (List)val),
     LANG("KINDE_LANG",(Function<Object, String>)val->(String)val),
     ORG_CODE("KINDE_ORG_CODE",(Function<Object, String>)val->(String)val),
-    HAS_SUCCESS_PAGE("KINDE_HAS_SUCCESS_PAGE",(Function<Object, Boolean>)val->Boolean.valueOf((String)val));
+    HAS_SUCCESS_PAGE("KINDE_HAS_SUCCESS_PAGE",(Function<Object, Boolean>)val->val instanceof String? Boolean.valueOf((String)val) : Boolean.valueOf((Boolean) val));
 
 
     // Field to store the string value
