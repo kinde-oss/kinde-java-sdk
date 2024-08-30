@@ -148,14 +148,14 @@ public class KindeClientSessionImpl implements KindeClientSession {
         parameters.put("prompt",Prompt.Type.CREATE.toString());
         parameters.put("is_create_org",Boolean.TRUE.toString());
         parameters.put("org_name",orgName);
-        return null;
+        return authorizationUrlWithParameters(parameters);
     }
 
     @Override
     public AuthorizationUrl register() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt",Prompt.Type.CREATE.toString());
-        return null;
+        return authorizationUrlWithParameters(parameters);
     }
 
     @Override

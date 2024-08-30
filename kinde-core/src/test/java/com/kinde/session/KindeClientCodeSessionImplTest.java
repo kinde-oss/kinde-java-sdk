@@ -116,6 +116,7 @@ public class KindeClientCodeSessionImplTest {
         AuthorizationUrl authorizationUrl1 = kindeClientSession.authorizationUrl();
         assertNotNull(authorizationUrl1);
         assertNotNull(authorizationUrl1.getUrl());
+        assertTrue(!authorizationUrl1.getUrl().toString().contains("prompt"));
         assertTrue(authorizationUrl1.getCodeVerifier() == null);
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
@@ -131,6 +132,113 @@ public class KindeClientCodeSessionImplTest {
         AuthorizationUrl authorizationUrl2 = kindeClientSession2.authorizationUrl();
         assertNotNull(authorizationUrl2);
         assertNotNull(authorizationUrl2.getUrl());
+        assertTrue(!authorizationUrl1.getUrl().toString().contains("prompt"));
+        assertNotNull(authorizationUrl2.getCodeVerifier());
+    }
+
+    @Test
+    public void testLoginUrlRequestTest() {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.login();
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        assertTrue(!authorizationUrl1.getUrl().toString().contains("prompt"));
+        assertTrue(authorizationUrl1.getCodeVerifier() == null);
+
+        KindeClient kindeClient2 = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .addScope("openid")
+                .addAudience("http://localhost:8089/api")
+                .grantType(AuthorizationType.CODE)
+                .build();
+        KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl2 = kindeClientSession2.login();
+        assertNotNull(authorizationUrl2);
+        assertNotNull(authorizationUrl2.getUrl());
+        assertTrue(!authorizationUrl1.getUrl().toString().contains("prompt"));
+        assertNotNull(authorizationUrl2.getCodeVerifier());
+    }
+
+    @Test
+    public void testRegisterUrlRequestTest() {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.register();
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        System.out.println(authorizationUrl1.getUrl());
+        assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
+        assertTrue(authorizationUrl1.getCodeVerifier() == null);
+
+        KindeClient kindeClient2 = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .addScope("openid")
+                .addAudience("http://localhost:8089/api")
+                .grantType(AuthorizationType.CODE)
+                .orgCode("TEST")
+                .build();
+        KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl2 = kindeClientSession2.register();
+        assertNotNull(authorizationUrl2);
+        assertNotNull(authorizationUrl2.getUrl());
+        System.out.println(authorizationUrl2.getUrl());
+        assertTrue(authorizationUrl2.getUrl().toString().contains("prompt=create"));
+        assertTrue(authorizationUrl2.getUrl().toString().contains("org_code=TEST"));
+        assertNotNull(authorizationUrl2.getCodeVerifier());
+    }
+
+    @Test
+    public void testOrgCreateUrlRequestTest() {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.createOrg("TEST1");
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        System.out.println(authorizationUrl1.getUrl());
+        assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
+        assertTrue(authorizationUrl1.getUrl().toString().contains("org_name=TEST1"));
+        assertTrue(authorizationUrl1.getCodeVerifier() == null);
+
+        KindeClient kindeClient2 = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .addScope("openid")
+                .addAudience("http://localhost:8089/api")
+                .grantType(AuthorizationType.CODE)
+                .orgCode("TEST")
+                .build();
+        KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl2 = kindeClientSession2.createOrg("TEST2");
+        assertNotNull(authorizationUrl2);
+        assertNotNull(authorizationUrl2.getUrl());
+        System.out.println(authorizationUrl2.getUrl());
+        assertTrue(authorizationUrl2.getUrl().toString().contains("prompt=create"));
+        assertTrue(authorizationUrl2.getUrl().toString().contains("org_code=TEST"));
+        assertTrue(authorizationUrl2.getUrl().toString().contains("org_name=TEST2"));
         assertNotNull(authorizationUrl2.getCodeVerifier());
     }
 
