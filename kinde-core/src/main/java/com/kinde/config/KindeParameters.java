@@ -20,7 +20,10 @@ public enum KindeParameters {
     GRANT_TYPE("KINDE_GRANT_TYPE",(Function<Object, AuthorizationType>)val->AuthorizationType.fromValue(val)),
     SCOPES("KINDE_SCOPES",(Function<Object, List<String>>)val->val instanceof String? new ArrayList(Arrays.asList(((String)val).split(","))) : (List)val),
     PROTOCOL("KINDE_PROTOCOL",(Function<Object, String>)val->(String)val),
-    AUDIENCE("KINDE_AUDIENCE",(Function<Object, List<String>>)val->val instanceof String? new ArrayList(Arrays.asList(((String)val).split(","))) : (List)val);
+    AUDIENCE("KINDE_AUDIENCE",(Function<Object, List<String>>)val->val instanceof String? new ArrayList(Arrays.asList(((String)val).split(","))) : (List)val),
+    LANG("KINDE_LANG",(Function<Object, String>)val->(String)val),
+    ORG_CODE("KINDE_ORG_CODE",(Function<Object, String>)val->(String)val),
+    HAS_SUCCESS_PAGE("KINDE_HAS_SUCCESS_PAGE",(Function<Object, Boolean>)val->Boolean.valueOf((String)val));
 
 
     // Field to store the string value

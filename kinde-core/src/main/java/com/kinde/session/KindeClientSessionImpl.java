@@ -21,6 +21,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.openid.connect.sdk.Prompt;
 import lombok.SneakyThrows;
 
 import java.net.URI;
@@ -83,6 +84,12 @@ public class KindeClientSessionImpl implements KindeClientSession {
     @Override
     @SneakyThrows
     public AuthorizationUrl authorizationUrl() {
+        return authorizationUrlWithParameters(new HashMap<>());
+    }
+
+    @Override
+    @SneakyThrows
+    public AuthorizationUrl authorizationUrlWithParameters(Map<String, String> parameters) {
         URI authzEndpoint = this.oidcMetaData.getOpMetadata().getAuthorizationEndpointURI();
         ClientID clientID = new ClientID(this.kindeConfig.clientId());
         Scope scope = new Scope();
@@ -92,27 +99,63 @@ public class KindeClientSessionImpl implements KindeClientSession {
         URI callback = new URI(this.kindeConfig.redirectUri());
         State state = new State();
 
+        CodeVerifier codeVerifier = null;
+        AuthorizationRequest.Builder builder = null;
         if (this.kindeConfig.grantType() == AuthorizationType.CODE) {
-            CodeVerifier codeVerifier = new CodeVerifier(); // Random 43-character string
-            AuthorizationRequest request = new AuthorizationRequest.Builder(
-                    new ResponseType(this.kindeConfig.grantType() == AuthorizationType.CODE ? ResponseType.Value.CODE : ResponseType.Value.TOKEN), clientID)
-                    .scope(scope)
-                    .state(state)
-                    .redirectionURI(callback)
-                    .endpointURI(authzEndpoint)
-                    .codeChallenge(codeVerifier,CodeChallengeMethod.S256)
-                    .build();
-            return new AuthorizationUrl(request.toURI().toURL(),codeVerifier);
+            codeVerifier = new CodeVerifier(); // Random 43-character string
+            builder = new AuthorizationRequest.Builder(
+                    new ResponseType(ResponseType.Value.CODE), clientID)
+                    .codeChallenge(codeVerifier,CodeChallengeMethod.S256);
         } else {
-            AuthorizationRequest request = new AuthorizationRequest.Builder(
-                    new ResponseType(this.kindeConfig.grantType() == AuthorizationType.CODE ? ResponseType.Value.CODE : ResponseType.Value.TOKEN), clientID)
-                    .scope(scope)
-                    .state(state)
-                    .redirectionURI(callback)
-                    .endpointURI(authzEndpoint)
-                    .build();
-            return new AuthorizationUrl(request.toURI().toURL(),null);
+            builder = new AuthorizationRequest.Builder(
+                    new ResponseType(ResponseType.Value.TOKEN), clientID);
         }
+        builder.scope(scope)
+                .state(state)
+                .redirectionURI(callback)
+                .endpointURI(authzEndpoint);
+
+        if (this.kindeConfig.hasSuccessPage() != null && this.kindeConfig.hasSuccessPage()) {
+            parameters.put(KindeRequestParameters.HAS_SUCCESS_PAGE,Boolean.TRUE.toString());
+        }
+
+        if (this.kindeConfig.lang() != null && !this.kindeConfig.lang().isEmpty()) {
+            parameters.put(KindeRequestParameters.LANG,this.kindeConfig.lang());
+        }
+
+        if (this.kindeConfig.orgCode() != null && !this.kindeConfig.orgCode().isEmpty()) {
+            parameters.put(KindeRequestParameters.ORG_CODE,this.kindeConfig.orgCode());
+        }
+
+        // add the custom parameters for either login or register
+        if (!parameters.isEmpty()) {
+            parameters.forEach(builder::customParameter);
+        }
+
+        AuthorizationRequest request = builder.build();
+
+        return new AuthorizationUrl(request.toURI().toURL(),codeVerifier);
+    }
+
+    @Override
+    public AuthorizationUrl login() {
+        return authorizationUrlWithParameters(new HashMap<>());
+    }
+
+    @Override
+    public AuthorizationUrl createOrg(String orgName) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("prompt",Prompt.Type.CREATE.toString());
+        parameters.put("is_create_org",Boolean.TRUE.toString());
+        parameters.put("org_name",orgName);
+        return null;
+    }
+
+    @Override
+    public AuthorizationUrl register() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("prompt",Prompt.Type.CREATE.toString());
+        return null;
     }
 
     @Override

@@ -105,6 +105,36 @@ public class KindeClientCodeSessionImplTest {
     }
 
     @Test
+    public void testAuthorizationUrlRequestTest() {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.authorizationUrl();
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        assertTrue(authorizationUrl1.getCodeVerifier() == null);
+
+        KindeClient kindeClient2 = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .addScope("openid")
+                .addAudience("http://localhost:8089/api")
+                .grantType(AuthorizationType.CODE)
+                .build();
+        KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl2 = kindeClientSession2.authorizationUrl();
+        assertNotNull(authorizationUrl2);
+        assertNotNull(authorizationUrl2.getUrl());
+        assertNotNull(authorizationUrl2.getCodeVerifier());
+    }
+
+    @Test
     public void testCodeResponseTokenRequestTest() {
         KindeClient kindeClient = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")

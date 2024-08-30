@@ -36,6 +36,12 @@ public interface KindeConfig {
 
     List<String> audience();
 
+    String lang();
+
+    String orgCode();
+
+    Boolean hasSuccessPage();
+
     Map<String, Object> parameters();
 
     String getStringValue(String key);

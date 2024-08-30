@@ -78,8 +78,25 @@ public class KindeConfigImpl implements KindeConfig {
         return (String)this.parameters.get(KindeParameters.PROTOCOL.getValue());
     }
 
+    @Override
     public List<String> audience() {
         return (List<String>)this.parameters.get(KindeParameters.AUDIENCE.getValue());
+    }
+
+
+    @Override
+    public String lang() {
+        return (String)this.parameters.get(KindeParameters.LANG.getValue());
+    }
+
+    @Override
+    public String orgCode() {
+        return (String)this.parameters.get(KindeParameters.ORG_CODE.getValue());
+    }
+
+    @Override
+    public Boolean hasSuccessPage(){
+        return (Boolean) this.parameters.get(KindeParameters.HAS_SUCCESS_PAGE.getValue());
     }
 
     @Override

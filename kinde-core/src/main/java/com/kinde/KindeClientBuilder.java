@@ -34,6 +34,9 @@ public class KindeClientBuilder {
         setParameterFromEnvironmental(KindeParameters.SCOPES,dotenv);
         setParameterFromEnvironmental(KindeParameters.PROTOCOL,dotenv);
         setParameterFromEnvironmental(KindeParameters.AUDIENCE,dotenv);
+        setParameterFromEnvironmental(KindeParameters.LANG,dotenv);
+        setParameterFromEnvironmental(KindeParameters.ORG_CODE,dotenv);
+        setParameterFromEnvironmental(KindeParameters.HAS_SUCCESS_PAGE,dotenv);
     }
 
     /**
@@ -120,6 +123,21 @@ public class KindeClientBuilder {
     public KindeClientBuilder addAudience(String audience) {
         List.class.cast(this.parameters.computeIfAbsent(KindeParameters.AUDIENCE.getValue(), k -> new ArrayList<String>()))
                 .add(audience);
+        return this;
+    }
+
+    public KindeClientBuilder lang(String lang) {
+        this.parameters.put(KindeParameters.LANG.getValue(), lang);
+        return this;
+    }
+
+    public KindeClientBuilder orgCode(String lang) {
+        this.parameters.put(KindeParameters.ORG_CODE.getValue(), lang);
+        return this;
+    }
+
+    public KindeClientBuilder hasSuccessPage(Boolean success) {
+        this.parameters.put(KindeParameters.HAS_SUCCESS_PAGE.getValue(), success);
         return this;
     }
 

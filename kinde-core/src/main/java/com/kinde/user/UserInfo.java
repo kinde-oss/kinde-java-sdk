@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 public class UserInfo {
 
-    private com.nimbusds.openid.connect.sdk.claims.UserInfo userInfo;
 
     public UserInfo(com.nimbusds.openid.connect.sdk.claims.UserInfo userInfo) {
         this.userInfo = userInfo;
@@ -18,6 +17,7 @@ public class UserInfo {
         this.picture = userInfo.getPicture().toString();
     }
 
+    private com.nimbusds.openid.connect.sdk.claims.UserInfo userInfo;
     private String subject;
     private String givenName;
     private String id;
