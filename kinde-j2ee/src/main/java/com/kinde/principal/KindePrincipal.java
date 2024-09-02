@@ -22,4 +22,8 @@ public class KindePrincipal implements Principal {
     public List<String> roles() {
         return this.roles;
     }
+
+    public boolean hasRole(String role) {
+        return this.roles.contains(role);
+    }
 }
