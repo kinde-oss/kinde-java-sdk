@@ -22,5 +22,7 @@ public interface KindeClientSession {
 
     AuthorizationUrl register();
 
+    AuthorizationUrl logout() throws Exception;
+
     UserInfo retrieveUserInfo();
 }

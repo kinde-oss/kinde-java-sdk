@@ -193,6 +193,7 @@ public class KindeClientCodeSessionImplTest {
                 .addAudience("http://localhost:8089/api")
                 .grantType(AuthorizationType.CODE)
                 .orgCode("TEST")
+                .hasSuccessPage(Boolean.TRUE)
                 .build();
         KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
         AuthorizationUrl authorizationUrl2 = kindeClientSession2.register();
@@ -201,6 +202,7 @@ public class KindeClientCodeSessionImplTest {
         System.out.println(authorizationUrl2.getUrl());
         assertTrue(authorizationUrl2.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_code=TEST"));
+        assertTrue(authorizationUrl2.getUrl().toString().contains("has_success_page=true"));
         assertNotNull(authorizationUrl2.getCodeVerifier());
     }
 
@@ -230,6 +232,7 @@ public class KindeClientCodeSessionImplTest {
                 .addAudience("http://localhost:8089/api")
                 .grantType(AuthorizationType.CODE)
                 .orgCode("TEST")
+                .hasSuccessPage(Boolean.TRUE)
                 .build();
         KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
         AuthorizationUrl authorizationUrl2 = kindeClientSession2.createOrg("TEST2");
@@ -239,6 +242,7 @@ public class KindeClientCodeSessionImplTest {
         assertTrue(authorizationUrl2.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_code=TEST"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_name=TEST2"));
+        assertTrue(authorizationUrl2.getUrl().toString().contains("has_success_page=true"));
         assertNotNull(authorizationUrl2.getCodeVerifier());
     }
 

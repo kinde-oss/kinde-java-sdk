@@ -7,14 +7,13 @@ import com.kinde.authorization.AuthorizationType;
 public class KindeSingleton {
 
     private static KindeSingleton instance;
-    private KindeClient kindeClient;
+    private KindeClientBuilder kindeClientBuilder;
 
     private KindeSingleton() {
-        this.kindeClient = KindeClientBuilder
+        this.kindeClientBuilder = KindeClientBuilder
                 .builder()
                 .grantType(AuthorizationType.CODE)
-                .addScope("openid")
-                .build();
+                .addScope("openid");
     }
 
     public static synchronized KindeSingleton getInstance() {
@@ -25,6 +24,9 @@ public class KindeSingleton {
     }
 
     public KindeClient getKindeClient() {
-        return this.kindeClient;
+        return this.kindeClientBuilder.build();
+    }
+    public KindeClientBuilder getKindeClientBuilder() {
+        return this.kindeClientBuilder;
     }
 }

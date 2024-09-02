@@ -19,13 +19,14 @@ import java.security.Principal;
 import java.util.List;
 
 import static com.kinde.constants.KindeConstants.*;
-import static com.kinde.constants.KindeJ2eeConstants.*;
+import static com.kinde.constants.KindeJ2eeConstants.AUTHENTICATED_USER;
+import static com.kinde.constants.KindeJ2eeConstants.AUTHORIZATION_URL;
 
 @Slf4j
-public class KindeLoginServlet extends KindeAuthenticationServlet {
+public class KindeRegistrationServlet extends KindeAuthenticationServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req,resp, KindeAuthenticationAction.LOGIN);
+        doGet(req,resp, KindeAuthenticationAction.REGISTER);
     }
 }

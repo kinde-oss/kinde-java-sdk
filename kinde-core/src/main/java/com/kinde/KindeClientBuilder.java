@@ -15,6 +15,7 @@ import java.util.*;
 public class KindeClientBuilder {
 
     private Map<String, Object> parameters = new HashMap<>();
+    private Injector injector;
 
     /**
      * Private constructor to prevent new instantiation
@@ -37,6 +38,8 @@ public class KindeClientBuilder {
         setParameterFromEnvironmental(KindeParameters.LANG,dotenv);
         setParameterFromEnvironmental(KindeParameters.ORG_CODE,dotenv);
         setParameterFromEnvironmental(KindeParameters.HAS_SUCCESS_PAGE,dotenv);
+        injector = KindeGuiceSingleton.getInstance().getInjector().createChildInjector(new KindeClientGuiceModule(this.parameters));
+
     }
 
     /**
@@ -50,73 +53,101 @@ public class KindeClientBuilder {
 
 
     public KindeClientBuilder domain(String domain) {
-        this.parameters.put(KindeParameters.DOMAIN.getValue(),domain);
+        if (domain != null) {
+            this.parameters.put(KindeParameters.DOMAIN.getValue(), domain);
+        }
         return this;
     }
 
     public KindeClientBuilder redirectUri(String redirectUri) {
-        this.parameters.put(KindeParameters.REDIRECT_URI.getValue(),redirectUri);
+        if (redirectUri != null) {
+            this.parameters.put(KindeParameters.REDIRECT_URI.getValue(), redirectUri);
+        }
         return this;
     }
 
     public KindeClientBuilder logoutRedirectUri(String logoutRedirectUri) {
-        this.parameters.put(KindeParameters.LOGOUT_REDIRECT_URI.getValue(),logoutRedirectUri);
+        if (logoutRedirectUri != null) {
+            this.parameters.put(KindeParameters.LOGOUT_REDIRECT_URI.getValue(), logoutRedirectUri);
+        }
         return this;
     }
 
     public KindeClientBuilder openidEndpoint(String openidEndpoint) {
-        this.parameters.put(KindeParameters.OPENID_ENDPOINT.getValue(),openidEndpoint);
+        if (openidEndpoint != null) {
+            this.parameters.put(KindeParameters.OPENID_ENDPOINT.getValue(), openidEndpoint);
+        }
         return this;
     }
 
     public KindeClientBuilder authorizationEndpoint(String authorizationEndpoint) {
-        this.parameters.put(KindeParameters.AUTHORIZATION_ENDPOINT.getValue(),authorizationEndpoint);
+        if (authorizationEndpoint != null) {
+            this.parameters.put(KindeParameters.AUTHORIZATION_ENDPOINT.getValue(), authorizationEndpoint);
+        }
         return this;
     }
 
     public KindeClientBuilder tokenEndpoint(String tokenEndpoint) {
-        this.parameters.put(KindeParameters.TOKEN_ENDPOINT.getValue(),tokenEndpoint);
+        if (tokenEndpoint != null) {
+            this.parameters.put(KindeParameters.TOKEN_ENDPOINT.getValue(), tokenEndpoint);
+        }
         return this;
     }
 
     public KindeClientBuilder logoutEndpoint(String logoutEndpoint) {
-        this.parameters.put(KindeParameters.LOGOUT_ENDPOINT.getValue(),logoutEndpoint);
+        if (logoutEndpoint != null) {
+            this.parameters.put(KindeParameters.LOGOUT_ENDPOINT.getValue(), logoutEndpoint);
+        }
         return this;
     }
 
     public KindeClientBuilder clientId(String clientId) {
-        this.parameters.put(KindeParameters.CLIENT_ID.getValue(),clientId);
+        if (clientId != null) {
+            this.parameters.put(KindeParameters.CLIENT_ID.getValue(), clientId);
+        }
         return this;
     }
 
     public KindeClientBuilder clientSecret(String clientSecret) {
-        this.parameters.put(KindeParameters.CLIENT_SECRET.getValue(),clientSecret);
+        if (clientSecret != null) {
+            this.parameters.put(KindeParameters.CLIENT_SECRET.getValue(), clientSecret);
+        }
         return this;
     }
 
     public KindeClientBuilder grantType(AuthorizationType authorizationType) {
-        this.parameters.put(KindeParameters.GRANT_TYPE.getValue(),authorizationType);
+        if (authorizationType != null) {
+            this.parameters.put(KindeParameters.GRANT_TYPE.getValue(), authorizationType);
+        }
         return this;
     }
 
     public KindeClientBuilder scopes(String scope) {
-        this.parameters.put(KindeParameters.SCOPES.getValue(), new ArrayList(Arrays.asList(scope.split(","))));
+        if (scope != null) {
+            this.parameters.put(KindeParameters.SCOPES.getValue(), new ArrayList(Arrays.asList(scope.split(","))));
+        }
         return this;
     }
 
     public KindeClientBuilder addScope(String scope) {
-        List.class.cast(this.parameters.computeIfAbsent(KindeParameters.SCOPES.getValue(), k -> new ArrayList<String>()))
-                .add(scope);
+        if (scope != null) {
+            List.class.cast(this.parameters.computeIfAbsent(KindeParameters.SCOPES.getValue(), k -> new ArrayList<String>()))
+                    .add(scope);
+        }
         return this;
     }
 
     public KindeClientBuilder protocol(String protocol) {
-        this.parameters.put(KindeParameters.PROTOCOL.getValue(),protocol);
+        if (protocol != null) {
+            this.parameters.put(KindeParameters.PROTOCOL.getValue(), protocol);
+        }
         return this;
     }
 
     public KindeClientBuilder audience(String audiences) {
-        this.parameters.put(KindeParameters.AUDIENCE.getValue(), Arrays.asList(audiences.split(",")));
+        if (audiences != null) {
+            this.parameters.put(KindeParameters.AUDIENCE.getValue(), Arrays.asList(audiences.split(",")));
+        }
         return this;
     }
 
@@ -127,17 +158,23 @@ public class KindeClientBuilder {
     }
 
     public KindeClientBuilder lang(String lang) {
-        this.parameters.put(KindeParameters.LANG.getValue(), lang);
+        if (lang != null) {
+            this.parameters.put(KindeParameters.LANG.getValue(), lang);
+        }
         return this;
     }
 
-    public KindeClientBuilder orgCode(String lang) {
-        this.parameters.put(KindeParameters.ORG_CODE.getValue(), lang);
+    public KindeClientBuilder orgCode(String orgCode) {
+        if (orgCode != null) {
+            this.parameters.put(KindeParameters.ORG_CODE.getValue(), orgCode);
+        }
         return this;
     }
 
     public KindeClientBuilder hasSuccessPage(Boolean success) {
-        this.parameters.put(KindeParameters.HAS_SUCCESS_PAGE.getValue(), success);
+        if (success != null) {
+            this.parameters.put(KindeParameters.HAS_SUCCESS_PAGE.getValue(), success);
+        }
         return this;
     }
 
@@ -151,7 +188,6 @@ public class KindeClientBuilder {
             throw new InvalidParameterException("The required parameters were not set");
         }
         // create a child injector for the scope of this client
-        Injector injector = KindeGuiceSingleton.getInstance().getInjector().createChildInjector(new KindeClientGuiceModule(this.parameters));
         return injector.getInstance(KindeClient.class);
     }
 

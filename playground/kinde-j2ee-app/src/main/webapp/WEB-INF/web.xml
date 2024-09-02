@@ -9,15 +9,31 @@
     <servlet-class>com.kinde.servlet.KindeLoginServlet</servlet-class>
   </servlet>
   <servlet>
-    <servlet-name>ProtectedResourceServlet</servlet-name>
-    <servlet-class>com.kinde.ProtectedResourceServlet</servlet-class>
+    <servlet-name>KindeLogoutServlet</servlet-name>
+    <servlet-class>com.kinde.servlet.KindeLogoutServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>KindeRegisterServlet</servlet-name>
+    <servlet-class>com.kinde.servlet.KindeRegistrationServlet</servlet-class>
+  </servlet>
+  <filter>
+    <filter-name>KindeLoginFilter</filter-name>
+    <filter-class>com.kinde.filter.KindeLoginFilter</filter-class>
+  </filter>
   <servlet-mapping>
     <servlet-name>KindeLoginServlet</servlet-name>
     <url-pattern>/login</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-    <servlet-name>ProtectedResourceServlet</servlet-name>
-    <url-pattern>/protected-resource</url-pattern>
+    <servlet-name>KindeRegisterServlet</servlet-name>
+    <url-pattern>/register</url-pattern>
   </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>KindeLogoutServlet</servlet-name>
+    <url-pattern>/logout</url-pattern>
+  </servlet-mapping>
+  <filter-mapping>
+    <filter-name>KindeLoginFilter</filter-name>
+    <url-pattern>/private/*</url-pattern> <!-- Apply to all URLs or specify specific patterns -->
+  </filter-mapping>
 </web-app>
