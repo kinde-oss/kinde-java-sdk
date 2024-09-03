@@ -1,3 +1,5 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.kinde.principal.KindePrincipal" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,7 +11,20 @@
     <nav class="nav container">
         <h1 class="text-display-3">KindeAuth</h1>
         <div class="profile-blob">
+<%
+KindePrincipal kindePrincipal = (KindePrincipal)request.getUserPrincipal();
+if (kindePrincipal.getUserInfo().getPicture() != null) {
+%>
+            <img class="avatar" src="<%=kindePrincipal.getUserInfo().getPicture()%>" alt="user profile avatar" />
+<%
+} else {
+%>
+            <div class="avatar"><%=kindePrincipal.getUserInfo().getId()%></div>
+<%
+}
+%>
             <div>
+                <p class="text-heading-2"><%=kindePrincipal.getUserInfo().getId()%></p>
                 <button class="text-subtle" onclick="redirectToLogOut()">Sign out</button>
             </div>
         </div>

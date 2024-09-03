@@ -1,12 +1,15 @@
 package com.kinde.user;
 
-import lombok.Data;
+import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.ToString;
 
+@ToString
 @Getter
 public class UserInfo {
 
-
+    @SneakyThrows
     public UserInfo(com.nimbusds.openid.connect.sdk.claims.UserInfo userInfo) {
         this.userInfo = userInfo;
         this.subject = userInfo.getSubject().toString();
@@ -14,7 +17,7 @@ public class UserInfo {
         this.givenName = userInfo.getGivenName();
         this.id = userInfo.getName();
         this.familyName = userInfo.getFamilyName();
-        this.picture = userInfo.getPicture().toString();
+        this.picture = userInfo.getPicture() == null? null : userInfo.getPicture().toString();
     }
 
     private com.nimbusds.openid.connect.sdk.claims.UserInfo userInfo;

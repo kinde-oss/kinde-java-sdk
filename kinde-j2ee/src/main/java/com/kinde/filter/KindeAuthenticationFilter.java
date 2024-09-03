@@ -10,6 +10,7 @@ import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
 import com.kinde.token.KindeToken;
 import com.kinde.token.RefreshToken;
+import com.kinde.user.UserInfo;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,6 +40,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
                     .grantType(AuthorizationType.CODE)
                     .orgCode(req.getParameter(ORG_CODE))
                     .lang(req.getParameter(LANG))
+                    .scopes(SCOPE)
                     .build()
                     .clientSession();
             if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
@@ -56,11 +58,13 @@ public abstract class KindeAuthenticationFilter implements Filter {
         } else if (code != null) {
             // Exchange the authorization code for an access token
             try {
-                List<KindeToken> tokens = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
+                KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
+                List<KindeToken> tokens = kindeClientSession.retrieveTokens();
 
                 tokens.stream().filter(token->token instanceof AccessToken).forEach(token-> {
                     req.getSession().setAttribute(ACCESS_TOKEN,token.token());
-                    Principal principal = new KindePrincipal(token.getUser(), token.getPermissions());
+                    UserInfo userInfo = kindeClientSession.retrieveUserInfo();
+                    Principal principal = new KindePrincipal(token.getUser(), token.getPermissions(), userInfo);
                     req.getSession().setAttribute(AUTHENTICATED_USER,principal);
                 });
                 tokens.stream().filter(token->token instanceof IDToken).forEach(token->req.getSession().setAttribute(ID_TOKEN,token.token()));
@@ -74,7 +78,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
                 throw new ServletException("Authentication failure as the user principal has not been set correctly");
             }
             HttpServletRequest wrappedRequest = new KindeHttpRequestWrapper(req, userPrincipal);
-            filterChain.doFilter(servletRequest,servletResponse);
+            filterChain.doFilter(wrappedRequest,servletResponse);
         }
     }
 

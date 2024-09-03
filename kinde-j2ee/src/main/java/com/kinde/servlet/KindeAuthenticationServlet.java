@@ -9,6 +9,7 @@ import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
 import com.kinde.token.KindeToken;
 import com.kinde.token.RefreshToken;
+import com.kinde.user.UserInfo;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +41,7 @@ public class KindeAuthenticationServlet extends HttpServlet {
                     .grantType(AuthorizationType.CODE)
                     .orgCode(req.getParameter(ORG_CODE))
                     .lang(req.getParameter(LANG))
+                    .scopes(SCOPE)
                     .build()
                     .clientSession();
             AuthorizationUrl authorizationUrl = null;
@@ -61,11 +63,13 @@ public class KindeAuthenticationServlet extends HttpServlet {
             try {
                 AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
                 String postLoginUrl = (String)req.getSession().getAttribute(POST_LOGIN_URL);
-                List<KindeToken> tokens = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
+                KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
+                List<KindeToken> tokens = kindeClientSession.retrieveTokens();
 
                 tokens.stream().filter(token->token instanceof AccessToken).forEach(token-> {
                     req.getSession().setAttribute(ACCESS_TOKEN,token.token());
-                    Principal principal = new KindePrincipal(token.getUser(), token.getPermissions());
+                    UserInfo userInfo = kindeClientSession.retrieveUserInfo();
+                    Principal principal = new KindePrincipal(token.getUser(), token.getPermissions(), userInfo);
                     req.getSession().setAttribute(AUTHENTICATED_USER,principal);
                 });
                 tokens.stream().filter(token->token instanceof IDToken).forEach(token->req.getSession().setAttribute(ID_TOKEN,token.token()));
