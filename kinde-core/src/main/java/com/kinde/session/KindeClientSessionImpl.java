@@ -10,6 +10,7 @@ import com.kinde.config.KindeConfig;
 import com.kinde.guice.KindeAnnotations;
 import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
+import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
@@ -42,7 +43,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     @SneakyThrows
-    public List<KindeToken> retrieveTokens() {
+    public KindeTokens retrieveTokens() {
         // Construct the client credentials grant
         AuthorizationGrant clientGrant = new ClientCredentialsGrant();
 
@@ -77,8 +78,10 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
-        return Arrays.asList(
-                AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true));
+        return new KindeTokens(null,null,
+                (AccessToken) AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true),
+                null);
+
     }
 
     @Override

@@ -11,7 +11,7 @@ public class IDToken extends BaseToken {
         super(token,valid);
     }
 
-    public static KindeToken init(String token, boolean valid) {
+    public static IDToken init(String token, boolean valid) {
         return new IDToken(token,valid);
     }
 

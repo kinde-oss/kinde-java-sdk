@@ -4,6 +4,7 @@ import com.kinde.KindeAdminSession;
 import com.kinde.KindeClient;
 import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
+import com.kinde.token.KindeTokens;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.auth.Authentication;
 import org.openapitools.client.auth.HttpBearerAuth;
@@ -25,11 +26,11 @@ public class KindeAdminSessionImpl implements KindeAdminSession {
         if (kindeClient == null) {
             return new ApiClient();
         }
-        List<KindeToken> tokens = kindeClient.clientSession().retrieveTokens();
-        if (!tokens.stream().allMatch(token->token instanceof AccessToken)) {
+        KindeTokens kindeTokens = kindeClient.clientSession().retrieveTokens();
+        if (kindeTokens.getAccessToken() == null) {
             throw new IllegalStateException("Invalid session type.");
         }
-        AccessToken accessToken = (AccessToken) tokens.stream().filter(token->token instanceof AccessToken).findFirst().get();
+        AccessToken accessToken = kindeTokens.getAccessToken();
         HttpBearerAuth httpBearerAuth = new HttpBearerAuth("bearer");
         httpBearerAuth.setBearerToken(accessToken.token());
         Map<String, Authentication> authMap = new HashMap<>();

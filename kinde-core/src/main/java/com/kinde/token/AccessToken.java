@@ -6,7 +6,7 @@ public class AccessToken extends BaseToken {
         super(token,valid);
     }
 
-    public static KindeToken init(String token,boolean valid) {
+    public static AccessToken init(String token,boolean valid) {
         return new AccessToken(token,valid);
     }
 }

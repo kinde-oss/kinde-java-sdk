@@ -11,7 +11,7 @@ public class RefreshToken extends BaseToken {
         super(token,valid);
     }
 
-    public static KindeToken init(String token,boolean valid) {
+    public static RefreshToken init(String token,boolean valid) {
         return new RefreshToken(token,valid);
     }
 

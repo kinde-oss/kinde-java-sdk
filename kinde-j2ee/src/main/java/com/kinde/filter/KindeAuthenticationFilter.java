@@ -6,10 +6,7 @@ import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.constants.KindeAuthenticationAction;
 import com.kinde.principal.KindePrincipal;
 import com.kinde.servlet.KindeSingleton;
-import com.kinde.token.AccessToken;
-import com.kinde.token.IDToken;
-import com.kinde.token.KindeToken;
-import com.kinde.token.RefreshToken;
+import com.kinde.token.*;
 import com.kinde.user.UserInfo;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,8 +17,7 @@ import java.security.Principal;
 import java.util.List;
 
 import static com.kinde.constants.KindeConstants.*;
-import static com.kinde.constants.KindeJ2eeConstants.AUTHENTICATED_USER;
-import static com.kinde.constants.KindeJ2eeConstants.AUTHORIZATION_URL;
+import static com.kinde.constants.KindeJ2eeConstants.*;
 
 public abstract class KindeAuthenticationFilter implements Filter {
     protected void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain, KindeAuthenticationAction kindeAuthenticationAction) throws IOException, ServletException {
@@ -59,16 +55,14 @@ public abstract class KindeAuthenticationFilter implements Filter {
             // Exchange the authorization code for an access token
             try {
                 KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
-                List<KindeToken> tokens = kindeClientSession.retrieveTokens();
-
-                tokens.stream().filter(token->token instanceof AccessToken).forEach(token-> {
-                    req.getSession().setAttribute(ACCESS_TOKEN,token.token());
-                    UserInfo userInfo = kindeClientSession.retrieveUserInfo();
-                    Principal principal = new KindePrincipal(token.getUser(), token.getPermissions(), userInfo);
-                    req.getSession().setAttribute(AUTHENTICATED_USER,principal);
-                });
-                tokens.stream().filter(token->token instanceof IDToken).forEach(token->req.getSession().setAttribute(ID_TOKEN,token.token()));
-                tokens.stream().filter(token->token instanceof RefreshToken).forEach(token->req.getSession().setAttribute(REFRESH_TOKEN,token.token()));
+                KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
+                req.getSession().setAttribute(KINDE_TOKENS,kindeTokens);
+                req.getSession().setAttribute(ACCESS_TOKEN,kindeTokens.getAccessToken());
+                UserInfo userInfo = kindeClientSession.retrieveUserInfo();
+                Principal principal = new KindePrincipal(kindeTokens.getAccessToken().getUser(), kindeTokens.getAccessToken().getPermissions(), userInfo);
+                req.getSession().setAttribute(AUTHENTICATED_USER,principal);
+                req.getSession().setAttribute(ID_TOKEN,kindeTokens.getIdToken());
+                req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
                 resp.sendRedirect(req.getRequestURI());
             } catch (Exception e) {
                 throw new ServletException("OAuth token exchange failed", e);

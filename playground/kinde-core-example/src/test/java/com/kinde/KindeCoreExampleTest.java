@@ -1,6 +1,7 @@
 package com.kinde;
 
 import com.kinde.token.KindeToken;
+import com.kinde.token.KindeTokens;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -44,15 +45,15 @@ public class KindeCoreExampleTest
                 .build();
         KindeClientSession kindeClientSession = kindeClient.clientSession();
         System.out.println(kindeClientSession.authorizationUrl());
-        List<KindeToken> tokens = kindeClientSession.retrieveTokens();
+        KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
         KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
-        kindeTokenFactory.parse(tokens.get(0).token());
+        kindeTokenFactory.parse(kindeTokens.getAccessToken().token());
 
         assertNotNull(kindeClient);
         assertNotNull(kindeClientSession);
-        assertNotNull(tokens);
-        assertFalse(tokens.isEmpty());
+        assertNotNull(kindeTokens);
+        assertNotNull(kindeTokens.getAccessToken());
         assertNotNull(kindeTokenFactory);
-        assertNotNull(kindeTokenFactory.parse(tokens.get(0).token()));
+        assertNotNull(kindeTokenFactory.parse(kindeTokens.getAccessToken().token()));
     }
 }

@@ -8,14 +8,14 @@ import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
 import com.kinde.token.jwt.JwtGenerator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class KindClientImplTest {
 
@@ -23,6 +23,23 @@ public class KindClientImplTest {
     public void setup() {
         KindeGuiceSingleton.init(new KindeClientGuiceTestModule());
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
+    }
+
+    @AfterEach
+    public void teardown() {
+        KindeGuiceSingleton.fin();
+        KindeEnvironmentSingleton.fin();
+    }
+
+    /**
+     * Rigourous Test :-)
+     */
+    @Test
+    public void testEnvironmentSingleton() {
+        // clear out the environment
+        KindeEnvironmentSingleton.fin();
+        KindeEnvironmentSingleton environmentSingleton = KindeEnvironmentSingleton.getInstance();
+        assertTrue(environmentSingleton.getState() == KindeEnvironmentSingleton.State.ACTIVE);
     }
 
     /**

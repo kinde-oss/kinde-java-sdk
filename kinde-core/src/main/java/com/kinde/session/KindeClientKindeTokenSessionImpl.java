@@ -5,7 +5,9 @@ import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.guice.KindeAnnotations;
 import com.kinde.token.AccessToken;
+import com.kinde.token.IDToken;
 import com.kinde.token.KindeToken;
+import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.AccessTokenResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
@@ -44,7 +46,7 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
     @Override
     @SneakyThrows
-    public List<KindeToken> retrieveTokens() {
+    public KindeTokens retrieveTokens() {
         // Construct the grant from the saved refresh token
         RefreshToken refreshToken = new RefreshToken(kindeToken.token());
         AuthorizationGrant refreshTokenGrant = new RefreshTokenGrant(refreshToken);
@@ -68,16 +70,20 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
-        if (successResponse.getTokens() instanceof OIDCTokens) {
-            OIDCTokens oidcTokens = successResponse.getTokens().toOIDCTokens();
-            return Arrays.asList(
-                    com.kinde.token.IDToken.init(oidcTokens.getIDTokenString(), true),
-                    com.kinde.token.AccessToken.init(oidcTokens.getAccessToken().getValue(), true),
-                    com.kinde.token.RefreshToken.init(oidcTokens.getRefreshToken().getValue(), true));
-        } else {
-            return Arrays.asList(
-                    com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true));
+        String idTokenStr = (String)successResponse.getCustomParameters().get("id_token");
+
+        IDToken idToken = null;
+        if (idTokenStr != null) {
+            idToken = IDToken.init(idTokenStr, true);
         }
+
+        AccessToken accessToken = com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true);
+        com.kinde.token.RefreshToken kindeRefreshToken = null;
+        if (successResponse.getTokens().getRefreshToken() != null) {
+            kindeRefreshToken = com.kinde.token.RefreshToken.init(successResponse.getTokens().getRefreshToken().getValue(), true);
+        }
+
+        return new KindeTokens(this.kindeConfig.scopes(),idToken,accessToken,kindeRefreshToken);
     }
 
 

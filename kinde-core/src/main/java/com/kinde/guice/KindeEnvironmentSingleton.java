@@ -27,6 +27,10 @@ public class KindeEnvironmentSingleton {
         return instance;
     }
 
+    public static synchronized void fin() {
+        instance = null;
+    }
+
     public State getState() {
         return this.state;
     }

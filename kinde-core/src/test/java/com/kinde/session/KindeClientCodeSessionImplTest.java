@@ -12,10 +12,14 @@ import com.kinde.client.oidc.OidcMetaDataImplTest;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.AccessToken;
+import com.kinde.token.KindeToken;
+import com.kinde.token.KindeTokens;
 import com.kinde.token.RefreshToken;
 import com.kinde.token.jwt.JwtGenerator;
 import com.kinde.user.UserInfo;
 import org.junit.jupiter.api.*;
+
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
@@ -255,7 +259,8 @@ public class KindeClientCodeSessionImplTest {
                 .redirectUri("http://localhost:8080/")
                 .build();
         KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
-        assertTrue(kindeClientSession.retrieveTokens().size()>0);
+        KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
+        assertNotNull(kindeTokens.getAccessToken());
         assertTrue(kindeClientSession.authorizationUrl()!=null);
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
@@ -268,7 +273,8 @@ public class KindeClientCodeSessionImplTest {
                 .grantType(AuthorizationType.CODE)
                 .build();
         KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
-        assertTrue(kindeClientSession2.retrieveTokens().size()>0);
+        KindeTokens kindeTokens2 = kindeClientSession2.retrieveTokens();
+        assertNotNull(kindeTokens2.getAccessToken());
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
 
         assertNotNull(kindeClient);
@@ -298,7 +304,8 @@ public class KindeClientCodeSessionImplTest {
                 .redirectUri("http://localhost:8080/")
                 .build();
         KindeClientSession kindeClientSession = kindeClient.clientSession();
-        assertTrue(kindeClientSession.retrieveTokens().size()>0);
+        KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
+        assertNotNull(kindeTokens.getAccessToken());
         assertTrue(kindeClientSession.authorizationUrl()!=null);
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
@@ -310,7 +317,8 @@ public class KindeClientCodeSessionImplTest {
                 .addAudience("http://localhost:8089/api")
                 .build();
         KindeClientSession kindeClientSession2 = kindeClient2.clientSession();
-        assertTrue(kindeClientSession2.retrieveTokens().size()>0);
+        KindeTokens kindeTokens2 = kindeClientSession2.retrieveTokens();
+        assertNotNull(kindeTokens2.getAccessToken());
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
 
         assertNotNull(kindeClient);
@@ -328,7 +336,8 @@ public class KindeClientCodeSessionImplTest {
                 .redirectUri("http://localhost:8080/")
                 .build();
         KindeClientSession kindeClientSession =  kindeClient.initClientSession(RefreshToken.init(JwtGenerator.refreshToken(),true));
-        assertTrue(kindeClientSession.retrieveTokens().size()>0);
+        KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
+        assertNotNull(kindeTokens.getAccessToken());
         assertTrue(kindeClientSession.authorizationUrl()!=null);
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
@@ -340,7 +349,8 @@ public class KindeClientCodeSessionImplTest {
                 .addAudience("http://localhost:8089/api")
                 .build();
         KindeClientSession kindeClientSession2 =  kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
-        assertTrue(kindeClientSession2.retrieveTokens().size()>0);
+        KindeTokens kindeTokens2 = kindeClientSession2.retrieveTokens();
+        assertNotNull(kindeTokens2.getAccessToken());
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
         assertNotNull(kindeClient);
         assertNotNull(kindeClientSession);

@@ -5,8 +5,7 @@ import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.guice.KindeAnnotations;
-import com.kinde.token.AccessToken;
-import com.kinde.token.KindeToken;
+import com.kinde.token.*;
 import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
@@ -30,7 +29,7 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
 
     private String code;
     private AuthorizationUrl authorizationUrl;
-    private KindeToken kindeToken;
+    private AccessToken accessToken;
 
     @Inject
     public KindeClientCodeSessionImpl(
@@ -45,7 +44,7 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
 
     @Override
     @SneakyThrows
-    public List<KindeToken> retrieveTokens() {
+    public KindeTokens retrieveTokens() {
         AuthorizationCode code = new AuthorizationCode(this.code);
         URI callback = new URI(this.kindeConfig.redirectUri());
         AuthorizationGrant codeGrant = this.authorizationUrl == null ? new AuthorizationCodeGrant(code, callback) :
@@ -67,32 +66,36 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
             // We got an error response...
             throw new Exception(response.toErrorResponse().toString());
         }
-
         AccessTokenResponse successResponse = response.toSuccessResponse();
-        if (successResponse.getTokens() instanceof OIDCTokens) {
-            OIDCTokens oidcTokens = successResponse.getTokens().toOIDCTokens();
-            this.kindeToken = com.kinde.token.AccessToken.init(oidcTokens.getAccessToken().getValue(), true);
-            return Arrays.asList(
-                    com.kinde.token.IDToken.init(oidcTokens.getIDTokenString(), true),
-                    this.kindeToken,
-                    com.kinde.token.RefreshToken.init(oidcTokens.getRefreshToken().getValue(), true));
-        } else {
-            this.kindeToken = com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true);
-            return Arrays.asList(kindeToken);
+
+        String idTokenStr = (String)successResponse.getCustomParameters().get("id_token");
+
+        IDToken idToken = null;
+        if (idTokenStr != null) {
+            idToken = IDToken.init(idTokenStr, true);
         }
+
+        this.accessToken = com.kinde.token.AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true);
+
+        RefreshToken refreshToken = null;
+        if (successResponse.getTokens().getRefreshToken() != null) {
+            refreshToken = com.kinde.token.RefreshToken.init(successResponse.getTokens().getRefreshToken().getValue(), true);
+        }
+
+        return new KindeTokens(this.kindeConfig.scopes(),idToken,this.accessToken,refreshToken);
     }
 
     @Override
     @SneakyThrows
     public UserInfo retrieveUserInfo() {
-        if (this.kindeToken == null) {
+        if (this.accessToken == null) {
             retrieveTokens();
         }
-        if (!(this.kindeToken instanceof AccessToken)) {
+        if (!(this.accessToken instanceof AccessToken)) {
             throw new IllegalArgumentException("Expected an access token to be present.");
         }
         URI userInfoEndpoint;    // The UserInfoEndpoint of the OpenID provider
-        BearerAccessToken token = new BearerAccessToken(this.kindeToken.token()); // The access token
+        BearerAccessToken token = new BearerAccessToken(this.accessToken.token()); // The access token
 
         HTTPResponse httpResponse = new UserInfoRequest(this.oidcMetaData.getOpMetadata().getUserInfoEndpointURI(), token)
                 .toHTTPRequest()

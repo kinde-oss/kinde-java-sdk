@@ -5,10 +5,7 @@ import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.constants.KindeAuthenticationAction;
 import com.kinde.principal.KindePrincipal;
-import com.kinde.token.AccessToken;
-import com.kinde.token.IDToken;
-import com.kinde.token.KindeToken;
-import com.kinde.token.RefreshToken;
+import com.kinde.token.*;
 import com.kinde.user.UserInfo;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -64,16 +61,14 @@ public class KindeAuthenticationServlet extends HttpServlet {
                 AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
                 String postLoginUrl = (String)req.getSession().getAttribute(POST_LOGIN_URL);
                 KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
-                List<KindeToken> tokens = kindeClientSession.retrieveTokens();
-
-                tokens.stream().filter(token->token instanceof AccessToken).forEach(token-> {
-                    req.getSession().setAttribute(ACCESS_TOKEN,token.token());
-                    UserInfo userInfo = kindeClientSession.retrieveUserInfo();
-                    Principal principal = new KindePrincipal(token.getUser(), token.getPermissions(), userInfo);
-                    req.getSession().setAttribute(AUTHENTICATED_USER,principal);
-                });
-                tokens.stream().filter(token->token instanceof IDToken).forEach(token->req.getSession().setAttribute(ID_TOKEN,token.token()));
-                tokens.stream().filter(token->token instanceof RefreshToken).forEach(token->req.getSession().setAttribute(REFRESH_TOKEN,token.token()));
+                KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
+                req.getSession().setAttribute(KINDE_TOKENS,kindeTokens);
+                req.getSession().setAttribute(ACCESS_TOKEN,kindeTokens.getAccessToken());
+                UserInfo userInfo = kindeClientSession.retrieveUserInfo();
+                Principal principal = new KindePrincipal(kindeTokens.getAccessToken().getUser(), kindeTokens.getAccessToken().getPermissions(), userInfo);
+                req.getSession().setAttribute(AUTHENTICATED_USER,principal);
+                req.getSession().setAttribute(ID_TOKEN,kindeTokens.getIdToken());
+                req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
 
                 resp.sendRedirect(postLoginUrl);
             } catch (Exception e) {
