@@ -103,10 +103,8 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
         UserInfoResponse userInfoResponse = UserInfoResponse.parse(httpResponse);
 
         if (! userInfoResponse.indicatesSuccess()) {
-            // The request failed, e.g. due to invalid or expired token
-            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getCode());
-            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getDescription());
-            return null;
+            // We got an error response...
+            throw new Exception(userInfoResponse.toErrorResponse().toString());
         }
 
         return new UserInfo(userInfoResponse.toSuccessResponse().getUserInfo());

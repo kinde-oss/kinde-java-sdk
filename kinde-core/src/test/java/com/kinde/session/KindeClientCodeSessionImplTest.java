@@ -320,6 +320,53 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(userInfo.getGivenName());
         assertNotNull(userInfo.getFamilyName());
 
+
+        wireMockServer.removeStub(
+                WireMock.post(urlPathMatching("/oauth2/token"))
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\n" +
+                                        "  \"access_token\": \"" + JwtGenerator.generateAccessToken() + "\",\n" +
+                                        "  \"token_type\": \"Bearer\",\n" +
+                                        "  \"expires_in\": 3600,\n" +
+                                        "  \"id_token\": \"" + JwtGenerator.generateIDToken() + "\",\n" +
+                                        "  \"refresh_token\": \"" + JwtGenerator.refreshToken() + "\",\n" +
+                                        "  \"scope\": \"openid profile email\"\n" +
+                                        "}")));
+
+        try {
+            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession("test", null);
+            KindeTokens kindeTokens4 = kindeClientSession4.retrieveTokens();
+            fail("Response should fail");
+        } catch (Exception ex) {
+            // ignore exception expected behavior
+        }
+
+        wireMockServer.removeStub(
+                WireMock.get(urlPathMatching("/oauth2/v2/user_profile"))
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("""
+                                  {
+                                  "sub": "1234567890",
+                                  "name": "John Doe",
+                                  "given_name": "John",
+                                  "family_name": "Doe",
+                                  "email": "johndoe@example.com",
+                                  "email_verified": true,
+                                  "picture": "https://example.com/johndoe.jpg",
+                                  "locale": "en-US",
+                                  "updated_at": 1611693980
+                                }
+                """)));
+
+        try {
+            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
+            kindeClientSession4.retrieveUserInfo();
+            fail("Response should fail");
+        } catch (Exception ex) {
+            // ignore exception expected behavior
+        }
     }
 
     @Test
@@ -352,6 +399,27 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(kindeClientSession);
         assertNotNull(kindeClient2);
         assertNotNull(kindeClientSession2);
+
+        wireMockServer.removeStub(
+                WireMock.post(urlPathMatching("/oauth2/token"))
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\n" +
+                                        "  \"access_token\": \"" + JwtGenerator.generateAccessToken() + "\",\n" +
+                                        "  \"token_type\": \"Bearer\",\n" +
+                                        "  \"expires_in\": 3600,\n" +
+                                        "  \"id_token\": \"" + JwtGenerator.generateIDToken() + "\",\n" +
+                                        "  \"refresh_token\": \"" + JwtGenerator.refreshToken() + "\",\n" +
+                                        "  \"scope\": \"openid profile email\"\n" +
+                                        "}")));
+
+        try {
+            KindeClientSession kindeClientSession4 = kindeClient2.clientSession();
+            KindeTokens kindeTokens4 = kindeClientSession4.retrieveTokens();
+            fail("Response should fail");
+        } catch (Exception ex) {
+            // ignore exception expected behavior
+        }
     }
 
     @Test
@@ -402,5 +470,51 @@ public class KindeClientCodeSessionImplTest {
             // ignore
         }
 
+        wireMockServer.removeStub(
+                WireMock.post(urlPathMatching("/oauth2/token"))
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\n" +
+                                        "  \"access_token\": \"" + JwtGenerator.generateAccessToken() + "\",\n" +
+                                        "  \"token_type\": \"Bearer\",\n" +
+                                        "  \"expires_in\": 3600,\n" +
+                                        "  \"id_token\": \"" + JwtGenerator.generateIDToken() + "\",\n" +
+                                        "  \"refresh_token\": \"" + JwtGenerator.refreshToken() + "\",\n" +
+                                        "  \"scope\": \"openid profile email\"\n" +
+                                        "}")));
+
+        try {
+            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
+            KindeTokens kindeTokens4 = kindeClientSession4.retrieveTokens();
+            fail("Response should fail");
+        } catch (Exception ex) {
+            // ignore exception expected behavior
+        }
+
+        wireMockServer.removeStub(
+                WireMock.get(urlPathMatching("/oauth2/v2/user_profile"))
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("""
+                                  {
+                                  "sub": "1234567890",
+                                  "name": "John Doe",
+                                  "given_name": "John",
+                                  "family_name": "Doe",
+                                  "email": "johndoe@example.com",
+                                  "email_verified": true,
+                                  "picture": "https://example.com/johndoe.jpg",
+                                  "locale": "en-US",
+                                  "updated_at": 1611693980
+                                }
+                """)));
+
+        try {
+            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
+            kindeClientSession4.retrieveUserInfo();
+            fail("Response should fail");
+        } catch (Exception ex) {
+            // ignore exception expected behavior
+        }
     }
 }
