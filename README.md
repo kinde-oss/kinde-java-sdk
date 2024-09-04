@@ -135,7 +135,7 @@ KindeClient kindeClient = KindeClientBuilder
         .builder()
         .build();
 KindeClientSession kindeClientSession = kindeClient.clientSession();
-List<KindeToken> tokens = kindeClientSession.retrieveTokens();
+KindeTokens tokens = kindeClientSession.retrieveTokens();
         
 ```
 
@@ -203,7 +203,7 @@ The token request looks like the following.
 KindeClient kindeClient = KindeClientBuilder
         .builder()
         .build();
-List<KindeToken> tokens = kindeClient.getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
+KindeTokens tokens = kindeClient.getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
 ```
 
 ## Migration
