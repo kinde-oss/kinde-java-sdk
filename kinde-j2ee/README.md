@@ -85,7 +85,7 @@ export KINDE_REDIRECT_URI=http://localhost:8080/kinde-j2ee-app/login
 ```
 
 ### .env
-The Kinde library supports .env files. The must be located in the directory from which the application is executed.
+The Kinde library supports .env files. They must be located in the directory from which the application is executed.
 ```shell
 KINDE_DOMAIN=https://<replace>.kinde.com
 KINDE_CLIENT_ID=<replace>
