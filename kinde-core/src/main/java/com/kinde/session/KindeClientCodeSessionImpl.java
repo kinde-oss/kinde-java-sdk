@@ -91,9 +91,6 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
         if (this.accessToken == null) {
             retrieveTokens();
         }
-        if (!(this.accessToken instanceof AccessToken)) {
-            throw new IllegalArgumentException("Expected an access token to be present.");
-        }
         URI userInfoEndpoint;    // The UserInfoEndpoint of the OpenID provider
         BearerAccessToken token = new BearerAccessToken(this.accessToken.token()); // The access token
 

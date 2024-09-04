@@ -319,6 +319,7 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(userInfo.getPicture());
         assertNotNull(userInfo.getGivenName());
         assertNotNull(userInfo.getFamilyName());
+
     }
 
     @Test
@@ -392,6 +393,14 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(userInfo.getPicture());
         assertNotNull(userInfo.getGivenName());
         assertNotNull(userInfo.getFamilyName());
+
+        try {
+            KindeClientSession kindeClientSession3 = kindeClient2.initClientSession(RefreshToken.init(JwtGenerator.refreshToken(), true));
+            kindeClientSession3.retrieveUserInfo();
+            fail("Expected an exception when retrieving the user info using the incorrect token.");
+        } catch (Exception ex) {
+            // ignore
+        }
 
     }
 }
