@@ -23,9 +23,7 @@ import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class KindeClientCodeSessionImplTest {
@@ -208,6 +206,34 @@ public class KindeClientCodeSessionImplTest {
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_code=TEST"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("has_success_page=true"));
         assertNotNull(authorizationUrl2.getCodeVerifier());
+    }
+
+    @Test
+    public void testLogoutUrlRequestTest() throws Exception {
+        try {
+            KindeClient kindeClient = KindeClientBuilder.builder()
+                    .domain("http://localhost:8089")
+                    .clientId("test")
+                    .clientSecret("test")
+                    .build();
+            KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+            AuthorizationUrl authorizationUrl1 = kindeClientSession.logout();
+            fail("Expect an exception due to the lack of configuration");
+        } catch (Exception ex) {
+            // ignore
+        }
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .logoutRedirectUri("http://localhost:8089")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.logout();
+
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        assertTrue(authorizationUrl1.getUrl().toString().contains("redirect="));
     }
 
     @Test
