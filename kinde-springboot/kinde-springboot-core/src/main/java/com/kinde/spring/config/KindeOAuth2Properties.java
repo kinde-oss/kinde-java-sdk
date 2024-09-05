@@ -189,6 +189,7 @@ public final class KindeOAuth2Properties implements Validator {
 
 
         KindeOAuth2Properties properties = (KindeOAuth2Properties) target;
+        // TODO: Add extra validation
         /*
         if (properties.getClientId() != null) {
         ConfigurationValidator.validateClientId(properties.getClientId()).ifInvalid(res ->
