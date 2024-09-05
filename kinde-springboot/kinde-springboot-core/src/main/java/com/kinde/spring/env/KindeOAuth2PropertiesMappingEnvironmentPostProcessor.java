@@ -50,7 +50,7 @@ final class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Envi
         String domain = environment.getProperty(KINDE_OAUTH_DOMAIN);
         if (domain != null) {
             kindeClientBuilder.domain(domain);
-            kindeClientBuilder.clientId(environment.getProperty(KINDE_OAUTH_CLIENT_SECRET));
+            kindeClientBuilder.clientId(environment.getProperty(KINDE_OAUTH_CLIENT_ID));
             kindeClientBuilder.clientSecret(environment.getProperty(KINDE_OAUTH_CLIENT_SECRET));
             kindeClientBuilder.scopes(environment.getProperty(KINDE_OAUTH_SCOPES));
         }
