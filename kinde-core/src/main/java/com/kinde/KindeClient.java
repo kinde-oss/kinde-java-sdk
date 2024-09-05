@@ -1,6 +1,7 @@
 package com.kinde;
 
 import com.kinde.authorization.AuthorizationUrl;
+import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.token.KindeToken;
 
@@ -43,4 +44,11 @@ public interface KindeClient {
      * @return KindeConfig object
      */
     KindeConfig kindeConfig();
+
+    /**
+     * The configuration for this client.
+     *
+     * @return KindeConfig object
+     */
+    OidcMetaData oidcMetaData();
 }

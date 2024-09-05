@@ -24,6 +24,7 @@
     <module>playground/kinde-management-example</module>
     <module>playground/kinde-j2ee-app</module>
     <module>playground/springboot-pkce-client-example</module>
+    <module>playground/kinde-springboot-starter-example</module>
   </modules>
   <build>
     <plugins>

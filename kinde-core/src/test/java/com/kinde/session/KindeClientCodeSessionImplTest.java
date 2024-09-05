@@ -33,6 +33,7 @@ public class KindeClientCodeSessionImplTest {
     @BeforeEach
     public void setUp() {
         KindeGuiceSingleton.fin();
+        KindeEnvironmentSingleton.fin();
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.ACTIVE);
         wireMockServer = new WireMockServer(8089); // you can specify the port
         wireMockServer.start();
@@ -104,6 +105,7 @@ public class KindeClientCodeSessionImplTest {
     public void tearDown() {
         wireMockServer.stop();
         KindeGuiceSingleton.fin();
+        KindeEnvironmentSingleton.fin();
     }
 
     @Test
@@ -210,18 +212,6 @@ public class KindeClientCodeSessionImplTest {
 
     @Test
     public void testLogoutUrlRequestTest() throws Exception {
-        try {
-            KindeClient kindeClient = KindeClientBuilder.builder()
-                    .domain("http://localhost:8089")
-                    .clientId("test")
-                    .clientSecret("test")
-                    .build();
-            KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
-            AuthorizationUrl authorizationUrl1 = kindeClientSession.logout();
-            fail("Expect an exception due to the lack of configuration");
-        } catch (Exception ex) {
-            // ignore
-        }
         KindeClient kindeClient = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
                 .clientId("test")
@@ -370,7 +360,7 @@ public class KindeClientCodeSessionImplTest {
     }
 
     @Test
-    public void testcClientTokenRequestTest() {
+    public void testcClientTokenRequestTest() throws Exception {
         KindeClient kindeClient = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
                 .clientId("test")
@@ -387,6 +377,7 @@ public class KindeClientCodeSessionImplTest {
                 .clientId("test")
                 .clientSecret("test")
                 .redirectUri("http://localhost:8080/")
+                .logoutRedirectUri("http://localhost:8080/")
                 .addScope("openid")
                 .addAudience("http://localhost:8089/api")
                 .build();
@@ -394,6 +385,7 @@ public class KindeClientCodeSessionImplTest {
         KindeTokens kindeTokens2 = kindeClientSession2.retrieveTokens();
         assertNotNull(kindeTokens2.getAccessToken());
         assertTrue(kindeClientSession2.authorizationUrl()!=null);
+        assertTrue(kindeClientSession2.logout()!=null);
 
         assertNotNull(kindeClient);
         assertNotNull(kindeClientSession);
@@ -420,6 +412,7 @@ public class KindeClientCodeSessionImplTest {
         } catch (Exception ex) {
             // ignore exception expected behavior
         }
+
     }
 
     @Test

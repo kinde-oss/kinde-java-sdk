@@ -1,0 +1,42 @@
+package com.kinde.spring.sdk;
+
+import com.kinde.KindeClient;
+import com.kinde.KindeClientBuilder;
+import com.kinde.KindeClientSession;
+import com.kinde.authorization.AuthorizationType;
+import com.kinde.spring.config.KindeOAuth2Properties;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.ApplicationScope;
+
+import java.util.Map;
+
+@ApplicationScope
+@Component
+public class KindeSdkClient {
+
+    @Autowired
+    private KindeOAuth2Properties kindeOAuth2Properties;
+
+    private KindeClientBuilder kindeClientBuilder;
+
+    @PostConstruct
+    public void init() {
+        this.kindeClientBuilder = KindeClientBuilder.builder();
+        this.kindeClientBuilder.clientId(kindeOAuth2Properties.getClientId());
+        this.kindeClientBuilder.clientSecret(kindeOAuth2Properties.getClientSecret());
+        this.kindeClientBuilder.grantType(AuthorizationType.valueOf(kindeOAuth2Properties.getAuthorizationGrantType()));
+        this.kindeClientBuilder.domain(kindeOAuth2Properties.getDomain());
+        this.kindeClientBuilder.redirectUri(kindeOAuth2Properties.getRedirectUri());
+    }
+
+    public KindeClient getClient() {
+        return this.kindeClientBuilder.build();
+    }
+
+    public KindeClientBuilder getClientBuilder() {
+        return this.kindeClientBuilder;
+    }
+}

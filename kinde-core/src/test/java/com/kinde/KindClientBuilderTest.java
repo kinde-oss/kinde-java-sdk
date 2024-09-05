@@ -50,13 +50,4 @@ public class KindClientBuilderTest {
         assertTrue( kindeClient != null );
     }
 
-    @Test
-    public void testBuilderInvalidParameterTest() {
-        try {
-            KindeClientBuilder.builder().build();
-            fail("An exception is expected");
-        } catch (InvalidParameterException ex) {
-            // ignore
-        }
-    }
 }

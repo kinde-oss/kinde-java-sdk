@@ -68,4 +68,8 @@ public class KindeClientImpl implements KindeClient {
         return this.kindeConfig;
     }
 
+    @Override
+    public OidcMetaData oidcMetaData() {
+        return this.oidcMetaData;
+    }
 }
