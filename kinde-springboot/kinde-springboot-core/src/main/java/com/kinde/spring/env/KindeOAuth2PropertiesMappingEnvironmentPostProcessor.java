@@ -59,7 +59,6 @@ final class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Envi
         environment.getPropertySources().addLast(remappedKindeToStandardOAuthPropertySource(environment));
         environment.getPropertySources().addLast(remappedKindeOAuth2ScopesPropertySource(environment));
         // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
-        System.out.println("Add the default kinde config");
         environment.getPropertySources().addLast(defaultKindeScopesSource(environment, kindeClient));
         // okta's endpoints can be resolved from an issuer
         environment.getPropertySources().addLast(kindeStaticDiscoveryPropertySource(environment, kindeClient));
@@ -76,7 +75,7 @@ final class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Envi
 
     private PropertySource<?> kindeForcePkcePropertySource(ConfigurableEnvironment environment, KindeClient kindeClient) {
         Map<String, Object> props = new HashMap<>();
-        // need to re-evaulate this mappingc
+        // need to re-evaluate this mapping
         props.put("spring.security.oauth2.client.registration.kinde.client-authentication-method", "none");
 
         return new ConditionalMapPropertySource("kinde-pkce-for-public-clients", props, environment, KINDE_OAUTH_DOMAIN, KINDE_OAUTH_CLIENT_ID) {
@@ -90,7 +89,6 @@ final class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Envi
 
     private PropertySource defaultKindeScopesSource(Environment environment, KindeClient kindeClient) {
         Map<String, Object> props = new HashMap<>();
-        System.out.println("Scopes: " + kindeClient.oidcMetaData().getOpMetadata().getScopes());
         props.put("spring.security.oauth2.client.registration.kinde.scope",kindeClient.kindeConfig().scopes().stream().collect(Collectors.joining(",")));
         return new ConditionalMapPropertySource("default-scopes", props, environment, KINDE_OAUTH_DOMAIN, KINDE_OAUTH_CLIENT_ID);
     }

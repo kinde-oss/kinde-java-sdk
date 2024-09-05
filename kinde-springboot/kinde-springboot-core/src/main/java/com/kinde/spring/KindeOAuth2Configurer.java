@@ -15,9 +15,11 @@
  */
 package com.kinde.spring;
 
+import com.kinde.spring.config.KindeOAuth2Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.security.AccessController;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
@@ -44,11 +46,11 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
     public void init(HttpSecurity http) throws Exception {
         log.info("Init the auth2 configure");
 
-        /*ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
         // make sure OktaOAuth2Properties are available
-        if (!context.getBeansOfType(OktaOAuth2Properties.class).isEmpty()) {
-            OktaOAuth2Properties oktaOAuth2Properties = context.getBean(OktaOAuth2Properties.class);
+        if (!context.getBeansOfType(KindeOAuth2Properties.class).isEmpty()) {
+            KindeOAuth2Properties kindeOAuth2Properties = context.getBean(KindeOAuth2Properties.class);
 
             // Auth Code Flow Config
 
@@ -56,12 +58,12 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
             OAuth2ClientProperties.Provider propertiesProvider;
             OAuth2ClientProperties.Registration propertiesRegistration;
             if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
-                && (propertiesProvider = context.getBean(OAuth2ClientProperties.class).getProvider().get("okta")) != null
-                && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("okta")) != null
-                && !isEmpty(propertiesProvider.getIssuerUri())
-                && !isEmpty(propertiesRegistration.getClientId())) {
+                && (propertiesProvider = context.getBean(OAuth2ClientProperties.class).getProvider().get("kinde")) != null
+                && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("kinde")) != null
+                && !propertiesProvider.getIssuerUri().isEmpty()
+                && !propertiesRegistration.getClientId().isEmpty()) {
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties, context.getEnvironment());
+                configureLogin(http, kindeOAuth2Properties, context.getEnvironment());
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -72,10 +74,10 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
                 OAuth2ResourceServerProperties.Opaquetoken propertiesOpaquetoken;
                 if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
                     && (propertiesOpaquetoken = context.getBean(OAuth2ResourceServerProperties.class).getOpaquetoken()) != null
-                    && !isEmpty(propertiesOpaquetoken.getIntrospectionUri())
+                    && !propertiesOpaquetoken.getIntrospectionUri().isEmpty()
                     && TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
                     log.debug("Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                    configureResourceServerForOpaqueTokenValidation(http, kindeOAuth2Properties);
                     return;
                 }
                 OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
@@ -83,21 +85,21 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
                 if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
                     log.debug("JWT configurer is set in OAuth resource server configuration. " +
                         "JWT validation will be configured.");
-                    configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
+                    configureResourceServerForJwtValidation(http, kindeOAuth2Properties);
                 } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
                     log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
                         "Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                    configureResourceServerForOpaqueTokenValidation(http, kindeOAuth2Properties);
                 } else {
                     log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
                 }
             } else {
-                log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
+                log.debug("Kinde/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
             }
-        } */
+        }
     }
 
-    /*private Optional<OAuth2ResourceServerConfigurer<?>.JwtConfigurer> getJwtConfigurer(OAuth2ResourceServerConfigurer<?> oAuth2ResourceServerConfigurer) throws IllegalAccessException {
+    private Optional<OAuth2ResourceServerConfigurer<?>.JwtConfigurer> getJwtConfigurer(OAuth2ResourceServerConfigurer<?> oAuth2ResourceServerConfigurer) throws IllegalAccessException {
         if (oAuth2ResourceServerConfigurer != null) {
             return getFieldValue(oAuth2ResourceServerConfigurer, "jwtConfigurer");
         }
@@ -132,7 +134,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
         }
 
         return Optional.ofNullable((T) field.get(source));
-    } */
+    }
 
     /**
      * Method to "unset" Jwt Resource Server Configurer using Reflection API.
@@ -143,7 +145,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
      * To address this, we need this helper method to unset Jwt configurer before attempting to set Opaque Token configuration
      * for Root/Org issuer use case.
      */
-    /*@SuppressWarnings("PMD.UnusedPrivateMethod")
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void unsetJwtConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) {
 
         AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
@@ -161,15 +163,15 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
         });
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
+    private void configureLogin(HttpSecurity http, KindeOAuth2Properties kindeOAuth2Properties, Environment environment) throws Exception {
 
-        RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
+        RestTemplate restTemplate = KindeOAuth2ResourceServerAutoConfig.restTemplate(kindeOAuth2Properties);
 
         http.oauth2Login()
             .tokenEndpoint()
             .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
 
-        String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
+        String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.kinde.redirect-uri");
         if (redirectUriProperty != null) {
             //  remove `{baseUrl}` pattern, if present, as Spring will solve this on its own
             String redirectUri = redirectUriProperty.replace("{baseUrl}", "");
@@ -177,14 +179,14 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
         }
     }
 
-    private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureResourceServerForJwtValidation(HttpSecurity http, KindeOAuth2Properties kindeOAuth2Properties) throws Exception {
         http.oauth2ResourceServer()
-            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+            .jwt().jwtAuthenticationConverter(new KindeJwtAuthenticationConverter(kindeOAuth2Properties.getPermissionsClaim()));
     }
 
-    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, KindeOAuth2Properties kindeOAuth2Properties) throws Exception {
 
-        if (!isEmpty(oktaOAuth2Properties.getClientId()) && !isEmpty(oktaOAuth2Properties.getClientSecret())) {
+        if (!kindeOAuth2Properties.getClientId().isEmpty() && !kindeOAuth2Properties.getClientSecret().isEmpty()) {
             // Spring (2.7.x+) configures JWT be default and this creates startup failure "Spring Security
             // only supports JWTs or Opaque Tokens, not both at the same time" when we try to configure Opaque Token mode in following line.
             // Therefore, we are unsetting JWT mode before attempting to configure Opaque Token mode for ROOT issuer case.
@@ -203,5 +205,5 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
         accessTokenResponseClient.setRestOperations(restTemplate);
 
         return accessTokenResponseClient;
-    }*/
+    }
 }
