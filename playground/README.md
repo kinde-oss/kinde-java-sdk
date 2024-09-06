@@ -11,3 +11,4 @@ The following subprojects are included with the playground:
 | [kinde-management-example](kinde-management-example/README.md)                   | A management API example            |
 | [springboot-pkce-client-example](springboot-pkce-client-example/README.md)       | A Springboot PKCE example           |
 | [springboot-thymeleaf-full-example](springboot-thymeleaf-full-example/README.md) | A Springboot Thymeleaf Full example |
+| [kinde-springboot-starter-example](kinde-springboot-starter-example/README.md)   | A Kinde Springboot Core example     |
