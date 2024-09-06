@@ -16,13 +16,10 @@ PKCE authentication is a crucial part of securing OAuth 2.0 flows, and our libra
 - **Authorization**: This library configures spring to use Kinde for authorization.
 - **Feature Flags**: This library provides access to the Kinde feature flags.
 
-## Examples
+## Sub Projects
 
-Please take a look at our spring boot examples. We provide two stand alone projects. These detail how to use Kinde for authentication and authorization without the inclusion of any Kinde specific libraries. And we include an example of the Kinde Spring Boot Starer in action.
+| Project                  | URL                                                       |
+|--------------------------|-----------------------------------------------------------|
+| kinde-springboot-core    | [kinde-springboot-core](./springboot-pkce-client-example) |
+| kinde-sprinbboot-starter | [kinde-sprinbboot-starter](./kinde-sprinbboot-starter)    |
 
-| Project                  | URL                                                          |
-|--------------------------|--------------------------------------------------------------|
-| PKCE stand alone example | [PKCE Example](../playground/springboot-pkce-client-example) |
-| Full stand alone example | [PKCE Example](../playground/springboot-pkce-client-example) |
-
-Stay tuned for more updates!
