@@ -4,21 +4,25 @@ Welcome to the Spring Boot SDK Library!
 
 ## Overview
 
-This library is currently under active development. At present, it only supports PKCE (Proof Key for Code Exchange) authentication through Spring Boot. Authorization and access to feature flags are not yet supported, but don't worry—we're actively working on these features and will announce them as soon as they are ready.
+This project consists of a springboot core which is responsible for configuring a spring boot project use Kinde PKCE authentication. This is used in conjunction with the Kinde-Springboot-Starer project which wraps the core and bootstraps spring.
 
 ## PKCE Authentication
 
 PKCE authentication is a crucial part of securing OAuth 2.0 flows, and our library currently provides robust support for it. If you need to implement PKCE authentication in your Spring Boot application, this library is here to help.
 
-## Future Features
+## Features
 
-- **Authorization**: We plan to add comprehensive support for authorization soon.
-- **Feature Flags**: Access to feature flags through Spring Boot will also be available in upcoming updates.
+- **Authentication**: This library configures spring to use Kinde for authentication.
+- **Authorization**: This library configures spring to use Kinde for authorization.
+- **Feature Flags**: This library provides access to the Kinde feature flags.
 
 ## Examples
 
-While we continue to build out these features, we encourage you to explore our PKCE example in the playground. It offers a practical demonstration of how to implement PKCE authentication with our library.
+Please take a look at our spring boot examples. We provide two stand alone projects. These detail how to use Kinde for authentication and authorization without the inclusion of any Kinde specific libraries. And we include an example of the Kinde Spring Boot Starer in action.
 
-[Explore the PKCE Example](../playground/springboot-pkce-client-example)
+| Project                  | URL                                                          |
+|--------------------------|--------------------------------------------------------------|
+| PKCE stand alone example | [PKCE Example](../playground/springboot-pkce-client-example) |
+| Full stand alone example | [PKCE Example](../playground/springboot-pkce-client-example) |
 
 Stay tuned for more updates!

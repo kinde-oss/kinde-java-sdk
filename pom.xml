@@ -23,8 +23,9 @@
     <module>playground/kinde-core-example</module>
     <module>playground/kinde-management-example</module>
     <module>playground/kinde-j2ee-app</module>
-    <module>playground/springboot-pkce-client-example</module>
     <module>playground/kinde-springboot-starter-example</module>
+    <module>playground/springboot-pkce-client-example</module>
+    <module>playground/springboot-thymeleaf-full-example</module>
   </modules>
   <build>
     <plugins>
