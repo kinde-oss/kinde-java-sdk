@@ -41,4 +41,11 @@ KINDE_SCOPES=profile,email,openid
 ```
 
 ### `application.yaml`
-
+```yaml
+kinde:
+  oauth2:
+    domain: https://< replace >.kinde.com
+    client-id: < replace >
+    client-secret: < replace >
+    scopes: openid,email,profile
+```
