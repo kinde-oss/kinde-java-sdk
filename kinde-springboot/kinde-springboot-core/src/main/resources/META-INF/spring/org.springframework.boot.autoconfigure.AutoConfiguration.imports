@@ -1,1 +1,6 @@
+com.kinde.spring.KindeOAuth2AutoConfig
 com.kinde.spring.KindeOAuth2ResourceServerAutoConfig
+com.kinde.spring.ReactiveKindeOAuth2AutoConfig
+com.kinde.spring.ReactiveKindeOAuth2ResourceServerAutoConfig
+com.kinde.spring.ReactiveKindeOAuth2ResourceServerHttpServerAutoConfig
+com.kinde.spring.ReactiveKindeOAuth2ServerHttpServerAutoConfig

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>KindeAuth</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/index.css}" />
+</head>
+<body>
+<header>
+    <nav class="nav container">
+        <h1 class="text-display-3">KindeAuth</h1>
+        <div class="profile-blob">
+            <th:block th:if="${not #strings.isEmpty(picture)}">
+                <img class="avatar" th:src="${picture}" alt="user profile avatar" />
+            </th:block>
+            <th:block th:unless="${not #strings.isEmpty(picture)}">
+                <div class="avatar" th:text="${given_name.substring(0, 1)} + ${family_name.substring(0, 1)}"></div>
+            </th:block>
+            <div>
+                <p class="text-heading-2" th:text="${given_name} + ' ' + ${family_name}"></p>
+                <button class="text-subtle" th:onclick="'javascript:redirectToController();'">Sign out</button>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="container">
+        <div class="card start-hero">
+            <p class="text-body-2 start-hero-intro">Woohoo!</p>
+            <p class="text-display-2">
+                Your authentication is all sorted.
+                <br />
+                Build the important stuff.
+            </p>
+        </div>
+        <section class="next-steps-section">
+            <h2 class="text-heading-1">Next steps for you</h2>
+        </section>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <strong class="text-heading-2">KindeAuth</strong>
+        <p class="footer-tagline text-body-3">
+            Visit our <a class="link" href="https://kinde.com/docs">help center</a>
+        </p>
+        <small class="text-subtle">© 2023 KindeAuth, Inc. All rights reserved</small>
+    </div>
+</footer>
+
+<script th:inline="javascript">
+    function redirectToController() {
+        window.location.href = "/logout";
+    }
+</script>
+</body>
+</html>

@@ -16,22 +16,30 @@
 package com.kinde.spring.controllers;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
-@RestController
+@Controller
 public class WelcomeController {
 
-    /**
-     * Simple example REST endpoint that returns a static message.  This controller also serves as an example for checking
-     * an OAuth scope and client roles (parsed from an access token).
-     * @return a static welcome message
-     */
-    @GetMapping("/")
-    public Welcome getMessageOfTheDay(Principal principal) {
-        return new Welcome("The message of the day is boring.", principal.getName());
+    @RequestMapping(path = {"/"}, method = RequestMethod.GET)
+    public String index() {
+        return "index";
+    }
+
+    @RequestMapping(path = {"/home"}, method = RequestMethod.GET)
+    public String home(Principal principal, Model model) {
+        model.addAttribute("given_name", principal.getName());
+        model.addAttribute("family_name", principal.getName());
+        model.addAttribute("email", principal.getName());
+        model.addAttribute("picture", principal.getName());
+        return "home";
     }
 
     public static class Welcome {
