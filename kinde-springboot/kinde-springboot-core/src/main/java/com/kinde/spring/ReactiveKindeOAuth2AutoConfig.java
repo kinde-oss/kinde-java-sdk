@@ -16,6 +16,8 @@
 package com.kinde.spring;
 
 import com.kinde.spring.config.KindeOAuth2Properties;
+import com.kinde.spring.sdk.KindeSdkClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -51,17 +53,20 @@ import java.util.Collection;
 @Import(AuthorityProvidersConfig.class)
 class ReactiveKindeOAuth2AutoConfig {
 
+    @Autowired
+    private KindeSdkClient kindeSdkClient;
+
     @Bean
     @ConditionalOnMissingBean
     ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(Collection<AuthoritiesProvider> authoritiesProviders) {
-        return new ReactiveKindeOAuth2UserService(authoritiesProviders);
+        return new ReactiveKindeOAuth2UserService(authoritiesProviders,kindeSdkClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
     OidcReactiveOAuth2UserService oidcUserService(Collection<AuthoritiesProvider> authoritiesProviders,
                                                   @Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService) {
-        return new ReactiveKindeOidcUserService(authoritiesProviders, oAuth2UserService);
+        return new ReactiveKindeOidcUserService(authoritiesProviders, oAuth2UserService, kindeSdkClient);
     }
 
     @Bean

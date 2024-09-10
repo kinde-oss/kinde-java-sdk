@@ -17,6 +17,7 @@ package com.kinde.spring;
 
 import com.kinde.spring.http.KindeClientRequestInterceptor;
 import com.kinde.spring.http.UserAgentRequestInterceptor;
+import com.kinde.spring.sdk.KindeSdkClient;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -30,8 +31,11 @@ final class KindeOAuth2UserService extends DefaultOAuth2UserService {
 
     private final Collection<AuthoritiesProvider> authoritiesProviders;
 
-    KindeOAuth2UserService(Collection<AuthoritiesProvider> authoritiesProviders) {
+    private KindeSdkClient kindeSdkClient;
+
+    KindeOAuth2UserService(Collection<AuthoritiesProvider> authoritiesProviders, KindeSdkClient kindeSdkClient) {
         this.authoritiesProviders = authoritiesProviders;
+        this.kindeSdkClient = kindeSdkClient;
         setRestOperations(restOperations());
     }
 
@@ -46,6 +50,7 @@ final class KindeOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
         OAuth2User user = super.loadUser(userRequest);
-        return UserUtil.decorateUser(user, userRequest, authoritiesProviders);
+        System.out.println("Request auth details : " + kindeSdkClient);
+        return UserUtil.decorateUser(user, userRequest, authoritiesProviders, kindeSdkClient.getClient());
     }
 }

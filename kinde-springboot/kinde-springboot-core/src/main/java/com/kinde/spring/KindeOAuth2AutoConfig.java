@@ -16,6 +16,8 @@
 package com.kinde.spring;
 
 import com.kinde.spring.config.KindeOAuth2Properties;
+import com.kinde.spring.sdk.KindeSdkClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -50,6 +52,9 @@ import java.util.Collection;
 @Import(AuthorityProvidersConfig.class)
 class KindeOAuth2AutoConfig {
 
+    @Autowired
+    private KindeSdkClient kindeSdkClient;
+
     @Bean
     @ConditionalOnProperty(name = "okta.oauth2.post-logout-redirect-uri")
     OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(KindeOAuth2Properties kindeOAuth2Properties,
@@ -63,7 +68,7 @@ class KindeOAuth2AutoConfig {
     @Bean
     @ConditionalOnMissingBean(name="oAuth2UserService")
     OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService(Collection<AuthoritiesProvider> authoritiesProviders) {
-        return new KindeOAuth2UserService(authoritiesProviders);
+        return new KindeOAuth2UserService(authoritiesProviders,this.kindeSdkClient);
     }
 
     @Bean
@@ -71,7 +76,7 @@ class KindeOAuth2AutoConfig {
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(
         @Qualifier("oAuth2UserService") OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
         Collection<AuthoritiesProvider> authoritiesProviders) {
-        return new KindeOidcUserService(oAuth2UserService, authoritiesProviders);
+        return new KindeOidcUserService(oAuth2UserService, authoritiesProviders, kindeSdkClient);
     }
 
     @Configuration

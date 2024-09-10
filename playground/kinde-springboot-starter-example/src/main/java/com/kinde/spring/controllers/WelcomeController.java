@@ -15,7 +15,11 @@
  */
 package com.kinde.spring.controllers;
 
+import com.kinde.user.UserInfo;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,11 +38,13 @@ public class WelcomeController {
     }
 
     @RequestMapping(path = {"/home"}, method = RequestMethod.GET)
-    public String home(Principal principal, Model model) {
-        model.addAttribute("given_name", principal.getName());
-        model.addAttribute("family_name", principal.getName());
-        model.addAttribute("email", principal.getName());
-        model.addAttribute("picture", principal.getName());
+    public String home(Principal principal, @AuthenticationPrincipal OidcUser oidcUser, Model model) {
+        //UserInfo userInfo = (UserInfo)oAuth2User.getAttributes().get("KindeUserInfo");
+
+        model.addAttribute("given_name", oidcUser.getGivenName());
+        model.addAttribute("family_name", oidcUser.getFamilyName());
+        model.addAttribute("email", oidcUser.getEmail());
+        model.addAttribute("picture", oidcUser.getPicture());
         return "home";
     }
 
