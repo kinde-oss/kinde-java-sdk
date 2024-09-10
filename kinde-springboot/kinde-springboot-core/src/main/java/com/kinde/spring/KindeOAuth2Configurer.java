@@ -43,8 +43,6 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
     @SuppressWarnings("rawtypes")
     @Override
     public void init(HttpSecurity http) throws Exception {
-        System.out.println("Init the auth2 configure");
-
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
         // make sure OktaOAuth2Properties are available

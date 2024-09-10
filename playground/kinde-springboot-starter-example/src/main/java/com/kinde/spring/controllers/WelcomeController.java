@@ -38,9 +38,7 @@ public class WelcomeController {
     }
 
     @RequestMapping(path = {"/home"}, method = RequestMethod.GET)
-    public String home(Principal principal, @AuthenticationPrincipal OidcUser oidcUser, Model model) {
-        //UserInfo userInfo = (UserInfo)oAuth2User.getAttributes().get("KindeUserInfo");
-
+    public String home(@AuthenticationPrincipal OidcUser oidcUser, Model model) {
         model.addAttribute("given_name", oidcUser.getGivenName());
         model.addAttribute("family_name", oidcUser.getFamilyName());
         model.addAttribute("email", oidcUser.getEmail());
