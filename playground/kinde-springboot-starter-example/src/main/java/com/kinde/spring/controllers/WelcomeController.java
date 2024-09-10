@@ -46,21 +46,4 @@ public class WelcomeController {
         return "home";
     }
 
-    public static class Welcome {
-        public String messageOfTheDay;
-        public String username;
-
-        public Welcome() {}
-
-        public Welcome(String messageOfTheDay, String username) {
-            this.messageOfTheDay = messageOfTheDay;
-            this.username = username;
-        }
-    }
-
-    @GetMapping("/everyone")
-    @PreAuthorize("hasAuthority('Everyone')")
-    public String everyoneRole() {
-        return "Okta Groups have been mapped to Spring Security authorities correctly!";
-    }
 }
