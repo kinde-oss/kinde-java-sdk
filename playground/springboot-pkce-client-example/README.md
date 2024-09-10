@@ -1,4 +1,4 @@
-# KINDE SPRINGBOOT PKCE Example
+# Kinde Spring Boot PKCE Example
 
 This is a standalone Spring Boot example that demonstrates how to quickly set up a Spring client using PKCE (Proof Key for Code Exchange) authentication. While this example focuses on PKCE, please note that the functionality to pull through user permissions is currently under development.
 
@@ -25,7 +25,9 @@ spring:
             client-secret: <replace>
             scope: openid,email
 ```
+
 #### Explanation of Key Configuration Properties:
+
 - **`client-id`**: Replace with your Kinde application's client ID, which you can obtain from the Kinde dashboard.
 - **`client-secret`**: Replace with your Kinde application's client secret, also available from the Kinde dashboard.
 - **`issuer-uri`**: Replace with the Kinde domain you have created.
@@ -51,7 +53,9 @@ Alternatively, you can build the application into a JAR file and run it directly
 mvn clean package
 java -jar target/kinde-springboot-pkce-example-0.0.1-SNAPSHOT.jar
 ```
+
 ### Explanation:
+
 - **`./mvnw clean package`**: This command uses Maven to clean the project, which removes any previously compiled files and artifacts, ensuring a fresh build. It then packages the application into a JAR file, which can be found in the `target` directory.
 - **`java -jar target/kinde-springboot-pkce-example-0.0.1-SNAPSHOT.jar`**: This command runs the Spring Boot application directly from the JAR file. The `-jar` option specifies the JAR file to execute. This allows you to run your application as a standalone Java process, independent of an IDE or other tools.
 
@@ -72,6 +76,7 @@ Once the application is running, you should see output in the console indicating
 Once the Spring Boot application is up and running, you can perform browser-based testing to verify that PKCE authentication is working correctly.
 
 ### Testing Steps:
+
 1. **Open Your Browser**: Launch your preferred web browser (e.g., Chrome, Firefox, Safari).
 2. **Navigate to the Application**: Go to `http://localhost:8080/` (or the appropriate URL based on your server configuration).
 3. **Trigger the Authentication Flow**: If your application has a login button, click it to initiate the authentication process. This should redirect you to the Kinde login page.
@@ -79,6 +84,7 @@ Once the Spring Boot application is up and running, you can perform browser-base
 5. **Verify the Login**: Upon successful login, the application should now be able to display some user information retrieved from Kinde, such as the user's profile or a welcome message.
 
 ### Additional Testing
+
 - **Inspect the Access Token**: If possible, inspect the JWT access token received from Kinde to ensure it contains the correct scopes and claims.
 - **Test Logout Functionality**: Ensure that your application’s logout functionality correctly invalidates the session and redirects the user as needed.
 - **Check Error Handling**: Test various scenarios, such as invalid credentials or expired tokens, to ensure your application handles errors gracefully.

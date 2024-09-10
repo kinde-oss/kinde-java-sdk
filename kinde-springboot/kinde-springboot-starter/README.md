@@ -1,10 +1,13 @@
-# Kinde Springboot Starter
+# Kinde Spring Boot Starter
 
-The spring boot starter project. This project manages all the dependencies required by a spring boot application connecting to Kinde.
-## Project Dependancies
+The Spring Boot starter project. This project manages all the dependencies required by a Spring Boot application connecting to Kinde.
+
+## Project Dependencies
 
 ### Maven
+
 In order to use configure Spring Boot to use Kinde for authentication include the following dependency.
+
 ```xml
     <dependency>
       <groupId>com.kinde.spring</groupId>
@@ -12,15 +15,21 @@ In order to use configure Spring Boot to use Kinde for authentication include th
       <version>2.0.0</version>
     </dependency>
 ```
+
 ### Gradle
-In order to use the SDK with a Gradle build process please use the following dependancy.
+
+In order to use the SDK with a Gradle build process please use the following dependency.
+
 ```groovy
     configuration('com.kinde.spring:kinde-springboot-starter:2.0.0')
 ```
+
 ## Usage
-This library can be configured in different ways, via environmental variables, via .env file and via the spring boot application.yaml file.
+
+This library can be configured in different ways, via environmental variables, via .env file and via the Spring Boot application.yaml file.
 
 ### Environmetal configuration
+
 ```shell
 export KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
 export KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
@@ -30,7 +39,8 @@ export KINDE_GRANT_TYPE=CODE
 export KINDE_SCOPES=profile,email,openid
 ```
 
-### `.env` 
+### `.env`
+
 ```shell
 KINDE_DOMAIN=https://<replace>.kinde.com # This is the domain you setup at kinde
 KINDE_CLIENT_ID=<replace> # the id for the client connecting to Kinde
@@ -41,6 +51,7 @@ KINDE_SCOPES=profile,email,openid
 ```
 
 ### `application.yaml`
+
 ```yaml
 kinde:
   oauth2:
