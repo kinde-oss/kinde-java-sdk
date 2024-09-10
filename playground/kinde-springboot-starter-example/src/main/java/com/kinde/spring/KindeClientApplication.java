@@ -16,4 +16,18 @@ public class KindeClientApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(KindeClientApplication.class, args);
 	}
+
+	@Configuration
+    static class SecurityConfig {
+        @Bean
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http.authorizeHttpRequests()
+                .anyRequest().authenticated()
+                .and().oauth2Client()
+                .and().oauth2Login()
+                .and().oauth2ResourceServer().jwt();
+            return http.build();
+        }
+    }
+
 }
