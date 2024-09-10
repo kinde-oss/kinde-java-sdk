@@ -39,7 +39,7 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 class ReactiveKindeOAuth2ResourceServerHttpServerAutoConfig {
 
     @Bean
-    BeanPostProcessor oktaOAuth2ResourceServerBeanPostProcessor(KindeOAuth2Properties kindeOAuth2Properties) {
+    BeanPostProcessor kindeOAuth2ResourceServerBeanPostProcessor(KindeOAuth2Properties kindeOAuth2Properties) {
         return new KindeOAuth2ResourceServerBeanPostProcessor(kindeOAuth2Properties);
     }
 

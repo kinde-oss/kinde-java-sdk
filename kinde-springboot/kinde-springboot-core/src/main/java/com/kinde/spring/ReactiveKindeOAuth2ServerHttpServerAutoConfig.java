@@ -62,16 +62,16 @@ class ReactiveKindeOAuth2ServerHttpServerAutoConfig {
     BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(@Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
                                                                      @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService,
                                                                      @Autowired(required = false) OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
-        return new OktaOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService, logoutSuccessHandler);
+        return new KindeOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService, logoutSuccessHandler);
     }
 
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "okta.oauth2.post-logout-redirect-uri")
-    OidcClientInitiatedServerLogoutSuccessHandler oidcClientInitiatedServerLogoutSuccessHandler(KindeOAuth2Properties kindeOAuth2Properties,
+    OidcClientInitiatedServerLogoutSuccessHandler oidcClientInitiatedServerLogoutSuccessHandler(KindeOAuth2Properties oktaOAuth2Properties,
                                                                                                 ReactiveClientRegistrationRepository repository) throws URISyntaxException {
         OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(repository);
-        String logoutUri = kindeOAuth2Properties.getPostLogoutRedirectUri();
+        String logoutUri = oktaOAuth2Properties.getPostLogoutRedirectUri();
         logoutSuccessHandler.setPostLogoutRedirectUri((logoutUri.startsWith("/") ? "{baseUrl}" : "") + logoutUri);
         return logoutSuccessHandler;
     }
@@ -121,13 +121,13 @@ class ReactiveKindeOAuth2ServerHttpServerAutoConfig {
         }
     }
 
-    static class OktaOAuth2LoginServerBeanPostProcessor implements BeanPostProcessor {
+    static class KindeOAuth2LoginServerBeanPostProcessor implements BeanPostProcessor {
 
         private final ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
         private final OidcReactiveOAuth2UserService oidcUserService;
         private final OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler;
 
-        OktaOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
+        KindeOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
                                                OidcReactiveOAuth2UserService oidcUserService,
                                                @Nullable OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
             this.oAuth2UserService = oAuth2UserService;
