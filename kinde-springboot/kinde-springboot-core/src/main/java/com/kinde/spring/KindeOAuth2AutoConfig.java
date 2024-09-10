@@ -75,7 +75,8 @@ class KindeOAuth2AutoConfig {
     }
 
     @Configuration
-    @ConditionalOnDefaultWebSecurity
+    @ConditionalOnClass({ EnableWebSecurity.class, ClientRegistration.class })
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     static class OAuth2SecurityFilterChainConfiguration {
 
         @Bean
