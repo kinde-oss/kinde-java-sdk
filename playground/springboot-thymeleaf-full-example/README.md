@@ -24,22 +24,22 @@ Run the app, go to `http://localhost:8081` and click sign up to add your new Kin
 
 1. **Clone the repository:**
 
-   ```bash
-   git clone git@github.com:KomanRudden/kinde-spring-thymeleaf-oauth.git
-   cd kinde-spring-oauth
-   ```
+```bash
+git clone git@github.com:KomanRudden/kinde-spring-thymeleaf-oauth.git
+cd kinde-spring-oauth
+```
 
 2. **Build the project:**
 
-   ```bash
-   mvn clean install
-   ```
+```bash
+mvn clean install
+```
 
 3. **Run the application:**
 
-   ```bash
-   mvn spring-boot:run
-   ```
+```bash
+mvn spring-boot:run
+```
 
 ## Configurations
 
@@ -64,14 +64,26 @@ The security is configured in `SecurityConfig.java`. Key configurations include:
 
 ## Running the Application
 
-1. **Start the Application:**
+1. **Environmental Variable Setup:**
+Setup the environment to execute correctly
+```shell
+export KINDE_DOMAIN=https://<replace>.kinde.com
+export KINDE_CLIENT_ID=<replace>
+export KINDE_CLIENT_SECRET=<replace>
+export KINDE_REDIRECT_URI=http://localhost:8081/login/oauth2/code/kinde-provider
+export KINDE_GRANT_TYPE=authorization_code
+export KINDE_SCOPES=openid,profile,email
+export KINDE_PREFIX=<replace>
+```
+
+2. **Start the Application:**
    Run the application using the Maven command:
 
    ```bash
    mvn spring-boot:run
    ```
 
-2. **Access the Application:**
+3. **Access the Application:**
    Open your browser and navigate to `http://localhost:8081`.
 
 ## Endpoints
