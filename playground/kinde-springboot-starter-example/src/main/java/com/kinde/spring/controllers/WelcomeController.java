@@ -15,40 +15,35 @@
  */
 package com.kinde.spring.controllers;
 
+import com.kinde.user.UserInfo;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
-@RestController
+@Controller
 public class WelcomeController {
 
-    /**
-     * Simple example REST endpoint that returns a static message.  This controller also serves as an example for checking
-     * an OAuth scope and client roles (parsed from an access token).
-     * @return a static welcome message
-     */
-    @GetMapping("/")
-    public Welcome getMessageOfTheDay(Principal principal) {
-        return new Welcome("The message of the day is boring.", principal.getName());
+    @RequestMapping(path = {"/"}, method = RequestMethod.GET)
+    public String index() {
+        return "index";
     }
 
-    public static class Welcome {
-        public String messageOfTheDay;
-        public String username;
-
-        public Welcome() {}
-
-        public Welcome(String messageOfTheDay, String username) {
-            this.messageOfTheDay = messageOfTheDay;
-            this.username = username;
-        }
+    @RequestMapping(path = {"/home"}, method = RequestMethod.GET)
+    public String home(@AuthenticationPrincipal OidcUser oidcUser, Model model) {
+        model.addAttribute("given_name", oidcUser.getGivenName());
+        model.addAttribute("family_name", oidcUser.getFamilyName());
+        model.addAttribute("email", oidcUser.getEmail());
+        model.addAttribute("picture", oidcUser.getPicture());
+        return "home";
     }
 
-    @GetMapping("/everyone")
-    @PreAuthorize("hasAuthority('Everyone')")
-    public String everyoneRole() {
-        return "Okta Groups have been mapped to Spring Security authorities correctly!";
-    }
 }

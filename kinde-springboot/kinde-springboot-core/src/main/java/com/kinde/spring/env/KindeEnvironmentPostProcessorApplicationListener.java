@@ -15,15 +15,17 @@
  */
 package com.kinde.spring.env;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-@Slf4j
 public class KindeEnvironmentPostProcessorApplicationListener implements SmartApplicationListener, Ordered {
+
+    private static final Logger log = LoggerFactory.getLogger(KindeEnvironmentPostProcessorApplicationListener.class);
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {

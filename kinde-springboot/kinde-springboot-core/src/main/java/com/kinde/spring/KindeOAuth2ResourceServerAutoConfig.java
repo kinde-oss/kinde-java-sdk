@@ -51,7 +51,7 @@ import java.util.*;
 @AutoConfiguration
 @AutoConfigureBefore(OAuth2ResourceServerAutoConfiguration.class)
 @ConditionalOnClass(JwtAuthenticationToken.class)
-//@ConditionalOnOktaResourceServerProperties
+@ConditionalOnKindeResourceServerProperties
 @EnableConfigurationProperties(KindeOAuth2Properties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 class KindeOAuth2ResourceServerAutoConfig {

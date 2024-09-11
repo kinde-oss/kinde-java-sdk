@@ -16,10 +16,8 @@
 package com.kinde.spring;
 
 import com.kinde.spring.config.KindeOAuth2Properties;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.security.AccessController;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
@@ -34,18 +32,17 @@ import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInit
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
+import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Optional;
 
 
-@Slf4j
 final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Configurer, HttpSecurity> {
 
+    private static final Logger log = LoggerFactory.getLogger(KindeOAuth2Configurer.class);
     @SuppressWarnings("rawtypes")
     @Override
     public void init(HttpSecurity http) throws Exception {
-        log.info("Init the auth2 configure");
-
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
         // make sure OktaOAuth2Properties are available

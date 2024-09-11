@@ -27,7 +27,8 @@ public class KindeSdkClient {
         this.kindeClientBuilder = KindeClientBuilder.builder();
         this.kindeClientBuilder.clientId(kindeOAuth2Properties.getClientId());
         this.kindeClientBuilder.clientSecret(kindeOAuth2Properties.getClientSecret());
-        this.kindeClientBuilder.grantType(AuthorizationType.valueOf(kindeOAuth2Properties.getAuthorizationGrantType()));
+        // default to code as that is the only type currently supported by Kinde
+        this.kindeClientBuilder.grantType(AuthorizationType.CODE);
         this.kindeClientBuilder.domain(kindeOAuth2Properties.getDomain());
         this.kindeClientBuilder.redirectUri(kindeOAuth2Properties.getRedirectUri());
     }
