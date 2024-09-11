@@ -4,7 +4,7 @@ Welcome to the Spring Boot SDK Library!
 
 ## Overview
 
-This project consists of a Spring Boot core which is responsible for configuring a Spring Boot project use Kinde PKCE authentication. This is used in conjunction with the Kinde-Springboot-Starter project which wraps the core and bootstraps spring.
+This project consists of a Spring Boot core responsible for configuring a Spring Boot project to use Kinde PKCE authentication, alongside the Kinde-Springboot-Starter project, which wraps the core and bootstraps spring.
 
 ## PKCE Authentication
 
