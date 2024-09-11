@@ -3,7 +3,7 @@ package com.kinde.oauth.config;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,26 +11,21 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 /**
  * Security configuration class that sets up the security filters and OAuth2 login
  * configurations for the application. This class enables method-level security
  * and configures the security filter chain with necessary handlers.
  */
-@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Value("${jwk-set-uri}")
+    private String issuerUri;
 
     /**
      * Configures the security filter chain, setting up CORS, authorization rules,
@@ -51,24 +46,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**").permitAll()
                         .requestMatchers("/", "/home").permitAll()
-                        /* Uncomment the lines below to configure security based on roles or permissions
-                         * at the configuration level. This project is currently configured at the RestController
-                         * method level.
+                        /* This project is currently configured at the RestController method level for `read` & `admin`.
+                         * `write` is configured below at the configuration level.
                          */
                         // .requestMatchers("/admin").hasRole("admins")
                         // .requestMatchers("/read").hasRole("read")
+                         .requestMatchers("/write").hasRole("write")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions ->
                         exceptions
                                 .accessDeniedHandler(accessDeniedHandler())
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .oidcUserService(new CustomOidcUserService())
+                                .oidcUserService(new CustomOidcUserService(issuerUri))
                         )
                 );
 
@@ -76,31 +68,12 @@ public class SecurityConfig {
     }
 
     /**
-     * Configures the JwtAuthenticationConverter to extract authorities from JWT claims.
+     * Defines a bean for handling Access Denied (403 Forbidden) errors.
+     * When an authenticated user tries to access a resource they do not have permission for,
+     * they are redirected to the "/403" error page.
      *
-     * @return the configured JwtAuthenticationConverter.
+     * @return an {@link AccessDeniedHandler} that forwards the request to the "/403" page.
      */
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(this::extractAuthoritiesFromClaims);
-        return converter;
-    }
-
-    /**
-     * Extracts authorities from the JWT claims, converting them to GrantedAuthority.
-     *
-     * @param jwt the JWT containing the claims.
-     * @return a collection of GrantedAuthority extracted from the JWT claims.
-     */
-    private Collection<GrantedAuthority> extractAuthoritiesFromClaims(Jwt jwt) {
-        var permissions = jwt.getClaimAsStringList("permissions");
-
-        return permissions.stream()
-                .map(permission -> new SimpleGrantedAuthority("ROLE_" + permission))
-                .collect(Collectors.toList());
-    }
-
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return (HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) -> {
