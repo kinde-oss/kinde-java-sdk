@@ -1,6 +1,8 @@
-# Kinde Spring Thymeleaf Full Example
+# Springboot Kinde OAuth Project
 
 This project demonstrates the integration of OAuth2 login with Kinde using Spring Boot and Spring Security. The application provides a simple web interface with authentication and role-based authorization.
+
+Run the app, go to `http://localhost:8081` and click sign up to add your new Kinde application. You will need your new client id and secret from the Kinde portal for the `application.properties`. You will also need to configure roles and permissions. This starter uses three for demonstration purposes: `read`, `write` and `admin`.
 
 ## Table of Contents
 
@@ -22,23 +24,22 @@ This project demonstrates the integration of OAuth2 login with Kinde using Sprin
 
 1. **Clone the repository:**
 
-```bash
-git clone https://github.com/kinde-oss/kinde-java-sdk.git
-cd kinde-java-sdk
-```
+   ```bash
+   git clone git@github.com:KomanRudden/kinde-spring-thymeleaf-oauth.git
+   cd kinde-spring-oauth
+   ```
 
 2. **Build the project:**
 
-```bash
-mvn clean install
-```
+   ```bash
+   mvn clean install
+   ```
 
 3. **Run the application:**
 
-```bash
-cd playground/springboot-thymeleaf-full-example
-mvn spring-boot:run
-```
+   ```bash
+   mvn spring-boot:run
+   ```
 
 ## Configurations
 
@@ -66,13 +67,12 @@ The security is configured in `SecurityConfig.java`. Key configurations include:
 1. **Start the Application:**
    Run the application using the Maven command:
 
-```bash
-cd playground/springboot-thymeleaf-full-example
-mvn spring-boot:run
-```
+   ```bash
+   mvn spring-boot:run
+   ```
 
 2. **Access the Application:**
-   Open your browser and navigate to `http://localhost:8080`.
+   Open your browser and navigate to `http://localhost:8081`.
 
 ## Endpoints
 
@@ -81,6 +81,7 @@ The application provides several endpoints:
 - **`/home` or `/`** - Publicly accessible homepage.
 - **`/admin`** - Accessible to users with the `admins` role.
 - **`/read`** - Accessible to users with the `read` role.
+- **`/write`** - Accessible to users with the `write` role.
 - **`/dashboard`** - Displays the user's Kinde profile data.
 
 ## Security Configuration
@@ -92,17 +93,7 @@ The application provides several endpoints:
   Other routes require authentication, and access is controlled by roles. For example, `/admin` requires the `admins` role.
 
 - **JWT Processing:**
-  The JWT `permissions` claim is used to assign roles dynamically.
-
-```java
-private Collection<GrantedAuthority> extractAuthoritiesFromClaims(Jwt jwt) {
-    var permissions = jwt.getClaimAsStringList("permissions");
-
-    return permissions.stream()
-            .map(permission -> new SimpleGrantedAuthority("ROLE_" + permission))
-            .collect(Collectors.toList());
-}
-```
+  The JWT `permissions` claim is used to assign roles provided from Kinde.
 
 ## Logout Handling
 
@@ -111,18 +102,6 @@ The application handles logout with the following settings:
 - **Logout URL:** `/logout`
 - **Logout Success URL:** `/home`
 - **Session Management:** Invalidates the session and clears authentication.
-
-```java
-http
-    .logout(logout -> logout
-        .logoutUrl("/logout")
-        .logoutSuccessUrl("/home")
-        .addLogoutHandler(oidcLogoutHandler)
-        .invalidateHttpSession(true)
-        .deleteCookies("JSESSIONID")
-        .clearAuthentication(true)
-    );
-```
 
 ## Conclusion
 
