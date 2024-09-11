@@ -18,7 +18,7 @@ PKCE authentication is a crucial part of securing OAuth 2.0 flows, and our libra
 
 ## Sub Projects
 
-| Project                  | URL                                                       |
-| ------------------------ | --------------------------------------------------------- |
-| kinde-springboot-core    | [kinde-springboot-core](./springboot-pkce-client-example) |
-| kinde-sprinbboot-starter | [kinde-sprinbboot-starter](./kinde-sprinbboot-starter)    |
+| Project                  | URL                                                    |
+| ------------------------ |--------------------------------------------------------|
+| kinde-springboot-core    | [kinde-springboot-core](./kinde-springboot-core)       |
+| kinde-springboot-starter | [kinde-springboot-starter](./kinde-springboot-starter) |

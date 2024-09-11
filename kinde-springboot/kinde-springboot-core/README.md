@@ -20,7 +20,7 @@ This project should not be included directly, rather use the kinde-springboot-st
 
 ### Gradle
 
-In order to use the SDK with a Gradle build process please use the following dependency.
+To use the SDK with a Gradle build, please include the following dependency.
 
 ```groovy
     configuration('com.kinde.spring:kinde-springboot-starter:2.0.0')
