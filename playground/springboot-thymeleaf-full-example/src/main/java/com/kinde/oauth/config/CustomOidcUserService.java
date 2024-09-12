@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class CustomOidcUserService extends OidcUserService {
 
-
+    private static final String PERMISSIONS_CLAIM = "permissions";
     private final JwtDecoder jwtDecoder;
 
     public CustomOidcUserService(@Value("${jwk-set-uri}") String issuerUri) {
@@ -52,7 +52,7 @@ public class CustomOidcUserService extends OidcUserService {
      * @return a collection of GrantedAuthority extracted from the JWT token.
      */
     Collection<GrantedAuthority> extractAuthoritiesFromJwt(Jwt jwt) {
-        List<String> permissions = jwt.getClaimAsStringList("permissions");
+        List<String> permissions = jwt.getClaimAsStringList(PERMISSIONS_CLAIM);
 
         // Convert permissions to Spring Security roles
         return permissions.stream()
