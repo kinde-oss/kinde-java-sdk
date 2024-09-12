@@ -7,11 +7,13 @@ import java.util.stream.Collectors;
 
 final class WebClientUtil {
 
+    private static final String USER_AGENT = "KINDE";
+
     private WebClientUtil() {}
 
     static WebClient createWebClient() {
        return WebClient.builder()
-            .defaultHeader(HttpHeaders.USER_AGENT, "KINDE")
+            .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT)
             .build();
     }
 }
