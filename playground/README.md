@@ -1,6 +1,6 @@
 # Playground
 
-The playground provides example projects that you can use to start a project of your own or simply test how to use the various components that make up the SDK.
+The playground provides example projects that you can use to start a project of your own or simply test how to use the various components that comprise the SDK.
 
 ## Playground subprojects
 
