@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>KindeAuth</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/index.css}"/>
+
+</head>
+<body>
+<header>
+    <nav class="nav container">
+        <h1 class="text-display-3">KindeAuth with Spring Boot</h1>
+        <div>
+            <a class="btn btn-ghost sign-in-btn">Already signed up?</a>
+            <a class="btn btn-dark" href="/dashboard">Sign In</a>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="container">
+        <div class="card hero">
+            <p class="text-display-1 hero-title">
+                Let's start authenticating <br/> with KindeAuth
+            </p>
+            <p class="text-body-1 hero-tagline">Let's sign you up</p>
+
+            <a href="https://app.kinde.com/auth/cx/_:nav&m:register&psid:2d31d7b55d8a41089adf4f15ef82186f"
+               target="_blank" rel="noreferrer"
+               class="btn btn-light btn-big">
+                Sign Up
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p class="footer-tagline text-body-3">
+            Browse Kinde
+            <a class="link" target="_blank" href="https://kinde.com/docs">docs</a>
+        </p>
+
+        <small class="text-subtle">© 2024 KindeAuth, Inc. All rights reserved</small>
+    </div>
+</footer>
+</body>
+</html>

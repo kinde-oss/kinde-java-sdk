@@ -1,0 +1,7 @@
+kinde:
+  oauth2:
+    domain: https://burntjam.kinde.com
+    client-id: d129efa11ffe436ca46e66aa16753e02
+    client-secret: x9kxMgGeMuHD5rgs3xK4aulij5qnpqM6zRaRz4RsWwCt4Bu1e0a
+    scopes: openid,email,profile
+

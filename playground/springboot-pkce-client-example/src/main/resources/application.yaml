@@ -1,0 +1,13 @@
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          kinde:
+            issuer-uri: https://<replace>.kinde.com
+        registration: 
+          pkce: 
+            provider: kinde
+            client-id: <replace>
+            client-secret: <replace>
+            scope: openid,email
