@@ -5,8 +5,40 @@
   <artifactId>kinde-parent-pom</artifactId>
   <version>2.0.0</version>
   <name>parent-project</name>
+  <description>Kinde Java SDK</description>
   <packaging>pom</packaging>
-  <url>http://maven.apache.org</url>
+  <url>https://kinde.com</url>
+  <organization>
+    <name>Kinde</name>
+    <url>https://kinde.com/docs</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://github.com/kinde-oss/kinde-java-sdk/blob/main/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <developerConnection>scm:git:https://github.com/kinde-oss/kinde-java-sdk.git</developerConnection>
+    <connection>scm:git:https://github.com/kinde-oss/kinde-java-sdk.git</connection>
+    <url>https://github.com/kinde-oss/kinde-java-sdk.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>kinde-engineering</id>
+      <name>Kinde Engineering</name>
+      <email>engineering at kinde.com</email>
+      <roles>
+        <role>Owner</role>
+      </roles>
+    </developer>
+  </developers>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -15,6 +47,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <modules>
     <module>kinde-core</module>
     <module>kinde-management</module>
@@ -27,17 +60,106 @@
     <module>playground/springboot-pkce-client-example</module>
     <module>playground/springboot-thymeleaf-full-example</module>
   </modules>
+
+  <distributionManagement>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <build>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.7.0</version>
+          <extensions>true</extensions>
+          <configuration>
+            <serverId>ossrh</serverId>
+            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement> 
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.10.1</version> <!-- You can use the latest version -->
+        <version>3.10.1</version>
         <configuration>
-          <source>17</source> <!-- Specify your desired Java version -->
-          <target>17</target> <!-- Specify your desired Java version -->
+          <source>17</source>
+          <target>17</target>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <inherited>false</inherited>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>empty-javadoc-jar</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>jar</goal>
+                </goals>
+                <configuration>
+                    <classifier>javadoc</classifier>
+                    <classesDirectory>${basedir}/javadoc</classesDirectory>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+      
+      <!-- We must generate a -sources JAR file to publish on Maven Central -->
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.2.0</version>
+          <executions>
+              <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                      <goal>jar-no-fork</goal>
+                  </goals>
+              </execution>
+          </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>3.2.5</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+            <configuration>
+              <keyname>${gpg.keyname}</keyname>
+              <passphraseServerId>${gpg.keyname}</passphraseServerId>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
+
 </project>
