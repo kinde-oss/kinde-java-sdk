@@ -169,6 +169,10 @@
           <target>17</target> <!-- Specify your desired Java version -->
         </configuration>
       </plugin>
+      <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 </project>
