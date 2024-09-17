@@ -16,7 +16,6 @@ import reactor.core.publisher.Mono;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-@WireMockTest(httpPort = 8080)
 public class WebClientUtilTest {
 
 
