@@ -84,9 +84,9 @@ final class TokenUtil {
      * Issuer URL that does not follow the pattern '/oauth2/default' (or) '/oauth2/some_id_string' is
      * considered root/org issuer.
      *
-     * e.g. https://sample.okta.com (root/org url)
-     *      https://sample.okta.com/oauth2/default (non-root issuer/org url)
-     *      https://sample.okta.com/oauth2/ausar5cbq5TRRsbcJ0h7 (non-root issuer/org url)
+     * e.g. https://sample.kinde.com (root/org url)
+     *      https://sample.kinde.com/oauth2/default (non-root issuer/org url)
+     *      https://sample.kinde.com/oauth2/ausar5cbq5TRRsbcJ0h7 (non-root issuer/org url)
      *
      * @param issuerUri
      * @return true if root/org, false otherwise
