@@ -17,16 +17,17 @@ import org.springframework.core.env.PropertySource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-final class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+public class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final DeferredLog log = new DeferredLog();
 
 
-    private static final String KINDE_OAUTH_PREFIX = "kinde.oauth2.";
-    private static final String KINDE_OAUTH_DOMAIN = KINDE_OAUTH_PREFIX + "domain";
-    private static final String KINDE_OAUTH_CLIENT_ID = KINDE_OAUTH_PREFIX + "client-id";
-    private static final String KINDE_OAUTH_CLIENT_SECRET = KINDE_OAUTH_PREFIX + "client-secret";
-    private static final String KINDE_OAUTH_SCOPES = KINDE_OAUTH_PREFIX + "scopes"; // array vs string*/
+
+    public static final String KINDE_OAUTH_PREFIX = "kinde.oauth2.";
+    public static final String KINDE_OAUTH_DOMAIN = KINDE_OAUTH_PREFIX + "domain";
+    public static final String KINDE_OAUTH_CLIENT_ID = KINDE_OAUTH_PREFIX + "client-id";
+    public static final String KINDE_OAUTH_CLIENT_SECRET = KINDE_OAUTH_PREFIX + "client-secret";
+    public static final String KINDE_OAUTH_SCOPES = KINDE_OAUTH_PREFIX + "scopes"; // array vs string*/
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
