@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.test.context.TestPropertySource;
 
+import static org.mockito.Mockito.when;
+
 @TestPropertySource(properties = {
         KindeOAuth2PropertiesMappingEnvironmentPostProcessor.KINDE_OAUTH_DOMAIN + "=https://test.kinde.com" ,
         KindeOAuth2PropertiesMappingEnvironmentPostProcessor.KINDE_OAUTH_CLIENT_ID + "=test_client_id" ,
@@ -52,10 +54,11 @@ public class ReactiveKindeOAuth2ServerHttpServerAutoConfigTest {
 
     @Test
     public void testOidcClientInitiatedServerLogoutSuccessHandler() throws Exception {
-        KindeOAuth2Properties oktaOAuth2Properties = Mockito.mock(KindeOAuth2Properties.class);
+        KindeOAuth2Properties kindeOAuth2Properties = Mockito.mock(KindeOAuth2Properties.class);
         ReactiveClientRegistrationRepository repository = Mockito.mock(ReactiveClientRegistrationRepository.class);
+        when(kindeOAuth2Properties.getPostLogoutRedirectUri()).thenReturn("https://kinde.com");
         reactiveKindeOAuth2ResourceServerHttpServerAutoConfig.oidcClientInitiatedServerLogoutSuccessHandler(
-                oktaOAuth2Properties,repository);
+                kindeOAuth2Properties,repository);
     }
 
 
