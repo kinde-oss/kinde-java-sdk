@@ -193,15 +193,34 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version> <!-- Use the latest version available -->
         <executions>
           <execution>
-            <id>jacoco-report</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase> <!-- Or you can bind it to another phase -->
             <goals>
               <goal>report</goal>
             </goals>
-            <phase>verify</phase>
           </execution>
         </executions>
+        <configuration>
+          <rules>
+            <rule>
+              <limits>
+                <limit>
+                  <counter>INSTRUCTION</counter>
+                  <value>COVEREDRATIO</value>
+                  <minimum>0.80</minimum> <!-- Set your threshold here -->
+                </limit>
+              </limits>
+            </rule>
+          </rules>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
