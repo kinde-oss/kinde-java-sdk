@@ -53,7 +53,7 @@ To use the SDK with a Gradle build process, please use the following dependency.
 3. Install the dependencies:
 
    ```bash
-   mvn clean install
+   mvn -B clean package
    ```
 
 ## Documentation

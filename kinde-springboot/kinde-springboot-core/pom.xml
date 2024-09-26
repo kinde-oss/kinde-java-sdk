@@ -104,6 +104,49 @@
       <version>3.26.3</version>
       <scope>test</scope>
     </dependency>
+
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- JUnit 5 API and Engine -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.10.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.10.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Optional: For parameterized tests -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>5.10.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Mockito (if you are using it for mocking) -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.4.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>1.15.0</version> <!-- Replace with the latest version -->
+    </dependency>
+
     <dependency>
       <groupId>com.github.tomakehurst</groupId>
       <artifactId>wiremock-standalone</artifactId>
@@ -150,13 +193,19 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version> <!-- Use the latest version available -->
         <executions>
           <execution>
-            <id>jacoco-report</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase> <!-- Or you can bind it to another phase -->
             <goals>
               <goal>report</goal>
             </goals>
-            <phase>verify</phase>
           </execution>
         </executions>
       </plugin>

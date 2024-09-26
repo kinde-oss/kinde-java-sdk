@@ -44,7 +44,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
                 && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("kinde")) != null
                 && !propertiesProvider.getIssuerUri().isEmpty()
                 && !propertiesRegistration.getClientId().isEmpty()) {
-                // configure Okta user services
+                // configure kinde user services
                 configureLogin(http, kindeOAuth2Properties, context.getEnvironment());
 
                 // check for RP-Initiated logout
@@ -53,15 +53,6 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
                 }
 
                 // Resource Server Config
-                OAuth2ResourceServerProperties.Opaquetoken propertiesOpaquetoken;
-                if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
-                    && (propertiesOpaquetoken = context.getBean(OAuth2ResourceServerProperties.class).getOpaquetoken()) != null
-                    && !propertiesOpaquetoken.getIntrospectionUri().isEmpty()
-                    && TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
-                    log.debug("Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http, kindeOAuth2Properties);
-                    return;
-                }
                 OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
 
                 if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {

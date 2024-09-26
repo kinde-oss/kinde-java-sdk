@@ -37,15 +37,18 @@ import java.util.Collection;
 @Import(AuthorityProvidersConfig.class)
 class KindeOAuth2AutoConfig {
 
-    @Autowired
     private KindeSdkClient kindeSdkClient;
+
+    @Autowired
+    public void setKindeSdkClient(KindeSdkClient kindeSdkClient) {
+        this.kindeSdkClient = kindeSdkClient;
+    }
 
     @Bean
     @ConditionalOnProperty(name = "okta.oauth2.post-logout-redirect-uri")
-    OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(KindeOAuth2Properties kindeOAuth2Properties,
-                                                                     ClientRegistrationRepository clientRegistrationRepository) {
+    OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(ClientRegistrationRepository clientRegistrationRepository) {
         OidcClientInitiatedLogoutSuccessHandler successHandler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
-        String logoutUri = kindeOAuth2Properties.getPostLogoutRedirectUri();
+        String logoutUri = kindeSdkClient.getClient().kindeConfig().logoutRedirectUri();
         successHandler.setPostLogoutRedirectUri((logoutUri.startsWith("/") ? "{baseUrl}" : "") + logoutUri);
         return successHandler;
     }
