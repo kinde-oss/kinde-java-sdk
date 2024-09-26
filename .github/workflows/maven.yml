@@ -33,6 +33,10 @@ jobs:
       working-directory: ./kinde-core
       run: mvn jacoco:report
 
+    - name: Run tests coverage on Spring Boot
+      working-directory: ./kinde-springboot/kinde-springboot-core
+      run: mvn jacoco:report
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
