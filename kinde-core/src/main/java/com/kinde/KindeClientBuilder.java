@@ -21,28 +21,23 @@ public class KindeClientBuilder {
      * Private constructor to prevent new instantiation
      */
     private KindeClientBuilder() {
-        try {
-            Dotenv dotenv = Dotenv.load();
-            setParameterFromEnvironmental(KindeParameters.DOMAIN, dotenv);
-            setParameterFromEnvironmental(KindeParameters.REDIRECT_URI, dotenv);
-            setParameterFromEnvironmental(KindeParameters.LOGOUT_REDIRECT_URI, dotenv);
-            setParameterFromEnvironmental(KindeParameters.OPENID_ENDPOINT, dotenv);
-            setParameterFromEnvironmental(KindeParameters.AUTHORIZATION_ENDPOINT, dotenv);
-            setParameterFromEnvironmental(KindeParameters.TOKEN_ENDPOINT, dotenv);
-            setParameterFromEnvironmental(KindeParameters.LOGOUT_ENDPOINT, dotenv);
-            setParameterFromEnvironmental(KindeParameters.CLIENT_ID, dotenv);
-            setParameterFromEnvironmental(KindeParameters.CLIENT_SECRET, dotenv);
-            setParameterFromEnvironmental(KindeParameters.GRANT_TYPE, dotenv);
-            setParameterFromEnvironmental(KindeParameters.SCOPES, dotenv);
-            setParameterFromEnvironmental(KindeParameters.PROTOCOL, dotenv);
-            setParameterFromEnvironmental(KindeParameters.AUDIENCE, dotenv);
-            setParameterFromEnvironmental(KindeParameters.LANG, dotenv);
-            setParameterFromEnvironmental(KindeParameters.ORG_CODE, dotenv);
-            setParameterFromEnvironmental(KindeParameters.HAS_SUCCESS_PAGE, dotenv);
-
-        } catch (Exception ex) {
-            // ignore exceptions as this means that the DotEnv environment was not configured
-        }
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().systemProperties().load();
+        setParameterFromEnvironmental(KindeParameters.DOMAIN, dotenv);
+        setParameterFromEnvironmental(KindeParameters.REDIRECT_URI, dotenv);
+        setParameterFromEnvironmental(KindeParameters.LOGOUT_REDIRECT_URI, dotenv);
+        setParameterFromEnvironmental(KindeParameters.OPENID_ENDPOINT, dotenv);
+        setParameterFromEnvironmental(KindeParameters.AUTHORIZATION_ENDPOINT, dotenv);
+        setParameterFromEnvironmental(KindeParameters.TOKEN_ENDPOINT, dotenv);
+        setParameterFromEnvironmental(KindeParameters.LOGOUT_ENDPOINT, dotenv);
+        setParameterFromEnvironmental(KindeParameters.CLIENT_ID, dotenv);
+        setParameterFromEnvironmental(KindeParameters.CLIENT_SECRET, dotenv);
+        setParameterFromEnvironmental(KindeParameters.GRANT_TYPE, dotenv);
+        setParameterFromEnvironmental(KindeParameters.SCOPES, dotenv);
+        setParameterFromEnvironmental(KindeParameters.PROTOCOL, dotenv);
+        setParameterFromEnvironmental(KindeParameters.AUDIENCE, dotenv);
+        setParameterFromEnvironmental(KindeParameters.LANG, dotenv);
+        setParameterFromEnvironmental(KindeParameters.ORG_CODE, dotenv);
+        setParameterFromEnvironmental(KindeParameters.HAS_SUCCESS_PAGE, dotenv);
         injector = KindeGuiceSingleton.getInstance().getInjector().createChildInjector(new KindeClientGuiceModule(this.parameters));
     }
 
