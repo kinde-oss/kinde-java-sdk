@@ -73,7 +73,8 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
         if (! response.indicatesSuccess()) {
             // We got an error response...
-            throw new Exception("Token request failed: " + response.toErrorResponse().toString());
+            TokenErrorResponse tokenErrorResponse = response.toErrorResponse();
+            throw new Exception("Token request failed: " + tokenErrorResponse.getErrorObject().toString());
         }
 
         AccessTokenResponse successResponse = response.toSuccessResponse();
