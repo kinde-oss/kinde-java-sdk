@@ -25,7 +25,10 @@ public class KindeAdminSessionImpl implements KindeAdminSession {
     @Override
     public ApiClient initClient() {
         if (kindeClient == null) {
-            return new ApiClient();
+            Map<String, Authentication> authMap = new HashMap<>();
+            authMap.put("ManagementAPI",new OAuth(
+                    "https://kinde.com","http://kinde.com/oauth2/token"));
+            return new ApiClient(authMap);
         }
         KindeTokens kindeTokens = kindeClient.clientSession().retrieveTokens();
         if (kindeTokens.getAccessToken() == null) {
