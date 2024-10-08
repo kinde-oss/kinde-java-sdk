@@ -29,13 +29,8 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
-    - name: Run tests and collect coverage
-      working-directory: ./kinde-core
-      run: mvn jacoco:report
-
-    - name: Run tests coverage on Spring Boot
-      working-directory: ./kinde-springboot/kinde-springboot-core
-      run: mvn jacoco:report
+    - name: Run tests and verify
+      run: mvn verify -Dgpg.skip=true
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4

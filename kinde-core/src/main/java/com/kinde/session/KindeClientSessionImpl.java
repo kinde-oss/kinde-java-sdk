@@ -17,6 +17,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
@@ -51,29 +52,26 @@ public class KindeClientSessionImpl implements KindeClientSession {
         Secret clientSecret = new Secret(this.kindeConfig.clientSecret());
         ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 
-        Scope scope = new Scope();
-        if (this.kindeConfig.scopes() != null && !this.kindeConfig.scopes().isEmpty()) {
-            scope = new Scope(this.kindeConfig.scopes().toArray(new String[0]));
-        }
-
         URI tokenEndpoint = this.oidcMetaData.getOpMetadata().getTokenEndpointURI();
         TokenRequest request = null;
         if (this.kindeConfig.audience() !=null && !this.kindeConfig.audience().isEmpty()) {
             HashMap<String,List<String>> customParameters = new HashMap<>();
             customParameters.put("audience",this.kindeConfig.audience());
-            request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, scope,null, customParameters);
+            request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, null,null, customParameters);
         } else {
-            request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, scope);
+            request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant);
         }
 
         HTTPRequest httpRequest = request.toHTTPRequest();
         httpRequest.setHeader("Kinde-SDK","Java/2.0.0");
 
-        TokenResponse response = TokenResponse.parse(httpRequest.send());
+        // make request
+        HTTPResponse httpResponse = httpRequest.send();
+        TokenResponse response = TokenResponse.parse(httpResponse);
 
         if (! response.indicatesSuccess()) {
-            // We got an error response...
-            throw new Exception("Token request failed: " + response.toErrorResponse().toString());
+            // Retrieve the content of the response.
+            throw new Exception("Token request failed: " + httpResponse.getContent());
         }
 
         AccessTokenResponse successResponse = response.toSuccessResponse();

@@ -20,6 +20,11 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <dependencyManagement>
+  <dependencies>
+
+  </dependencies>
+  </dependencyManagement>
   <modules>
     <module>kinde-springboot-core</module>
     <module>kinde-springboot-starter</module>
