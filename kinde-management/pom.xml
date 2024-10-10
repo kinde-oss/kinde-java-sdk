@@ -181,6 +181,16 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.10</version> <!-- Replace with the latest version -->
+                <configuration>
+                    <excludes>
+                        <exclude>com/google/inject/**/*.class</exclude>
+                        <exclude>javax/inject/**/*.class</exclude>
+                        <exclude>org/springframework/**/*.class</exclude>
+                        <exclude>**/generated/**</exclude>
+                        <exclude>**/thirdparty/**</exclude>
+                        <exclude>org/openapitools/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -209,17 +219,6 @@
                             </reportFormats>
                             <append>true</append>
                             <skip>false</skip>
-                            <includes>
-                                <include>com/kinde/**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>com/google/inject/**/*.class</exclude>
-                                <exclude>javax/inject/**/*.class</exclude>
-                                <exclude>org/springframework/**/*.class</exclude>
-                                <exclude>**/generated/**</exclude>
-                                <exclude>**/thirdparty/**</exclude>
-                                <!-- Add more excludes if necessary -->
-                            </excludes>
                         </configuration>
                     </execution>
                 </executions>
