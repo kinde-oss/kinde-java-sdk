@@ -180,7 +180,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version> <!-- Replace with the latest version -->
+                <version>0.8.12</version> <!-- Replace with the latest version -->
                 <configuration>
                     <excludes>
                         <exclude>com/google/inject/**/*.class</exclude>
@@ -206,7 +206,7 @@
                     </execution>
                     <execution>
                         <id>post-unit-test</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
