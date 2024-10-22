@@ -213,12 +213,6 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
                             <dataFile>${project.build.directory}/jacoco/jacoco.exec</dataFile>
-                            <reportFormats>
-                                <format>HTML</format>
-                                <format>XML</format>
-                            </reportFormats>
-                            <append>true</append>
-                            <skip>false</skip>
                         </configuration>
                     </execution>
                 </executions>

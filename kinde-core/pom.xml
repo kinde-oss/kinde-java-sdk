@@ -125,19 +125,13 @@
           </execution>
           <execution>
             <id>post-unit-test</id>
-            <phase>test</phase>
+            <phase>verify</phase>
             <goals>
               <goal>report</goal>
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
               <dataFile>${project.build.directory}/jacoco/jacoco.exec</dataFile>
-              <reportFormats>
-                <format>HTML</format>
-                <format>XML</format>
-              </reportFormats>
-              <append>true</append>
-              <skip>false</skip>
               <includes>
                 <include>com/kinde/**</include>
               </includes>
