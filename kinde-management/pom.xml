@@ -163,9 +163,30 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <target>
+                                <echo>Fixing syntax error in generated OpenAPI code</echo>
+                                <replace file="target/generated-sources/openapi/src/gen/java/main/org/openapitools/client/model/UpdateApplicationsPropertyRequestValue.java"
+                                         token="(token == JsonToken.VALUE_FALSE || token == JsonToken.VALUE_TRUE));"
+                                         value="(token == JsonToken.VALUE_FALSE || token == JsonToken.VALUE_TRUE);"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version> <!-- Replace with the latest version -->
+                <version>0.8.12</version> <!-- Replace with the latest version -->
                 <executions>
                     <execution>
                         <goals>
@@ -203,6 +224,7 @@
                                 <exclude>org/springframework/**/*.class</exclude>
                                 <exclude>**/generated/**</exclude>
                                 <exclude>**/thirdparty/**</exclude>
+                                <exclude>**/openapitools/**</exclude>
                                 <!-- Add more excludes if necessary -->
                             </excludes>
                         </configuration>
