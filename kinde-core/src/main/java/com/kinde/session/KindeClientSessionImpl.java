@@ -63,7 +63,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
         }
 
         HTTPRequest httpRequest = request.toHTTPRequest();
-        httpRequest.setHeader("Kinde-SDK","Java/2.0.0");
+        httpRequest.setHeader("Kinde-SDK","Java/2.0.1");
 
         // make request
         HTTPResponse httpResponse = httpRequest.send();

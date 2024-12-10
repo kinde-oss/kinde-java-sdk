@@ -7,13 +7,13 @@
     <parent>
         <groupId>com.kinde</groupId>
         <artifactId>kinde-parent-pom</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <groupId>com.kinde</groupId>
     <artifactId>springboot-thymeleaf-full-example</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <name>springboot-thymeleaf-full-example</name>
     <description>Kinde Spring Full Example</description>
 
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.kinde</groupId>
             <artifactId>kinde-core</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

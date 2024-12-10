@@ -4,13 +4,13 @@
   <parent>
     <groupId>com.kinde</groupId>
     <artifactId>kinde-parent-pom</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <groupId>com.kinde</groupId>
   <artifactId>example-j2ee-app</artifactId>
   <packaging>war</packaging>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
   <name>example-j2ee-app Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
@@ -27,12 +27,12 @@
     <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-core</artifactId>
-      <version>2.0.0</version>
+      <version>2.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-j2ee</artifactId>
-      <version>2.0.0</version>
+      <version>2.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
