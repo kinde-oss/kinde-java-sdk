@@ -17,16 +17,16 @@
     <parent>
         <groupId>com.kinde</groupId>
         <artifactId>kinde-parent-pom</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
     </parent>
 
     <properties>
-        <kinde-version>2.0.0</kinde-version>
+        <kinde-version>2.0.1</kinde-version>
     </properties>
 
     <artifactId>report</artifactId>
     <name>Aggregate Report</name>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 
     <dependencies>
         <dependency>

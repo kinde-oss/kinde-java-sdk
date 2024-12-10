@@ -57,7 +57,7 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
 
         TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
         HTTPRequest httpRequest = request.toHTTPRequest();
-        httpRequest.setHeader("Kinde-SDK","Java/2.0.0");
+        httpRequest.setHeader("Kinde-SDK","Java/2.0.1");
 
         TokenResponse response = TokenResponse.parse(httpRequest.send());
         System.out.println(response.toString());
