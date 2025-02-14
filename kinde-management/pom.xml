@@ -148,7 +148,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>https://kinde.com/api/kinde-mgmt-api-specs.yaml</inputSpec>
+                            <inputSpec>https://api-spec.kinde.com/kinde-combined-api-specs.yaml</inputSpec>
                             <generatorName>java</generatorName>
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
