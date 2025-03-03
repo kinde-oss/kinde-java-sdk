@@ -45,7 +45,7 @@ public class TestKeyGeneratorImpl implements TestKeyGenerator{
 
         // Step 4: Write the JSON string to the temporary file
         try (FileWriter writer = new FileWriter(this.tmpPath.toFile())) {
-            writer.write(jwkSet.toJSONObject().toString());
+            writer.write(jwkSet.toString(true));
         }
 
         return this.tmpPath;
