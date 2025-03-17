@@ -43,7 +43,7 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
-      <version>6.3.1</version>
+      <version>6.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -53,17 +53,17 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-client</artifactId>
-      <version>6.3.0</version>
+      <version>6.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-jose</artifactId>
-      <version>6.3.0</version>
+      <version>6.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-resource-server</artifactId>
-      <version>6.3.0</version>
+      <version>6.4.4</version>
     </dependency>
 
     <!-- Spring deps-->
