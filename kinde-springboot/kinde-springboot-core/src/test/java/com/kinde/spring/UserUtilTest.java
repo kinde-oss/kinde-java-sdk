@@ -3,6 +3,7 @@ package com.kinde.spring;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientSession;
 import com.kinde.spring.token.jwt.JwtGenerator;
+import com.kinde.user.UserInfo;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,6 +38,8 @@ public class UserUtilTest {
         Collection<AuthoritiesProvider> authoritiesProviderCollection = List.of();
         KindeClient kindeClient = Mockito.mock(KindeClient.class);
         KindeClientSession kindeClientSession = Mockito.mock(KindeClientSession.class);
+        UserInfo userInfo = Mockito.mock(UserInfo.class);
+
 
         when(oAuth2UserRequest.getClientRegistration())
                 .thenReturn(clientRegistration);
@@ -54,6 +57,7 @@ public class UserUtilTest {
                 .thenReturn(JwtGenerator.generateAccessToken());
         when(kindeClient.initClientSession(any()))
                 .thenReturn(kindeClientSession);
+        when(kindeClientSession.retrieveUserInfo()).thenReturn(userInfo);
 
 
         // test false route
