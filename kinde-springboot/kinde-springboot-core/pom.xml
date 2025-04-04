@@ -28,9 +28,16 @@
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <optional>true</optional>
+      <version>3.4.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-webflux</artifactId>
       <optional>true</optional>
-      <version>3.3.0</version>
+      <version>3.4.4</version>
     </dependency>
 
     <dependency>
@@ -43,40 +50,40 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
-      <version>6.3.1</version>
+      <version>6.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.3.1</version>
+      <version>3.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-client</artifactId>
-      <version>6.3.0</version>
+      <version>6.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-jose</artifactId>
-      <version>6.3.0</version>
+      <version>6.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-resource-server</artifactId>
-      <version>6.3.0</version>
+      <version>6.4.4</version>
     </dependency>
 
     <!-- Spring deps-->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.3.1</version>
+      <version>3.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
-      <version>3.3.0</version>
+      <version>3.4.4</version>
     </dependency>
 
     <!-- Test deps -->
@@ -84,13 +91,13 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-test</artifactId>
       <scope>test</scope>
-      <version>3.3.1</version>
+      <version>3.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <scope>test</scope>
-      <version>6.1.10</version>
+      <version>6.2.5</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -144,7 +151,7 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.15.0</version> <!-- Replace with the latest version -->
+      <version>1.17.2</version> <!-- Replace with the latest version -->
     </dependency>
 
     <dependency>
@@ -177,7 +184,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.16</version>
+      <version>2.0.17</version>
     </dependency>
 
   </dependencies>
