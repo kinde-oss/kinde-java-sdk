@@ -24,6 +24,8 @@ public interface KindeClientSession {
     AuthorizationUrl register();
 
     AuthorizationUrl logout() throws Exception;
+    
+    AuthorizationUrl logout(String logoutRedirectUri) throws Exception;
 
     UserInfo retrieveUserInfo();
 }
