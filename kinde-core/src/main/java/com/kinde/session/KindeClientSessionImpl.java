@@ -159,12 +159,18 @@ public class KindeClientSessionImpl implements KindeClientSession {
         return authorizationUrlWithParameters(parameters);
     }
 
+    @Override
     public AuthorizationUrl logout() throws Exception {
-        if (this.kindeConfig.logoutRedirectUri() == null || this.kindeConfig.logoutRedirectUri().isEmpty()) {
-            throw new Exception("Logout url is not provided");
+        return logout(this.kindeConfig.logoutRedirectUri());
+    }
+
+    @Override
+    public AuthorizationUrl logout(String logoutRedirectUri) throws Exception {
+        if (logoutRedirectUri == null || logoutRedirectUri.isEmpty()) {
+            throw new Exception("Logout redirect URI is not provided");
         }
         return new AuthorizationUrl(new URL(String.format("%s?redirect=%s",this.oidcMetaData.getOpMetadata().getEndSessionEndpointURI().toURL(),
-                this.kindeConfig.logoutRedirectUri())),null);
+                logoutRedirectUri)),null);
     }
 
     @Override
