@@ -1,44 +1,23 @@
 package com.kinde;
 
-import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.junit.Ignore;
 
-import java.util.List;
+public class KindeCoreExampleTest extends TestCase {
 
-
-/**
- * Unit test for simple App.
- */
-public class KindeCoreExampleTest
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public KindeCoreExampleTest(String testName )
-    {
-        super( testName );
+    public KindeCoreExampleTest(String testName) {
+        super(testName);
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( KindeCoreExampleTest.class );
+    public static Test suite() {
+        return new TestSuite(KindeCoreExampleTest.class);
     }
 
-    /**
-     * Rigourous Test :-)
-     */
     @Ignore
-    public void testApp() throws Exception {
+    public void testApp() {
         System.out.println("Test the kinde builder");
         KindeClient kindeClient = KindeClientBuilder
                 .builder()

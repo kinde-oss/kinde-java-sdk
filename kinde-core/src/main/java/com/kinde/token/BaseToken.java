@@ -6,17 +6,23 @@ import lombok.SneakyThrows;
 import java.util.List;
 import java.util.Map;
 
+import static com.kinde.token.JwtValidator.isJwt;
+
 public class BaseToken implements KindeToken {
 
-    private String token;
-    private boolean valid;
-    private SignedJWT signedJWT;
+    private final String token;
+    private final boolean valid;
+    private final SignedJWT signedJWT;
 
     @SneakyThrows
     protected BaseToken(String token, boolean valid) {
         this.token = token;
         this.valid = valid;
-        signedJWT = SignedJWT.parse(this.token);
+        if (isJwt(this.token)) {
+            signedJWT = SignedJWT.parse(this.token);
+        } else {
+            signedJWT = null;
+        }
     }
 
     @Override
@@ -24,6 +30,7 @@ public class BaseToken implements KindeToken {
         return valid;
     }
 
+    @Override
     public String token() {
         return this.token;
     }
@@ -34,16 +41,20 @@ public class BaseToken implements KindeToken {
         return this.signedJWT.getJWTClaimsSet().getSubject();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<String> getOrganisations() {
         return (List<String>)this.getClaim("org_codes");
     }
 
     @SneakyThrows
+    @Override
     public Object getClaim(String key) {
         return this.signedJWT.getJWTClaimsSet().getClaim(key);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
     public List<String> getPermissions() {
         return (List<String>) getClaim("permissions");
     }
@@ -63,10 +74,12 @@ public class BaseToken implements KindeToken {
         return (Boolean) getFlagClaims().get(key);
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String,Object> getFlagClaims() {
         return ((Map<String,Object>)getClaim("feature_flags"));
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String,Object> getFlags() {
         return (Map<String,Object>) getClaim("feature_flags");
     }

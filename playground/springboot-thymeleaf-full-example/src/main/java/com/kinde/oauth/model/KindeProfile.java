@@ -11,6 +11,7 @@ import java.util.Set;
 public class KindeProfile {
     private String idToken;
     private String accessToken;
+    private String refreshToken;
     private String fullName;
     private Set<GrantedAuthority> roles;
     private String userProfile;
