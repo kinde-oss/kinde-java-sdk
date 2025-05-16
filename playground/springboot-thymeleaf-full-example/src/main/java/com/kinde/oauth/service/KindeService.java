@@ -141,7 +141,7 @@ public class KindeService {
         log.info("Kinde access token user: {}", kindeClient.clientSession().retrieveTokens().getAccessToken().token());
         log.info("Kinde auth url: {}", kindeClient.clientSession().authorizationUrl().getUrl());
         log.info("Kinde scopes: {}", kindeClient.kindeConfig().scopes());
-        log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(((KindeProfile)session.getAttribute("kindeProfile")).getAccessToken()));
+        log.info("Kinde access token: {}", kindeClient.tokenFactory().parse(((KindeProfile)session.getAttribute("kindeProfile")).getAccessToken()));
         log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(((KindeProfile)session.getAttribute("kindeProfile")).getRefreshToken()));
 
         return "redirect:/dashboard";
