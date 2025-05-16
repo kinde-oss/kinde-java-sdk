@@ -18,8 +18,9 @@ public class BaseToken implements KindeToken {
     protected BaseToken(String token, boolean valid) {
         this.token = token;
         this.valid = valid;
-        if (isJwt(this.token)) {
-            signedJWT = SignedJWT.parse(this.token);
+        SignedJWT parsedJwt = JwtValidator.isJwt(this.token);
+        if (parsedJwt != null) {
+            signedJWT = parsedJwt;
         } else {
             signedJWT = null;
         }

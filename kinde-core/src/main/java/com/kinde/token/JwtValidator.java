@@ -5,16 +5,15 @@ import com.nimbusds.jwt.SignedJWT;
 import java.text.ParseException;
 
 public class JwtValidator {
-    public static boolean isJwt(String token) {
+    public static SignedJWT isJwt(String token) {
         if (token == null || token.trim().isEmpty()) {
-            return false;
+            return null;
         }
 
         try {
-            SignedJWT.parse(token);
-            return true;
+            return SignedJWT.parse(token);
         } catch (ParseException e) {
-            return false;
+            return null;
         }
     }
 }

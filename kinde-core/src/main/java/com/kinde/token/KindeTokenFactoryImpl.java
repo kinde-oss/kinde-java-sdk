@@ -34,7 +34,8 @@ public class KindeTokenFactoryImpl implements KindeTokenFactory {
 
     @SneakyThrows
     public KindeToken parse(String token) {
-        if (!isJwt(token)) {
+        SignedJWT parsedJwt = JwtValidator.isJwt(token);
+        if (parsedJwt == null) {
             log.debug("Token is not a JWT, returning as is");
             return RefreshToken.init(token, true);
         }
