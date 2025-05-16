@@ -5,6 +5,7 @@ import com.kinde.KindeClientBuilder;
 import com.kinde.KindeTokenFactory;
 import com.kinde.oauth.model.KindeProfile;
 import com.kinde.token.KindeToken;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -136,9 +138,11 @@ public class KindeService {
 
     public String callSdkApi(HttpSession session, Model model) {
         KindeClient kindeClient = KindeClientBuilder.builder().build();
-        log.info("Kinde access token: {}", kindeClient.clientSession().retrieveTokens());
-        log.info("Kinde user info subject: {}", kindeClient.clientSession().retrieveUserInfo().getUserInfo().getSubject());
+        log.info("Kinde access token user: {}", kindeClient.clientSession().retrieveTokens().getAccessToken().token());
         log.info("Kinde auth url: {}", kindeClient.clientSession().authorizationUrl().getUrl());
+        log.info("Kinde scopes: {}", kindeClient.kindeConfig().scopes());
+        log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse("eyJhbGciOiJSUzI1NiIsImtpZCI6IjVmOjRhOmY5OmUyOjQwOjJlOmUxOmQ4OmYzOjRiOjVjOjQzOmE2OjA0OmRjOmQyIiwidHlwIjoiSldUIn0.eyJhdWQiOltdLCJhenAiOiJhMDZhNzJmNmRmMzY0MmZlODVlOTllNDA4NGRkZjg2NiIsImVtYWlsIjoia29tYW5ydWRkZW5AZ21haWwuY29tIiwiZXhwIjoxNzQ3NDc3ODk4LCJpYXQiOjE3NDczOTE0OTgsImlzcyI6Imh0dHBzOi8va29tYW4ua2luZGUuY29tIiwianRpIjoiOTUwODJkMmMtOGY0MS00YTY2LTk5ZjktZmY4OTcwM2IxYTE5Iiwib3JnX2NvZGUiOiJvcmdfYzM0ODRmMTcyMjYiLCJvcmdfbmFtZSI6IkRlZmF1bHQgT3JnYW5pemF0aW9uIiwicGVybWlzc2lvbnMiOlsicmVhZCIsImFkbWluIl0sInJvbGVzIjpbeyJpZCI6IjAxOTE0YjU0LWIyOWEtMTVlZS1mM2EwLTU4MGE5YTNmODNlZiIsImtleSI6InJlYWQiLCJuYW1lIjoicmVhZCJ9LHsiaWQiOiIwMTkxNGI1NS0yYTdlLWM5MDEtM2ExMS1hNTI0MzJiYmIxZGYiLCJrZXkiOiJhZG1pbiIsIm5hbWUiOiJhZG1pbiJ9XSwic2NwIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJlbWFpbCIsIm9mZmxpbmUiXSwic3ViIjoia3BfNzM1NTdjNGY3Yzg1NGJmMGI4YmRkODlhZjNjMGJlZDUifQ.QOBhWkdmeEPhF2gyRQmV74FzcNK43W2XFeT6xcF8VzyvkuA6ckgaC1cBCTelQSxdK9Zfdp0nlx0s4mpGrfWgTdXVzFRJHrHXslnBJd0q2Mh8KBXe5xccXA9qMkxO5Qjvn3-i_GesK-gog8eCqmOgFdYCNwMTZPodFXxIzY8FjraZpwKvDNdLaeVTDirlRELF1N0Ll-iWQ-JhW6E0tQvMdg_DSUzqhmarwUcTkRd4j6au7cjAAxgLmBsF7xcc1dGleZOvpsh9xPVJQFPYXPtd_QXcIiLiBilJGazy840HKg2VKKw_kyvXACPSjL9P4ia2jdKHEUzCzarJ304mqzVGXg"));
+        log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(((KindeProfile)session.getAttribute("kindeProfile")).getRefreshToken()));
 
         return "redirect:/dashboard";
     }
