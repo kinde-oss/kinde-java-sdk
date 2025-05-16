@@ -127,9 +127,14 @@ public class KindeService {
 
         KindeClient kindeClient = KindeClientBuilder.builder().build();
         KindeTokenFactory kindeTokenFactory = kindeClient.tokenFactory();
-        KindeToken parsedToken = kindeTokenFactory.parse(accessToken.getTokenValue());
-        if (!parsedToken.valid()) {
-            log.error("Parsed token is not valid");
+        try {
+            KindeToken parsedToken = kindeTokenFactory.parse(accessToken.getTokenValue());
+            if (!parsedToken.valid()) {
+                log.error("Parsed token is not valid");
+                return false;
+            }
+        } catch (IllegalStateException e) {
+            log.error("Exception parsing token: {}", e.getMessage());
             return false;
         }
 
