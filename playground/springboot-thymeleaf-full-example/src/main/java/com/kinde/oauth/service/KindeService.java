@@ -147,9 +147,14 @@ public class KindeService {
         return "redirect:/dashboard";
     }
 
-    public String logout() throws Exception {
+    public String logout() {
         KindeClient kindeClient = KindeClientBuilder.builder().build();
-        kindeClient.clientSession().logout();
+        try {
+            kindeClient.clientSession().logout();
+        } catch (Exception e) {
+            log.error("Error during logout: {}", e.getMessage());
+            return "error";
+        }
         return "redirect:/login";
     }
 }
