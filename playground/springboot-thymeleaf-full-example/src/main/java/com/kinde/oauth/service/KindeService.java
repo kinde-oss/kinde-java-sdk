@@ -141,8 +141,14 @@ public class KindeService {
         log.info("Kinde access token user: {}", kindeClient.clientSession().retrieveTokens().getAccessToken().token());
         log.info("Kinde auth url: {}", kindeClient.clientSession().authorizationUrl().getUrl());
         log.info("Kinde scopes: {}", kindeClient.kindeConfig().scopes());
-        log.info("Kinde access token: {}", kindeClient.tokenFactory().parse(((KindeProfile)session.getAttribute("kindeProfile")).getAccessToken()));
-        log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(((KindeProfile)session.getAttribute("kindeProfile")).getRefreshToken()));
+        log.info("Kinde access token: {}", kindeClient.tokenFactory().parse(((KindeProfile) session.getAttribute("kindeProfile")).getAccessToken()));
+        log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(((KindeProfile) session.getAttribute("kindeProfile")).getRefreshToken()));
+        KindeProfile profile = (KindeProfile) session.getAttribute("kindeProfile");
+        if (profile != null && profile.getRefreshToken() != null) {
+            log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(profile.getRefreshToken()));
+        } else {
+            log.info("Kinde refresh token: not available");
+        }
 
         return "redirect:/dashboard";
     }
