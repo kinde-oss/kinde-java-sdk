@@ -30,7 +30,7 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
       <optional>true</optional>
-      <version>3.4.4</version>
+      <version>3.4.6</version>
     </dependency>
 
     <dependency>
@@ -50,34 +50,34 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
-      <version>6.4.4</version>
+      <version>6.4.6</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.4.4</version>
+      <version>3.4.6</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-client</artifactId>
-      <version>6.4.4</version>
+      <version>6.4.6</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-jose</artifactId>
-      <version>6.4.4</version>
+      <version>6.4.6</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-resource-server</artifactId>
-      <version>6.4.4</version>
+      <version>6.4.6</version>
     </dependency>
 
     <!-- Spring deps-->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.4.4</version>
+      <version>3.4.6</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
