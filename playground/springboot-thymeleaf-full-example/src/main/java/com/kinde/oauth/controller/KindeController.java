@@ -1,6 +1,7 @@
 package com.kinde.oauth.controller;
 
 import com.kinde.oauth.service.KindeService;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -39,15 +40,24 @@ public class KindeController {
     }
 
     /**
+     * Handles requests to the logout page.
+     *
+     * @return the name of the "logout" view.
+     */
+    @RequestMapping(path = {"/sdkLogout"}, method = RequestMethod.GET)
+    public String logout() throws Exception {
+        return kindeService.logout();
+    }
+
+    /**
      * Handles requests to the dashboard page, loading the authenticated user's Kinde profile.
      *
      * @param model the {@link Model} used to pass attributes to the view.
      * @return the name of the "dashboard" view.
      */
     @GetMapping(path = "/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("kindeUser", kindeService.loadDashboard());
-        return "dashboard";
+    public String dashboard(HttpSession session, Model model) {
+        return kindeService.loadDashboard(session, model);
     }
 
     /**
@@ -81,5 +91,10 @@ public class KindeController {
     // @PreAuthorize("hasRole('write')")
     public String writeEndpoint() {
         return "write";
+    }
+
+    @GetMapping("/callSdkApi")
+    public String callSdkApi(HttpSession session, Model model) {
+        return kindeService.callSdkApi(session, model);
     }
 }
