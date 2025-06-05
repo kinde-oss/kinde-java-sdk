@@ -84,11 +84,12 @@ public class KindeController {
 
     /**
      * Handles requests to the write endpoint, restricted to users with the 'write' role.
+     * See SecurityConfig for 'write' role definition.
      *
      * @return the name of the "write" view.
      */
     @GetMapping("/write")
-    // @PreAuthorize("hasRole('write')")
+    // @PreAuthorize("hasRole('write')") // Uncomment this line to enable write role restriction
     public String writeEndpoint() {
         return "write";
     }

@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>com.kinde</groupId>
-    <artifactId>springboot-thymeleaf-full-example</artifactId>
+    <artifactId>kinde-springboot-thymeleaf-full-example</artifactId>
     <version>2.0.1</version>
     <name>springboot-thymeleaf-full-example</name>
     <description>Kinde Spring Full Example</description>
