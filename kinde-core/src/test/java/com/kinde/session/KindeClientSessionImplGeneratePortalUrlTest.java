@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 
 import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -109,10 +110,10 @@ class KindeClientSessionImplGeneratePortalUrlTest {
         when(conn.getResponseCode()).thenReturn(200);
         when(conn.getInputStream()).thenReturn(new ByteArrayInputStream("{\"url\":\"ht!tp://bad-url\"}".getBytes()));
         Mockito.doReturn(conn).when(kindeClient).openConnection(any(URL.class));
-        Exception ex = assertThrows(RuntimeException.class, () ->
+        MalformedURLException ex = assertThrows(MalformedURLException.class, () ->
                 kindeClient.generatePortalUrl("https://example.kinde.com", "https://myapp.com/return", "profile")
         );
-        assertTrue(ex.getMessage().contains("Invalid URL format received from API"));
+        assertTrue(ex.getMessage().contains("no protocol: ht!tp://bad-url"));
     }
 }
 
