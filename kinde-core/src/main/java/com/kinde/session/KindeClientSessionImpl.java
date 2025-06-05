@@ -4,12 +4,9 @@ import com.google.inject.Inject;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
-import com.kinde.client.KindeClientImpl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
-import com.kinde.guice.KindeAnnotations;
 import com.kinde.token.AccessToken;
-import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.*;
@@ -20,7 +17,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.Prompt;
@@ -28,7 +24,10 @@ import lombok.SneakyThrows;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class KindeClientSessionImpl implements KindeClientSession {
 
@@ -41,11 +40,9 @@ public class KindeClientSessionImpl implements KindeClientSession {
         this.oidcMetaData = oidcMetaData;
     }
 
-
     @Override
     @SneakyThrows
     public KindeTokens retrieveTokens() {
-        // Construct the client credentials grant
         AuthorizationGrant clientGrant = new ClientCredentialsGrant();
 
         ClientID clientID = new ClientID(this.kindeConfig.clientId());
@@ -54,30 +51,29 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
         URI tokenEndpoint = this.oidcMetaData.getOpMetadata().getTokenEndpointURI();
         TokenRequest request = null;
-        if (this.kindeConfig.audience() !=null && !this.kindeConfig.audience().isEmpty()) {
-            HashMap<String,List<String>> customParameters = new HashMap<>();
-            customParameters.put("audience",this.kindeConfig.audience());
-            request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, null,null, customParameters);
+        if (this.kindeConfig.audience() != null && !this.kindeConfig.audience().isEmpty()) {
+            HashMap<String, List<String>> customParameters = new HashMap<>();
+            customParameters.put("audience", this.kindeConfig.audience());
+            request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, null, null, customParameters);
         } else {
             request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant);
         }
 
         HTTPRequest httpRequest = request.toHTTPRequest();
-        httpRequest.setHeader("Kinde-SDK","Java/2.0.1");
+        httpRequest.setHeader("Kinde-SDK", "Java/2.0.1");
 
         // make request
         HTTPResponse httpResponse = httpRequest.send();
         TokenResponse response = TokenResponse.parse(httpResponse);
 
-        if (! response.indicatesSuccess()) {
-            // Retrieve the content of the response.
+        if (!response.indicatesSuccess()) {
             throw new Exception("Token request failed: " + httpResponse.getContent());
         }
 
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
-        return new KindeTokens(null,null,
-                (AccessToken) AccessToken.init(successResponse.getTokens().getAccessToken().getValue(),true),
+        return new KindeTokens(null, null,
+                (AccessToken) AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true),
                 null);
 
     }
@@ -103,10 +99,10 @@ public class KindeClientSessionImpl implements KindeClientSession {
         CodeVerifier codeVerifier = null;
         AuthorizationRequest.Builder builder = null;
         if (this.kindeConfig.grantType() == AuthorizationType.CODE) {
-            codeVerifier = new CodeVerifier(); // Random 43-character string
+            codeVerifier = new CodeVerifier();
             builder = new AuthorizationRequest.Builder(
                     new ResponseType(ResponseType.Value.CODE), clientID)
-                    .codeChallenge(codeVerifier,CodeChallengeMethod.S256);
+                    .codeChallenge(codeVerifier, CodeChallengeMethod.S256);
         } else {
             builder = new AuthorizationRequest.Builder(
                     new ResponseType(ResponseType.Value.TOKEN), clientID);
@@ -117,25 +113,24 @@ public class KindeClientSessionImpl implements KindeClientSession {
                 .endpointURI(authzEndpoint);
 
         if (this.kindeConfig.hasSuccessPage() != null && this.kindeConfig.hasSuccessPage()) {
-            parameters.put(KindeRequestParameters.HAS_SUCCESS_PAGE,Boolean.TRUE.toString());
+            parameters.put(KindeRequestParameters.HAS_SUCCESS_PAGE, Boolean.TRUE.toString());
         }
 
         if (this.kindeConfig.lang() != null && !this.kindeConfig.lang().isEmpty()) {
-            parameters.put(KindeRequestParameters.LANG,this.kindeConfig.lang());
+            parameters.put(KindeRequestParameters.LANG, this.kindeConfig.lang());
         }
 
         if (this.kindeConfig.orgCode() != null && !this.kindeConfig.orgCode().isEmpty()) {
-            parameters.put(KindeRequestParameters.ORG_CODE,this.kindeConfig.orgCode());
+            parameters.put(KindeRequestParameters.ORG_CODE, this.kindeConfig.orgCode());
         }
 
-        // add the custom parameters for either login or register
         if (!parameters.isEmpty()) {
             parameters.forEach(builder::customParameter);
         }
 
         AuthorizationRequest request = builder.build();
 
-        return new AuthorizationUrl(request.toURI().toURL(),codeVerifier);
+        return new AuthorizationUrl(request.toURI().toURL(), codeVerifier);
     }
 
     @Override
@@ -146,16 +141,16 @@ public class KindeClientSessionImpl implements KindeClientSession {
     @Override
     public AuthorizationUrl createOrg(String orgName) {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("prompt",Prompt.Type.CREATE.toString());
-        parameters.put("is_create_org",Boolean.TRUE.toString());
-        parameters.put("org_name",orgName);
+        parameters.put("prompt", Prompt.Type.CREATE.toString());
+        parameters.put("is_create_org", Boolean.TRUE.toString());
+        parameters.put("org_name", orgName);
         return authorizationUrlWithParameters(parameters);
     }
 
     @Override
     public AuthorizationUrl register() {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("prompt",Prompt.Type.CREATE.toString());
+        parameters.put("prompt", Prompt.Type.CREATE.toString());
         return authorizationUrlWithParameters(parameters);
     }
 
@@ -163,12 +158,89 @@ public class KindeClientSessionImpl implements KindeClientSession {
         if (this.kindeConfig.logoutRedirectUri() == null || this.kindeConfig.logoutRedirectUri().isEmpty()) {
             throw new Exception("Logout url is not provided");
         }
-        return new AuthorizationUrl(new URL(String.format("%s?redirect=%s",this.oidcMetaData.getOpMetadata().getEndSessionEndpointURI().toURL(),
-                this.kindeConfig.logoutRedirectUri())),null);
+        return new AuthorizationUrl(new URL(String.format("%s?redirect=%s", this.oidcMetaData.getOpMetadata().getEndSessionEndpointURI().toURL(),
+                this.kindeConfig.logoutRedirectUri())), null);
     }
 
     @Override
     public UserInfo retrieveUserInfo() {
         throw new RuntimeException("Not Implemented");
+    }
+
+    /**
+     * Generates a portal URL for the user to access their account portal.
+     *
+     * @param domain    The base domain of the Kinde service (e.g., "https://example.kinde.com").
+     * @param returnUrl URL to redirect to after completing the profile flow.
+     * @param subNav    Optional sub-navigation parameter to specify which section of the portal to open.
+     * @return An AuthorizationUrl containing the generated portal URL.
+     */
+    @Override
+    @SneakyThrows
+    public AuthorizationUrl generatePortalUrl(String domain, String returnUrl, String subNav) {
+        if (returnUrl == null || !returnUrl.startsWith("http")) {
+            throw new IllegalArgumentException("generatePortalUrl: returnUrl must be an absolute URL");
+        }
+
+        String accessToken = null;
+        KindeTokens tokens = retrieveTokens();
+        if (tokens != null && tokens.getAccessToken() != null) {
+            accessToken = tokens.getAccessToken().token();
+        }
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new IllegalStateException("generatePortalUrl: Access Token not found");
+        }
+
+        String subNavValue = (subNav != null && !subNav.isEmpty()) ? subNav : "profile";
+        String params = String.format("sub_nav=%s&return_url=%s",
+                java.net.URLEncoder.encode(subNavValue, StandardCharsets.UTF_8),
+                java.net.URLEncoder.encode(returnUrl, StandardCharsets.UTF_8));
+
+        String sanitizedDomain = domain.endsWith("/") ? domain.substring(0, domain.length() - 1) : domain;
+        String urlString = sanitizedDomain + "/account_api/v1/portal_link?" + params;
+        java.net.URL url = new java.net.URL(urlString);
+
+        java.net.HttpURLConnection conn = openConnection(url);
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+        conn.setRequestProperty("Accept", "application/json");
+
+        int responseCode = conn.getResponseCode();
+        if (responseCode != 200) {
+            throw new RuntimeException("Failed to fetch profile URL: " + responseCode + " " + conn.getResponseMessage());
+        }
+
+        java.io.InputStream is = conn.getInputStream();
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        String responseBody = s.hasNext() ? s.next() : "";
+        s.close();
+        is.close();
+
+        String portalUrl = getPortalUrl(responseBody);
+        return new AuthorizationUrl(new URL(portalUrl), null);
+    }
+
+    private static String getPortalUrl(String responseBody) {
+        String portalUrl = null;
+        int idx = responseBody.indexOf("\"url\"");
+        if (idx != -1) {
+            int start = responseBody.indexOf(":", idx) + 1;
+            int quote1 = responseBody.indexOf('"', start);
+            int quote2 = responseBody.indexOf('"', quote1 + 1);
+            if (quote1 != -1 && quote2 != -1) {
+                portalUrl = responseBody.substring(quote1 + 1, quote2);
+            }
+        }
+        if (portalUrl == null || portalUrl.isEmpty()) {
+            throw new RuntimeException("Invalid URL received from API");
+        }
+        return portalUrl;
+    }
+
+    /**
+     * For testability: allows mocking HTTP connections in tests.
+     */
+    protected java.net.HttpURLConnection openConnection(java.net.URL url) throws java.io.IOException {
+        return (java.net.HttpURLConnection) url.openConnection();
     }
 }

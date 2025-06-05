@@ -42,9 +42,9 @@ public class KindeClientCodeSessionImplTest {
         // Mocking the token endpoint
         wireMockServer.stubFor(
                 WireMock.post(urlPathMatching("/oauth/token"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{\"access_token\":\"test-token\",\"token_type\":\"Bearer\",\"expires_in\":3600}")));
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\"access_token\":\"test-token\",\"token_type\":\"Bearer\",\"expires_in\":3600}")));
         wireMockServer.stubFor(
                 WireMock.get(urlPathMatching("/.well-known/openid-configuration"))
                         .willReturn(aResponse()
@@ -84,18 +84,18 @@ public class KindeClientCodeSessionImplTest {
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("""
-                                  {
-                                  "sub": "1234567890",
-                                  "name": "John Doe",
-                                  "given_name": "John",
-                                  "family_name": "Doe",
-                                  "email": "johndoe@example.com",
-                                  "email_verified": true,
-                                  "picture": "https://example.com/johndoe.jpg",
-                                  "locale": "en-US",
-                                  "updated_at": 1611693980
-                                }
-                """)));
+                                                          {
+                                                          "sub": "1234567890",
+                                                          "name": "John Doe",
+                                                          "given_name": "John",
+                                                          "family_name": "Doe",
+                                                          "email": "johndoe@example.com",
+                                                          "email_verified": true,
+                                                          "picture": "https://example.com/johndoe.jpg",
+                                                          "locale": "en-US",
+                                                          "updated_at": 1611693980
+                                                        }
+                                        """)));
         ///oauth2/token
         System.out.println("Instanciate the wiremock service");
     }
@@ -277,7 +277,7 @@ public class KindeClientCodeSessionImplTest {
         KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
         KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
         assertNotNull(kindeTokens.getAccessToken());
-        assertTrue(kindeClientSession.authorizationUrl()!=null);
+        assertTrue(kindeClientSession.authorizationUrl() != null);
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
@@ -291,14 +291,14 @@ public class KindeClientCodeSessionImplTest {
         KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
         KindeTokens kindeTokens2 = kindeClientSession2.retrieveTokens();
         assertNotNull(kindeTokens2.getAccessToken());
-        assertTrue(kindeClientSession2.authorizationUrl()!=null);
+        assertTrue(kindeClientSession2.authorizationUrl() != null);
 
         assertNotNull(kindeClient);
         assertNotNull(kindeClientSession);
         assertNotNull(kindeClient2);
         assertNotNull(kindeClientSession2);
 
-        assertTrue(kindeClientSession2.retrieveUserInfo()!=null);
+        assertTrue(kindeClientSession2.retrieveUserInfo() != null);
 
         KindeClientSession kindeClientSession3 = kindeClient2.initClientSession("test", null);
         UserInfo userInfo = kindeClientSession3.retrieveUserInfo();
@@ -337,21 +337,21 @@ public class KindeClientCodeSessionImplTest {
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("""
-                                  {
-                                  "sub": "1234567890",
-                                  "name": "John Doe",
-                                  "given_name": "John",
-                                  "family_name": "Doe",
-                                  "email": "johndoe@example.com",
-                                  "email_verified": true,
-                                  "picture": "https://example.com/johndoe.jpg",
-                                  "locale": "en-US",
-                                  "updated_at": 1611693980
-                                }
-                """)));
+                                                          {
+                                                          "sub": "1234567890",
+                                                          "name": "John Doe",
+                                                          "given_name": "John",
+                                                          "family_name": "Doe",
+                                                          "email": "johndoe@example.com",
+                                                          "email_verified": true,
+                                                          "picture": "https://example.com/johndoe.jpg",
+                                                          "locale": "en-US",
+                                                          "updated_at": 1611693980
+                                                        }
+                                        """)));
 
         try {
-            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
+            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(), true));
             kindeClientSession4.retrieveUserInfo();
             fail("Response should fail");
         } catch (Exception ex) {
@@ -370,7 +370,7 @@ public class KindeClientCodeSessionImplTest {
         KindeClientSession kindeClientSession = kindeClient.clientSession();
         KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
         assertNotNull(kindeTokens.getAccessToken());
-        assertTrue(kindeClientSession.authorizationUrl()!=null);
+        assertTrue(kindeClientSession.authorizationUrl() != null);
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
@@ -384,8 +384,8 @@ public class KindeClientCodeSessionImplTest {
         KindeClientSession kindeClientSession2 = kindeClient2.clientSession();
         KindeTokens kindeTokens2 = kindeClientSession2.retrieveTokens();
         assertNotNull(kindeTokens2.getAccessToken());
-        assertTrue(kindeClientSession2.authorizationUrl()!=null);
-        assertTrue(kindeClientSession2.logout()!=null);
+        assertTrue(kindeClientSession2.authorizationUrl() != null);
+        assertTrue(kindeClientSession2.logout() != null);
 
         assertNotNull(kindeClient);
         assertNotNull(kindeClientSession);
@@ -423,10 +423,10 @@ public class KindeClientCodeSessionImplTest {
                 .clientSecret("test")
                 .redirectUri("http://localhost:8080/")
                 .build();
-        KindeClientSession kindeClientSession =  kindeClient.initClientSession(RefreshToken.init(JwtGenerator.refreshToken(),true));
+        KindeClientSession kindeClientSession = kindeClient.initClientSession(RefreshToken.init(JwtGenerator.refreshToken(), true));
         KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
         assertNotNull(kindeTokens.getAccessToken());
-        assertTrue(kindeClientSession.authorizationUrl()!=null);
+        assertTrue(kindeClientSession.authorizationUrl() != null);
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
@@ -436,10 +436,10 @@ public class KindeClientCodeSessionImplTest {
                 .addScope("openid")
                 .addAudience("http://localhost:8089/api")
                 .build();
-        KindeClientSession kindeClientSession2 =  kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
+        KindeClientSession kindeClientSession2 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(), true));
         KindeTokens kindeTokens2 = kindeClientSession2.retrieveTokens();
         assertNotNull(kindeTokens2.getAccessToken());
-        assertTrue(kindeClientSession2.authorizationUrl()!=null);
+        assertTrue(kindeClientSession2.authorizationUrl() != null);
         assertNotNull(kindeClient);
         assertNotNull(kindeClientSession);
         assertNotNull(kindeClient2);
@@ -477,7 +477,7 @@ public class KindeClientCodeSessionImplTest {
                                         "}")));
 
         try {
-            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
+            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(), true));
             KindeTokens kindeTokens4 = kindeClientSession4.retrieveTokens();
             fail("Response should fail");
         } catch (Exception ex) {
@@ -489,21 +489,21 @@ public class KindeClientCodeSessionImplTest {
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("""
-                                  {
-                                  "sub": "1234567890",
-                                  "name": "John Doe",
-                                  "given_name": "John",
-                                  "family_name": "Doe",
-                                  "email": "johndoe@example.com",
-                                  "email_verified": true,
-                                  "picture": "https://example.com/johndoe.jpg",
-                                  "locale": "en-US",
-                                  "updated_at": 1611693980
-                                }
-                """)));
+                                                          {
+                                                          "sub": "1234567890",
+                                                          "name": "John Doe",
+                                                          "given_name": "John",
+                                                          "family_name": "Doe",
+                                                          "email": "johndoe@example.com",
+                                                          "email_verified": true,
+                                                          "picture": "https://example.com/johndoe.jpg",
+                                                          "locale": "en-US",
+                                                          "updated_at": 1611693980
+                                                        }
+                                        """)));
 
         try {
-            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(),true));
+            KindeClientSession kindeClientSession4 = kindeClient2.initClientSession(AccessToken.init(JwtGenerator.refreshToken(), true));
             kindeClientSession4.retrieveUserInfo();
             fail("Response should fail");
         } catch (Exception ex) {
