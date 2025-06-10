@@ -18,7 +18,8 @@ import java.net.URL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class KindeClientSessionImplGeneratePortalUrlTest {
+class KindeClientSessionImplTest {
+
     @Test
     @DisplayName("generatePortalUrl returns AuthorizationUrl for valid input")
     void generatePortalUrlReturnsAuthorizationUrlForValidInput() throws Exception {
