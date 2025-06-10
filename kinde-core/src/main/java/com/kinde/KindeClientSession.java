@@ -1,13 +1,9 @@
 package com.kinde;
 
-
 import com.kinde.authorization.AuthorizationUrl;
-import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
 
-import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
 public interface KindeClientSession {

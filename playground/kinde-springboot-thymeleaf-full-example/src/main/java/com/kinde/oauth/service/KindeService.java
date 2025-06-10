@@ -3,6 +3,7 @@ package com.kinde.oauth.service;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientBuilder;
 import com.kinde.KindeTokenFactory;
+import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.oauth.model.KindeProfile;
 import com.kinde.token.KindeToken;
 import jakarta.servlet.http.HttpSession;
@@ -144,18 +145,16 @@ public class KindeService {
         log.info("Kinde access token user: {}", kindeClient.clientSession().retrieveTokens().getAccessToken().token());
         log.info("Kinde auth url: {}", kindeClient.clientSession().authorizationUrl().getUrl());
         log.info("Kinde scopes: {}", kindeClient.kindeConfig().scopes());
-        log.info("Kinde access token: {}", kindeClient.tokenFactory().parse(((KindeProfile) session.getAttribute("kindeProfile")).getAccessToken()));
+        log.info("Kinde access token: {}", kindeClient.tokenFactory().parse(((KindeProfile) session.getAttribute("kindeProfile")).getAccessToken()).token());
         KindeProfile profile = (KindeProfile) session.getAttribute("kindeProfile");
         if (profile != null && profile.getRefreshToken() != null) {
-            log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(profile.getRefreshToken()));
+            log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(profile.getRefreshToken()).token());
         } else {
             log.info("Kinde refresh token: not available");
         }
 
-        // TODO
-        // kindeClient.clientSession().generatePortalUrl()
-
-        return "redirect:/dashboard";
+        AuthorizationUrl authorizationUrl = kindeClient.clientSession().generatePortalUrl("https://koman.kinde.com", "http://localhost:8081/dashboard", "profile");
+         return "redirect:" + authorizationUrl.getUrl().toString();
     }
 
     public String logout() {

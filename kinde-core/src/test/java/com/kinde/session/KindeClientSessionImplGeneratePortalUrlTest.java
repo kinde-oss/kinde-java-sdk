@@ -2,6 +2,7 @@ package com.kinde.session;
 
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.config.KindeConfig;
+import com.kinde.exceptions.KindeClientSessionException;
 import com.kinde.token.AccessToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.client.OidcMetaData;
@@ -72,7 +73,7 @@ class KindeClientSessionImplGeneratePortalUrlTest {
         when(conn.getResponseCode()).thenReturn(500);
         when(conn.getResponseMessage()).thenReturn("Internal Server Error");
         Mockito.doReturn(conn).when(kindeClient).openConnection(any(URL.class));
-        Exception ex = assertThrows(RuntimeException.class, () ->
+        KindeClientSessionException ex = assertThrows(KindeClientSessionException.class, () ->
                 kindeClient.generatePortalUrl("https://example.kinde.com", "https://myapp.com/return", "profile")
         );
         assertTrue(ex.getMessage().contains("Failed to fetch profile URL"));
@@ -91,10 +92,10 @@ class KindeClientSessionImplGeneratePortalUrlTest {
         when(conn.getResponseCode()).thenReturn(200);
         when(conn.getInputStream()).thenReturn(new ByteArrayInputStream("{}".getBytes()));
         Mockito.doReturn(conn).when(kindeClient).openConnection(any(URL.class));
-        Exception ex = assertThrows(RuntimeException.class, () ->
+        KindeClientSessionException ex = assertThrows(KindeClientSessionException.class, () ->
                 kindeClient.generatePortalUrl("https://example.kinde.com", "https://myapp.com/return", "profile")
         );
-        assertTrue(ex.getMessage().contains("Invalid URL received from API"));
+        assertTrue(ex.getMessage().contains("Failed to extract portal URL from response"));
     }
 
     @Test
