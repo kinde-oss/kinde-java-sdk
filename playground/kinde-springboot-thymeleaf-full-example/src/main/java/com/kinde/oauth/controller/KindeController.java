@@ -94,8 +94,13 @@ public class KindeController {
         return "write";
     }
 
-    @GetMapping("/callSdkApi")
-    public String callSdkApi(HttpSession session, Model model) {
-        return kindeService.callSdkApi(session, model);
+    /**
+     * Handles requests to the account portal.
+     *
+     * @return the redirect url to the Kinde account portal.
+     */
+    @GetMapping("/generatePortalUrl")
+    public String generatePortalUrl(HttpSession session, Model model) {
+        return kindeService.generatePortalUrl(session, model);
     }
 }

@@ -58,7 +58,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
         ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 
         URI tokenEndpoint = this.oidcMetaData.getOpMetadata().getTokenEndpointURI();
-        TokenRequest request = null;
+        TokenRequest request;
         if (this.kindeConfig.audience() != null && !this.kindeConfig.audience().isEmpty()) {
             HashMap<String, List<String>> customParameters = new HashMap<>();
             customParameters.put("audience", this.kindeConfig.audience());
@@ -70,7 +70,6 @@ public class KindeClientSessionImpl implements KindeClientSession {
         HTTPRequest httpRequest = request.toHTTPRequest();
         httpRequest.setHeader("Kinde-SDK", "Java/2.0.1");
 
-        // make request
         HTTPResponse httpResponse = httpRequest.send();
         TokenResponse response = TokenResponse.parse(httpResponse);
 
@@ -81,7 +80,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
         return new KindeTokens(null, null,
-                (AccessToken) AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true),
+                AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true),
                 null);
 
     }
