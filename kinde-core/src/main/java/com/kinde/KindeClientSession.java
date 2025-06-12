@@ -2,11 +2,9 @@ package com.kinde;
 
 
 import com.kinde.authorization.AuthorizationUrl;
-import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
 
-import java.util.List;
 import java.util.Map;
 
 public interface KindeClientSession {
@@ -19,9 +17,9 @@ public interface KindeClientSession {
 
     AuthorizationUrl login();
 
-    AuthorizationUrl createOrg(String orgName);
+    AuthorizationUrl createOrg(String orgName, String pricingTableKey);
 
-    AuthorizationUrl register();
+    AuthorizationUrl register(String parameter);
 
     AuthorizationUrl logout() throws Exception;
 

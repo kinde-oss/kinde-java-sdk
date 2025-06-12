@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
 
 import static com.kinde.constants.KindeConstants.*;
 import static com.kinde.constants.KindeJ2eeConstants.*;
@@ -45,12 +44,12 @@ public class KindeAuthenticationServlet extends HttpServlet {
             if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
                 authorizationUrl = kindeClientSession.login();
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register();
+                authorizationUrl = kindeClientSession.register(req.getParameter(PRICING_TABLE_KEY));
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
                 if (req.getParameter(ORG_NAME) == null) {
                     throw new ServletException("Must proved org_name query parameter to create an organisation.");
                 }
-                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
+                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME), req.getParameter(PRICING_TABLE_KEY));
             }
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             req.getSession().setAttribute(POST_LOGIN_URL,postLoginUrl);
