@@ -8,6 +8,7 @@ import com.kinde.oauth.model.KindeProfile;
 import com.kinde.token.KindeToken;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -34,6 +35,11 @@ public class KindeService {
 
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final WebClient userProfileClient;
+
+    @Value("${KINDE_DOMAIN}")
+    private String kindeDomain;
+    @Value("${app.base.url}")
+    private String appBaseUrl;
 
     /**
      * Constructor to initialize the KindeService.
@@ -140,13 +146,17 @@ public class KindeService {
         return true;
     }
 
-    public String generatePortalUrl(HttpSession session, Model model) {
+    public String generatePortalUrl(HttpSession session) {
         KindeClient kindeClient = KindeClientBuilder.builder().build();
         KindeProfile profile = (KindeProfile) session.getAttribute("kindeProfile");
+        if (profile == null || profile.getRefreshToken() == null || profile.getRefreshToken().isBlank()) {
+            log.warn("Missing profile or refresh token in session");
+            return "redirect:/dashboard";
+        }
 
         KindeToken kindeToken = kindeClient.tokenFactory().parse(profile.getRefreshToken());
-        AuthorizationUrl authorizationUrl = kindeClient.initClientSession(kindeToken).generatePortalUrl("https://koman.kinde.com", "http://localhost:8081/dashboard", "profile");
-         return "redirect:" + authorizationUrl.getUrl().toString();
+        AuthorizationUrl authorizationUrl = kindeClient.initClientSession(kindeToken).generatePortalUrl(kindeDomain, appBaseUrl + "/dashboard", "profile");
+        return "redirect:" + authorizationUrl.getUrl().toString();
     }
 
     public String logout() {

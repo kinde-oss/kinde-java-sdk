@@ -100,7 +100,7 @@ public class KindeController {
      * @return the redirect url to the Kinde account portal.
      */
     @GetMapping("/generatePortalUrl")
-    public String generatePortalUrl(HttpSession session, Model model) {
-        return kindeService.generatePortalUrl(session, model);
+    public String generatePortalUrl(HttpSession session) {
+        return kindeService.generatePortalUrl(session);
     }
 }
