@@ -210,6 +210,24 @@ public class KindeClientCodeSessionImplTest {
     }
 
     @Test
+    public void testRegisterUrlRequestPricingTableKeyEmptyTestTest() {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.register("");
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        System.out.println(authorizationUrl1.getUrl());
+        assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
+        assertFalse(authorizationUrl1.getUrl().toString().contains("pricing_table_key"));
+        assertNull(authorizationUrl1.getCodeVerifier());
+    }
+
+    @Test
     public void testLogoutUrlRequestTest() throws Exception {
         KindeClient kindeClient = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
@@ -265,6 +283,25 @@ public class KindeClientCodeSessionImplTest {
         assertTrue(authorizationUrl2.getUrl().toString().contains("has_success_page=true"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("pricing_table_key=KEY1"));
         assertNotNull(authorizationUrl2.getCodeVerifier());
+    }
+
+    @Test
+    public void testOrgCreateUrlRequestPricingTableKeyEmptyTest() {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.createOrg("TEST1", "");
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        System.out.println(authorizationUrl1.getUrl());
+        assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
+        assertTrue(authorizationUrl1.getUrl().toString().contains("org_name=TEST1"));
+        assertFalse(authorizationUrl1.getUrl().toString().contains("pricing_table_key"));
+        assertNull(authorizationUrl1.getCodeVerifier());
     }
 
     @Test
