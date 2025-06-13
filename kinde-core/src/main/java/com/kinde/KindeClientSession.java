@@ -19,7 +19,7 @@ public interface KindeClientSession {
 
     AuthorizationUrl createOrg(String orgName, String pricingTableKey);
 
-    AuthorizationUrl register(String parameter);
+    AuthorizationUrl register(String pricingTableKey);
 
     AuthorizationUrl logout() throws Exception;
 

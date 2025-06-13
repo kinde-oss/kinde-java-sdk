@@ -43,13 +43,16 @@ public class KindeAuthenticationServlet extends HttpServlet {
             AuthorizationUrl authorizationUrl = null;
             if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
                 authorizationUrl = kindeClientSession.login();
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register(req.getParameter(PRICING_TABLE_KEY));
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
-                if (req.getParameter(ORG_NAME) == null) {
-                    throw new ServletException("Must proved org_name query parameter to create an organisation.");
+            } else {
+                String pricingTableKey = req.getParameter(PRICING_TABLE_KEY);
+                if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
+                    authorizationUrl = kindeClientSession.register(pricingTableKey);
+                } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
+                    if (req.getParameter(ORG_NAME) == null) {
+                        throw new ServletException("Must provide org_name query parameter to create an organisation.");
+                    }
+                    authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME), pricingTableKey);
                 }
-                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME), req.getParameter(PRICING_TABLE_KEY));
             }
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             req.getSession().setAttribute(POST_LOGIN_URL,postLoginUrl);

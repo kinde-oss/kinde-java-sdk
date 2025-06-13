@@ -26,6 +26,9 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
+import static com.kinde.constants.KindeConstants.ORG_NAME;
+import static com.kinde.constants.KindeConstants.PRICING_TABLE_KEY;
+
 public class KindeClientSessionImpl implements KindeClientSession {
 
     protected KindeConfig kindeConfig;
@@ -144,9 +147,9 @@ public class KindeClientSessionImpl implements KindeClientSession {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt",Prompt.Type.CREATE.toString());
         parameters.put("is_create_org",Boolean.TRUE.toString());
-        parameters.put("org_name",orgName);
+        parameters.put(ORG_NAME,orgName);
         if (pricingTableKey != null && !pricingTableKey.isEmpty()) {
-            parameters.put("pricing_table_key", pricingTableKey);
+            parameters.put(PRICING_TABLE_KEY, pricingTableKey);
         }
         return authorizationUrlWithParameters(parameters);
     }
@@ -156,7 +159,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt",Prompt.Type.CREATE.toString());
         if (pricingTableKey != null && !pricingTableKey.isEmpty()) {
-            parameters.put("pricing_table_key", pricingTableKey);
+            parameters.put(PRICING_TABLE_KEY, pricingTableKey);
         }
         return authorizationUrlWithParameters(parameters);
     }
