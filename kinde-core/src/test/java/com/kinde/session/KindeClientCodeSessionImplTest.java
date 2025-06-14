@@ -184,6 +184,7 @@ public class KindeClientCodeSessionImplTest {
         System.out.println(authorizationUrl1.getUrl());
         assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl1.getUrl().toString().contains("pricing_table_key=test1"));
+        assertTrue(authorizationUrl1.getUrl().toString().contains("plan_interest=plan1"));
         assertNull(authorizationUrl1.getCodeVerifier());
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
@@ -206,11 +207,12 @@ public class KindeClientCodeSessionImplTest {
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_code=TEST"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("has_success_page=true"));
         assertTrue(authorizationUrl1.getUrl().toString().contains("pricing_table_key=test1"));
+        assertTrue(authorizationUrl1.getUrl().toString().contains("plan_interest=plan1"));
         assertNotNull(authorizationUrl2.getCodeVerifier());
     }
 
     @Test
-    public void testRegisterUrlRequestPricingTableKeyEmptyTestTest() {
+    public void testRegisterUrlRequestPricingTableKeyEmptyAndPlanInterestTest() {
         KindeClient kindeClient = KindeClientBuilder.builder()
                 .domain("http://localhost:8089")
                 .clientId("test")
@@ -224,6 +226,26 @@ public class KindeClientCodeSessionImplTest {
         System.out.println(authorizationUrl1.getUrl());
         assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
         assertFalse(authorizationUrl1.getUrl().toString().contains("pricing_table_key"));
+        assertTrue(authorizationUrl1.getUrl().toString().contains("plan_interest=plan1"));
+        assertNull(authorizationUrl1.getCodeVerifier());
+    }
+
+    @Test
+    public void testRegisterUrlRequestPricingTableKeyAndPlanInterestNullTest() {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.register("", "plan1");
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        System.out.println(authorizationUrl1.getUrl());
+        assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
+        assertFalse(authorizationUrl1.getUrl().toString().contains("pricing_table_key"));
+        assertTrue(authorizationUrl1.getUrl().toString().contains("plan_interest=plan1"));
         assertNull(authorizationUrl1.getCodeVerifier());
     }
 
