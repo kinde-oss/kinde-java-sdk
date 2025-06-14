@@ -41,13 +41,18 @@ public abstract class KindeAuthenticationFilter implements Filter {
                     .clientSession();
             if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
                 authorizationUrl = kindeClientSession.login();
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register();
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
-                if (req.getParameter(ORG_NAME) == null) {
-                    throw new ServletException("Must proved org_name query parameter to create an organisation.");
+            } else {
+                String pricingTableKey = req.getParameter(PRICING_TABLE_KEY);
+                String planInterest = req.getParameter(PLAN_INTEREST);
+                if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
+                    authorizationUrl = kindeClientSession.register(pricingTableKey, planInterest);
+                } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
+                    String orgName = req.getParameter(ORG_NAME);
+                    if (orgName == null) {
+                        throw new ServletException("Must provide org_name query parameter to create an organisation.");
+                    }
+                    authorizationUrl = kindeClientSession.createOrg(orgName, pricingTableKey, planInterest);
                 }
-                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
             }
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());

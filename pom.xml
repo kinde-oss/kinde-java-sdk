@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.kinde</groupId>
-    <artifactId>kinde-parent-pom</artifactId>
+    <artifactId>kinde-java-sdk</artifactId>
     <version>2.0.1</version>
     <name>parent-project</name>
     <description>Kinde Java SDK</description>
@@ -181,8 +181,8 @@
         <module>playground/kinde-management-example</module>
         <module>playground/kinde-j2ee-app</module>
         <module>playground/kinde-springboot-starter-example</module>
-        <module>playground/springboot-pkce-client-example</module>
-        <module>playground/springboot-thymeleaf-full-example</module>
+        <module>playground/kinde-springboot-pkce-client-example</module>
+        <module>playground/kinde-springboot-thymeleaf-full-example</module>
         <module>kinde-report-aggregate</module>
     </modules>
 

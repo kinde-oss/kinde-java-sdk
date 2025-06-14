@@ -4,12 +4,9 @@ import com.google.inject.Inject;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
-import com.kinde.client.KindeClientImpl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
-import com.kinde.guice.KindeAnnotations;
 import com.kinde.token.AccessToken;
-import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.*;
@@ -20,7 +17,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.Prompt;
@@ -29,6 +25,8 @@ import lombok.SneakyThrows;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+
+import static com.kinde.constants.KindeConstants.*;
 
 public class KindeClientSessionImpl implements KindeClientSession {
 
@@ -144,18 +142,30 @@ public class KindeClientSessionImpl implements KindeClientSession {
     }
 
     @Override
-    public AuthorizationUrl createOrg(String orgName) {
+    public AuthorizationUrl createOrg(String orgName, String pricingTableKey, String planInterest) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt",Prompt.Type.CREATE.toString());
         parameters.put("is_create_org",Boolean.TRUE.toString());
-        parameters.put("org_name",orgName);
+        parameters.put(ORG_NAME,orgName);
+        if (pricingTableKey != null && !pricingTableKey.isEmpty()) {
+            parameters.put(PRICING_TABLE_KEY, pricingTableKey);
+        }
+        if (planInterest != null && !planInterest.isEmpty()) {
+            parameters.put(PLAN_INTEREST, planInterest);
+        }
         return authorizationUrlWithParameters(parameters);
     }
 
     @Override
-    public AuthorizationUrl register() {
+    public AuthorizationUrl register(String pricingTableKey, String plan_interest) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt",Prompt.Type.CREATE.toString());
+        if (pricingTableKey != null && !pricingTableKey.isEmpty()) {
+            parameters.put(PRICING_TABLE_KEY, pricingTableKey);
+        }
+        if (plan_interest != null && !plan_interest.isEmpty()) {
+            parameters.put(PLAN_INTEREST, plan_interest);
+        }
         return authorizationUrlWithParameters(parameters);
     }
 

@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
 
 import static com.kinde.constants.KindeConstants.*;
 import static com.kinde.constants.KindeJ2eeConstants.*;
@@ -44,13 +43,17 @@ public class KindeAuthenticationServlet extends HttpServlet {
             AuthorizationUrl authorizationUrl = null;
             if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
                 authorizationUrl = kindeClientSession.login();
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register();
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
-                if (req.getParameter(ORG_NAME) == null) {
-                    throw new ServletException("Must proved org_name query parameter to create an organisation.");
+            } else {
+                String pricingTableKey = req.getParameter(PRICING_TABLE_KEY);
+                String planInterest = req.getParameter(PLAN_INTEREST);
+                if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
+                    authorizationUrl = kindeClientSession.register(pricingTableKey, planInterest);
+                } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
+                    if (req.getParameter(ORG_NAME) == null) {
+                        throw new ServletException("Must provide org_name query parameter to create an organisation.");
+                    }
+                    authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME), pricingTableKey, planInterest);
                 }
-                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
             }
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             req.getSession().setAttribute(POST_LOGIN_URL,postLoginUrl);

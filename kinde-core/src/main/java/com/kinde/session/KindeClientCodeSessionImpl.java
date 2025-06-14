@@ -27,8 +27,8 @@ import java.util.List;
 
 public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
 
-    private String code;
-    private AuthorizationUrl authorizationUrl;
+    private final String code;
+    private final AuthorizationUrl authorizationUrl;
     private AccessToken accessToken;
 
     @Inject
