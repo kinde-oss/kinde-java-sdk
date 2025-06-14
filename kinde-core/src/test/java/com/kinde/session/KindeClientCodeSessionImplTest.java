@@ -259,6 +259,7 @@ public class KindeClientCodeSessionImplTest {
         assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl1.getUrl().toString().contains("org_name=TEST1"));
         assertTrue(authorizationUrl1.getUrl().toString().contains("pricing_table_key=KEY1"));
+        assertTrue(authorizationUrl1.getUrl().toString().contains("plan_interest=PLAN1"));
         assertNull(authorizationUrl1.getCodeVerifier());
 
         KindeClient kindeClient2 = KindeClientBuilder.builder()
@@ -282,6 +283,7 @@ public class KindeClientCodeSessionImplTest {
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_name=TEST2"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("has_success_page=true"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("pricing_table_key=KEY1"));
+        assertTrue(authorizationUrl2.getUrl().toString().contains("plan_interest=PLAN1"));
         assertNotNull(authorizationUrl2.getCodeVerifier());
     }
 
@@ -301,6 +303,27 @@ public class KindeClientCodeSessionImplTest {
         assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl1.getUrl().toString().contains("org_name=TEST1"));
         assertFalse(authorizationUrl1.getUrl().toString().contains("pricing_table_key"));
+        assertFalse(authorizationUrl1.getUrl().toString().contains("plan_interest"));
+        assertNull(authorizationUrl1.getCodeVerifier());
+    }
+
+    @Test
+    public void testOrgCreateUrlRequestPricingTableKeyAndPlanInterestsNullTest() {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.createOrg("TEST1", null, null);
+        assertNotNull(authorizationUrl1);
+        assertNotNull(authorizationUrl1.getUrl());
+        System.out.println(authorizationUrl1.getUrl());
+        assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
+        assertTrue(authorizationUrl1.getUrl().toString().contains("org_name=TEST1"));
+        assertFalse(authorizationUrl1.getUrl().toString().contains("pricing_table_key"));
+        assertFalse(authorizationUrl1.getUrl().toString().contains("plan_interest"));
         assertNull(authorizationUrl1.getCodeVerifier());
     }
 
