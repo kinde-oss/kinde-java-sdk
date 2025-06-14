@@ -9,4 +9,5 @@ public class KindeConstants {
     public final static String ORG_NAME = "org_name";
     public final static String SCOPE = "openid,email,profile";
     public final static String PRICING_TABLE_KEY = "pricing_table_key";
+    public final static String PLAN_INTEREST = "plan_interest";
 }

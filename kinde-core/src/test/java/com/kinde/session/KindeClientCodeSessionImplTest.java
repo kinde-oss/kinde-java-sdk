@@ -178,7 +178,7 @@ public class KindeClientCodeSessionImplTest {
                 .redirectUri("http://localhost:8080/")
                 .build();
         KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
-        AuthorizationUrl authorizationUrl1 = kindeClientSession.register("test1");
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.register("test1", "plan1");
         assertNotNull(authorizationUrl1);
         assertNotNull(authorizationUrl1.getUrl());
         System.out.println(authorizationUrl1.getUrl());
@@ -198,7 +198,7 @@ public class KindeClientCodeSessionImplTest {
                 .hasSuccessPage(Boolean.TRUE)
                 .build();
         KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
-        AuthorizationUrl authorizationUrl2 = kindeClientSession2.register("test1");
+        AuthorizationUrl authorizationUrl2 = kindeClientSession2.register("test1", "plan1");
         assertNotNull(authorizationUrl2);
         assertNotNull(authorizationUrl2.getUrl());
         System.out.println(authorizationUrl2.getUrl());
@@ -218,7 +218,7 @@ public class KindeClientCodeSessionImplTest {
                 .redirectUri("http://localhost:8080/")
                 .build();
         KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
-        AuthorizationUrl authorizationUrl1 = kindeClientSession.register("");
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.register("", "plan1");
         assertNotNull(authorizationUrl1);
         assertNotNull(authorizationUrl1.getUrl());
         System.out.println(authorizationUrl1.getUrl());
@@ -252,7 +252,7 @@ public class KindeClientCodeSessionImplTest {
                 .redirectUri("http://localhost:8080/")
                 .build();
         KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
-        AuthorizationUrl authorizationUrl1 = kindeClientSession.createOrg("TEST1", "KEY1");
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.createOrg("TEST1", "KEY1", "PLAN1");
         assertNotNull(authorizationUrl1);
         assertNotNull(authorizationUrl1.getUrl());
         System.out.println(authorizationUrl1.getUrl());
@@ -273,7 +273,7 @@ public class KindeClientCodeSessionImplTest {
                 .hasSuccessPage(Boolean.TRUE)
                 .build();
         KindeClientSession kindeClientSession2 = kindeClient2.initClientSession("test", null);
-        AuthorizationUrl authorizationUrl2 = kindeClientSession2.createOrg("TEST2", "KEY1");
+        AuthorizationUrl authorizationUrl2 = kindeClientSession2.createOrg("TEST2", "KEY1", "PLAN1");
         assertNotNull(authorizationUrl2);
         assertNotNull(authorizationUrl2.getUrl());
         System.out.println(authorizationUrl2.getUrl());
@@ -294,7 +294,7 @@ public class KindeClientCodeSessionImplTest {
                 .redirectUri("http://localhost:8080/")
                 .build();
         KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
-        AuthorizationUrl authorizationUrl1 = kindeClientSession.createOrg("TEST1", "");
+        AuthorizationUrl authorizationUrl1 = kindeClientSession.createOrg("TEST1", "", "");
         assertNotNull(authorizationUrl1);
         assertNotNull(authorizationUrl1.getUrl());
         System.out.println(authorizationUrl1.getUrl());

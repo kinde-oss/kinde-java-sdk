@@ -17,9 +17,9 @@ public interface KindeClientSession {
 
     AuthorizationUrl login();
 
-    AuthorizationUrl createOrg(String orgName, String pricingTableKey);
+    AuthorizationUrl createOrg(String orgName, String pricingTableKey, String planInterest);
 
-    AuthorizationUrl register(String pricingTableKey);
+    AuthorizationUrl register(String pricingTableKey, String plan_interest);
 
     AuthorizationUrl logout() throws Exception;
 

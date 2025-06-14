@@ -26,8 +26,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
-import static com.kinde.constants.KindeConstants.ORG_NAME;
-import static com.kinde.constants.KindeConstants.PRICING_TABLE_KEY;
+import static com.kinde.constants.KindeConstants.*;
 
 public class KindeClientSessionImpl implements KindeClientSession {
 
@@ -143,7 +142,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
     }
 
     @Override
-    public AuthorizationUrl createOrg(String orgName, String pricingTableKey) {
+    public AuthorizationUrl createOrg(String orgName, String pricingTableKey, String planInterest) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt",Prompt.Type.CREATE.toString());
         parameters.put("is_create_org",Boolean.TRUE.toString());
@@ -151,15 +150,21 @@ public class KindeClientSessionImpl implements KindeClientSession {
         if (pricingTableKey != null && !pricingTableKey.isEmpty()) {
             parameters.put(PRICING_TABLE_KEY, pricingTableKey);
         }
+        if (planInterest != null && !planInterest.isEmpty()) {
+            parameters.put(PLAN_INTEREST, planInterest);
+        }
         return authorizationUrlWithParameters(parameters);
     }
 
     @Override
-    public AuthorizationUrl register(String pricingTableKey) {
+    public AuthorizationUrl register(String pricingTableKey, String plan_interest) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt",Prompt.Type.CREATE.toString());
         if (pricingTableKey != null && !pricingTableKey.isEmpty()) {
             parameters.put(PRICING_TABLE_KEY, pricingTableKey);
+        }
+        if (plan_interest != null && !plan_interest.isEmpty()) {
+            parameters.put(PLAN_INTEREST, plan_interest);
         }
         return authorizationUrlWithParameters(parameters);
     }
