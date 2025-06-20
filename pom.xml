@@ -51,6 +51,7 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/com.nimbusds/oauth2-oidc-sdk -->
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>oauth2-oidc-sdk</artifactId>
@@ -67,6 +68,7 @@
                 <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
+            <!-- JUnit 5 API and Engine -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
@@ -79,21 +81,28 @@
                 <version>5.12.0</version>
                 <scope>test</scope>
             </dependency>
+
+            <!-- Optional: For parameterized tests -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
                 <version>5.12.0</version>
                 <scope>test</scope>
             </dependency>
+
+            <!-- Mockito (if you are using it for mocking) -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>5.17.0</version>
                 <scope>test</scope>
             </dependency>
+
+
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
+                <!-- {version} can be 6.0.0, 7.0.0, etc. -->
                 <version>7.0.0</version>
                 <exclusions>
                     <exclusion>
@@ -102,17 +111,22 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>33.4.8-jre</version>
             </dependency>
+
+
+            <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.36</version>
                 <scope>provided</scope>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -184,6 +198,7 @@
     </distributionManagement>
 
     <build>
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -212,7 +227,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.36</version>
+                            <version>1.18.36</version> <!-- Use the version you need -->
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -242,6 +257,7 @@
                 </executions>
             </plugin>
 
+            <!-- We must generate a -sources JAR file to publish on Maven Central -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -298,9 +314,13 @@
                         <exclude>**/generated/**</exclude>
                         <exclude>**/thirdparty/**</exclude>
                         <exclude>**/openapitools/**</exclude>
+                        <!-- Add more excludes if necessary -->
                     </excludes>
                 </configuration>
             </plugin>
         </plugins>
+
+
     </build>
+
 </project>
