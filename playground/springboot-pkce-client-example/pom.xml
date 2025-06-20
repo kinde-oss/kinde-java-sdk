@@ -15,12 +15,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
-            <version>3.4.4</version>
+            <version>3.4.7</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
-            <version>3.4.4</version>
+            <version>3.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
