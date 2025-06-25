@@ -9,11 +9,7 @@ import com.kinde.token.IDToken;
 import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
-import com.nimbusds.oauth2.sdk.AccessTokenResponse;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
-import com.nimbusds.oauth2.sdk.TokenRequest;
-import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -24,14 +20,11 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
-import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import lombok.SneakyThrows;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationUrl;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
 
 public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
@@ -42,14 +35,13 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
             KindeConfig kindeConfig,
             OidcMetaData oidcMetaData,
             @KindeAnnotations.KindeToken KindeToken kindeToken) {
-        super(kindeConfig,oidcMetaData);
+        super(kindeConfig, oidcMetaData);
         this.kindeToken = kindeToken;
     }
 
     @Override
     @SneakyThrows
     public KindeTokens retrieveTokens() {
-        // Construct the grant from the saved refresh token
         RefreshToken refreshToken = new RefreshToken(kindeToken.token());
         AuthorizationGrant refreshTokenGrant = new RefreshTokenGrant(refreshToken);
 
@@ -61,18 +53,17 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
         TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, refreshTokenGrant);
         HTTPRequest httpRequest = request.toHTTPRequest();
-        httpRequest.setHeader("Kinde-SDK","Java/2.0.1");
+        httpRequest.setHeader("Kinde-SDK", "Java/2.0.1");
 
         TokenResponse response = TokenResponse.parse(httpRequest.send());
 
-        if (! response.indicatesSuccess()) {
-            // We got an error response...
+        if (!response.indicatesSuccess()) {
             throw new Exception(response.toErrorResponse().toString());
         }
 
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
-        String idTokenStr = (String)successResponse.getCustomParameters().get("id_token");
+        String idTokenStr = (String) successResponse.getCustomParameters().get("id_token");
 
         IDToken idToken = null;
         if (idTokenStr != null) {
@@ -85,7 +76,7 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
             kindeRefreshToken = com.kinde.token.RefreshToken.init(successResponse.getTokens().getRefreshToken().getValue(), true);
         }
 
-        return new KindeTokens(this.kindeConfig.scopes(),idToken,accessToken,kindeRefreshToken);
+        return new KindeTokens(this.kindeConfig.scopes(), idToken, accessToken, kindeRefreshToken);
     }
 
 
@@ -95,8 +86,7 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
         if (!(this.kindeToken instanceof AccessToken)) {
             throw new IllegalArgumentException("Expected an access token to be present.");
         }
-        URI userInfoEndpoint;    // The UserInfoEndpoint of the OpenID provider
-        BearerAccessToken token = new BearerAccessToken(this.kindeToken.token()); // The access token
+        BearerAccessToken token = new BearerAccessToken(this.kindeToken.token());
 
         HTTPResponse httpResponse = new UserInfoRequest(this.oidcMetaData.getOpMetadata().getUserInfoEndpointURI(), token)
                 .toHTTPRequest()
@@ -104,8 +94,7 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
         UserInfoResponse userInfoResponse = UserInfoResponse.parse(httpResponse);
 
-        if (! userInfoResponse.indicatesSuccess()) {
-            // We got an error response...
+        if (!userInfoResponse.indicatesSuccess()) {
             throw new Exception(userInfoResponse.toErrorResponse().toString());
         }
 

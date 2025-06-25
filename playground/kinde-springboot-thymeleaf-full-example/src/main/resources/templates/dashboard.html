@@ -11,7 +11,7 @@
             <h1 class="text-display-4">KindeAuth with Spring Boot</h1>
             <div class="profile-blob">
                 <div>
-                    <p class="text-heading-2" th:text="${kindeUser.fullName}"></p>
+                    <p class="text-heading-2" th:text="${kindeProfile.fullName}"></p>
                     <a class="text-subtle" href="/logout">Sign out</a>
                 </div>
             </div>
@@ -33,12 +33,12 @@
                     <h2 class="text-display-4">ID Token:</h2>
                     <br/>
                     <p class="text-heading-2 token-text">
-                        <span th:text="${kindeUser.idToken.substring(0, 20)} + '...'"></span>
+                        <span th:text="'...' + ${kindeProfile.idToken.substring(kindeProfile.idToken.length() - 20)}"></span>
                         <a href="#" class="text-display-5" onclick="openTokenPopup('idTokenPopup')">[View]</a>
                     </p>
                     <br/>
                     <a class="btn btn-light btn-small"
-                       th:href="'https://jwt.io/#debugger-io?token=' + ${kindeUser.idToken}"
+                       th:href="'https://jwt.io/#debugger-io?token=' + ${kindeProfile.idToken}"
                        target="_blank">
                         Parse token on JWT.io
                     </a>
@@ -48,22 +48,36 @@
                     <h2 class="text-display-4">Access Token:</h2>
                     <br/>
                     <p class="text-heading-2 token-text">
-                        <span th:text="${kindeUser.accessToken.substring(0, 20)} + '...'"></span>
+                        <span th:text="'...' + ${kindeProfile.accessToken.substring(kindeProfile.accessToken.length() - 20)}"></span>
                         <a href="#" class="text-display-5" onclick="openTokenPopup('accessTokenPopup')">[View]</a>
                     </p>
                     <br/>
-                    <a class="btn btn-light btn-small"
-                       th:href="'https://jwt.io/#debugger-io?token=' + ${kindeUser.accessToken}"
-                       target="_blank">
-                        Parse token on JWT.io
-                    </a>
+                    <ul class="role-buttons">
+                        <li>
+                            <a class="btn btn-light btn-small fixed-size-button"
+                               th:href="'https://jwt.io/#debugger-io?token=' + ${kindeProfile.accessToken}"
+                               target="_blank">
+                                Parse token on JWT.io
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-light btn-small fixed-size-button" href="/sdkLogout">
+                                Logout using SDK
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-light btn-small fixed-size-button" href="/generatePortalUrl">
+                                Account Portal
+                            </a>
+                        </li>
+                    </ul>
                 </section>
 
                 <section class="next-steps-section">
                     <h2 class="text-display-4">Kinde User Profile:</h2>
                     <br/>
                     <p class="text-heading-2 token-text">
-                        <span th:text="${kindeUser.userProfile.substring(0, 20)} + '...'"></span>
+                        <span th:text="${kindeProfile.userProfile.substring(0, 20)} + '...'"></span>
                         <a href="#" class="text-display-5" data-popup="userprofile" onclick="openPopup(this)">[View]</a>
                     </p>
                     <br/>
@@ -73,15 +87,10 @@
                     <h2 class="text-display-4">Kinde User Roles:</h2>
                     <br/>
                     <ul class="role-buttons">
-                        <li th:each="role : ${kindeUser.roles}">
+                        <li th:each="role : ${kindeProfile.roles}">
                             <a class="btn btn-light btn-small fixed-size-button"
                                th:href="@{'/' + ${#strings.substringAfter(role, 'ROLE_')} }">
                                 <span th:text="'Do I have ' + ${#strings.substringAfter(role, 'ROLE_')} + ' access?'">Do I have access?</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-light btn-small fixed-size-button" href="/write">
-                                Do I have write access?
                             </a>
                         </li>
                     </ul>
@@ -92,7 +101,7 @@
             <div id="accessTokenPopup" class="popup">
                 <div class="popup-content">
                     <span class="close" onclick="closeTokenPopup('accessTokenPopup')">&times;</span>
-                    <p th:text="${kindeUser.accessToken}"></p>
+                    <p th:text="${kindeProfile.accessToken}"></p>
                 </div>
             </div>
 
@@ -100,12 +109,12 @@
             <div id="idTokenPopup" class="popup">
                 <div class="popup-content">
                     <span class="close" onclick="closeTokenPopup('idTokenPopup')">&times;</span>
-                    <p th:text="${kindeUser.idToken}"></p>
+                    <p th:text="${kindeProfile.idToken}"></p>
                 </div>
             </div>
 
             <!-- Script tag to store JSON -->
-            <script id="userProfileJson" type="application/json" th:text="${kindeUser.userProfile}"></script>
+            <script id="userProfileJson" type="application/json" th:text="${kindeProfile.userProfile}"></script>
 
             <!-- Popup container -->
             <div id="userProfilePopup" class="popup">
