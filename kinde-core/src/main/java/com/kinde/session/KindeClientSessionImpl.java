@@ -207,7 +207,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
         String urlString = sanitizedDomain + "/account_api/v1/portal_link?" + params;
         URL url = new URL(urlString);
 
-        log.info("Generating portal URL: {} with token: {}", url, accessToken);
+        log.info("Generating portal URL: {}", url);
 
         HttpURLConnection conn = openConnection(url);
         conn.setRequestMethod("GET");
