@@ -210,25 +210,29 @@ public class KindeClientSessionImpl implements KindeClientSession {
         log.info("Generating portal URL: {}", url);
 
         HttpURLConnection conn = openConnection(url);
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
-        conn.setRequestProperty("Accept", "application/json");
+        try {
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            conn.setRequestProperty("Accept", "application/json");
 
-        int responseCode = conn.getResponseCode();
-        if (responseCode != 200) {
-            log.error("Failed to fetch profile URL: {} {}", responseCode, conn.getResponseMessage());
-            throw new KindeClientSessionException("Failed to fetch profile URL: " + responseCode + " " + conn.getResponseMessage());
+            int responseCode = conn.getResponseCode();
+            if (responseCode != 200) {
+                log.error("Failed to fetch profile URL: {} {}", responseCode, conn.getResponseMessage());
+                throw new KindeClientSessionException("Failed to fetch profile URL: " + responseCode + " " + conn.getResponseMessage());
+            }
+
+            String responseBody;
+            try (InputStream is = conn.getInputStream();
+                 Scanner s = new Scanner(is).useDelimiter("\\A")) {
+                responseBody = s.hasNext() ? s.next() : "";
+            }
+
+            String portalUrl = getPortalUrl(responseBody)
+                    .orElseThrow(() -> new KindeClientSessionException("Failed to extract portal URL from response"));
+            return new AuthorizationUrl(new URL(portalUrl), null);
+        } finally {
+            conn.disconnect();
         }
-
-        String responseBody;
-        try (InputStream is = conn.getInputStream();
-             Scanner s = new Scanner(is).useDelimiter("\\A")) {
-            responseBody = s.hasNext() ? s.next() : "";
-        }
-
-        String portalUrl = getPortalUrl(responseBody)
-                .orElseThrow(() -> new KindeClientSessionException("Failed to extract portal URL from response"));
-        return new AuthorizationUrl(new URL(portalUrl), null);
     }
 
     private static Optional<String> getPortalUrl(String responseBody) {
