@@ -66,8 +66,8 @@
                             </a>
                         </li>
                         <li>
-                            <a class="btn btn-light btn-small fixed-size-button" href="/callSdkApi">
-                                SDK API (check logs)
+                            <a class="btn btn-light btn-small fixed-size-button" href="/generatePortalUrl">
+                                Account Portal
                             </a>
                         </li>
                     </ul>
@@ -91,11 +91,6 @@
                             <a class="btn btn-light btn-small fixed-size-button"
                                th:href="@{'/' + ${#strings.substringAfter(role, 'ROLE_')} }">
                                 <span th:text="'Do I have ' + ${#strings.substringAfter(role, 'ROLE_')} + ' access?'">Do I have access?</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-light btn-small fixed-size-button" href="/write">
-                                Do I have write access?
                             </a>
                         </li>
                     </ul>
