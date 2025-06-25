@@ -84,17 +84,23 @@ public class KindeController {
 
     /**
      * Handles requests to the write endpoint, restricted to users with the 'write' role.
+     * See SecurityConfig for 'write' role definition.
      *
      * @return the name of the "write" view.
      */
     @GetMapping("/write")
-    // @PreAuthorize("hasRole('write')")
+    // @PreAuthorize("hasRole('write')") // Uncomment this line to enable write role restriction
     public String writeEndpoint() {
         return "write";
     }
 
-    @GetMapping("/callSdkApi")
-    public String callSdkApi(HttpSession session, Model model) {
-        return kindeService.callSdkApi(session, model);
+    /**
+     * Handles requests to the account portal.
+     *
+     * @return the redirect url to the Kinde account portal.
+     */
+    @GetMapping("/generatePortalUrl")
+    public String generatePortalUrl(HttpSession session) {
+        return kindeService.generatePortalUrl(session);
     }
 }

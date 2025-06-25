@@ -1,12 +1,9 @@
 package com.kinde;
 
-
 import com.kinde.authorization.AuthorizationUrl;
-import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
 
-import java.util.List;
 import java.util.Map;
 
 public interface KindeClientSession {
@@ -24,6 +21,8 @@ public interface KindeClientSession {
     AuthorizationUrl register();
 
     AuthorizationUrl logout() throws Exception;
+
+    AuthorizationUrl generatePortalUrl(String domain, String returnUrl, String subNav);
 
     UserInfo retrieveUserInfo();
 }

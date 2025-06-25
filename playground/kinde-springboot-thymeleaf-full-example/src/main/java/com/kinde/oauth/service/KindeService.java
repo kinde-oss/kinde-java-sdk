@@ -3,11 +3,12 @@ package com.kinde.oauth.service;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientBuilder;
 import com.kinde.KindeTokenFactory;
+import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.oauth.model.KindeProfile;
 import com.kinde.token.KindeToken;
-import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -35,6 +35,11 @@ public class KindeService {
 
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final WebClient userProfileClient;
+
+    @Value("${KINDE_DOMAIN}")
+    private String kindeDomain;
+    @Value("${app.base.url}")
+    private String appBaseUrl;
 
     /**
      * Constructor to initialize the KindeService.
@@ -141,21 +146,17 @@ public class KindeService {
         return true;
     }
 
-    public String callSdkApi(HttpSession session, Model model) {
+    public String generatePortalUrl(HttpSession session) {
         KindeClient kindeClient = KindeClientBuilder.builder().build();
-        log.info("Kinde access token user: {}", kindeClient.clientSession().retrieveTokens().getAccessToken().token());
-        log.info("Kinde auth url: {}", kindeClient.clientSession().authorizationUrl().getUrl());
-        log.info("Kinde scopes: {}", kindeClient.kindeConfig().scopes());
-        log.info("Kinde access token: {}", kindeClient.tokenFactory().parse(((KindeProfile) session.getAttribute("kindeProfile")).getAccessToken()));
-        log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(((KindeProfile) session.getAttribute("kindeProfile")).getRefreshToken()));
         KindeProfile profile = (KindeProfile) session.getAttribute("kindeProfile");
-        if (profile != null && profile.getRefreshToken() != null) {
-            log.info("Kinde refresh token: {}", kindeClient.tokenFactory().parse(profile.getRefreshToken()));
-        } else {
-            log.info("Kinde refresh token: not available");
+        if (profile == null || profile.getRefreshToken() == null || profile.getRefreshToken().isBlank()) {
+            log.warn("Missing profile or refresh token in session");
+            return "redirect:/dashboard";
         }
 
-        return "redirect:/dashboard";
+        KindeToken kindeToken = kindeClient.tokenFactory().parse(profile.getRefreshToken());
+        AuthorizationUrl authorizationUrl = kindeClient.initClientSession(kindeToken).generatePortalUrl(kindeDomain, appBaseUrl + "/dashboard", "profile");
+        return "redirect:" + authorizationUrl.getUrl().toString();
     }
 
     public String logout() {
