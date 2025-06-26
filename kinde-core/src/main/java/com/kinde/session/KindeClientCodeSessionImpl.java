@@ -22,7 +22,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import lombok.SneakyThrows;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.net.URI;
 
 public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
