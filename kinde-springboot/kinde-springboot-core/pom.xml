@@ -4,12 +4,12 @@
   <parent>
     <groupId>com.kinde.spring</groupId>
     <artifactId>kinde-spring-parent-pom</artifactId>
-    <version>2.0.1</version>
+    <version>2.1.0</version>
   </parent>
   <groupId>com.kinde.spring</groupId>
   <artifactId>kinde-springboot-core</artifactId>
   <packaging>jar</packaging>
-  <version>2.0.1</version>
+  <version>2.1.0</version>
   <name>kinde-springboot-core</name>
   <url>http://maven.apache.org</url>
   <dependencies>
@@ -23,7 +23,7 @@
     <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-core</artifactId>
-      <version>2.0.1</version>
+      <version>2.1.0</version>
     </dependency>
 
     <dependency>
@@ -224,10 +224,6 @@
           <source>17</source> <!-- Specify your desired Java version -->
           <target>17</target> <!-- Specify your desired Java version -->
         </configuration>
-      </plugin>
-      <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
