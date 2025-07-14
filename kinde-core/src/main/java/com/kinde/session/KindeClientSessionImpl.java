@@ -173,6 +173,11 @@ public class KindeClientSessionImpl implements KindeClientSession {
     public UserInfo retrieveUserInfo() {
         throw new RuntimeException("Not Implemented");
     }
+    
+    @Override
+    public boolean isAuthenticated() throws Exception {
+        return false;
+    }
 
     /**
      * Generates a portal URL for the user to access their account portal.

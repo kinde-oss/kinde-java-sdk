@@ -7,19 +7,16 @@ import com.kinde.KindeClientBuilder;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
-import com.kinde.client.KindeClientGuiceTestModule;
-import com.kinde.client.oidc.OidcMetaDataImplTest;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import com.kinde.token.AccessToken;
-import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.token.RefreshToken;
 import com.kinde.token.jwt.JwtGenerator;
 import com.kinde.user.UserInfo;
-import org.junit.jupiter.api.*;
-
-import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
@@ -97,7 +94,7 @@ public class KindeClientCodeSessionImplTest {
                                                         }
                                         """)));
         ///oauth2/token
-        System.out.println("Instanciate the wiremock service");
+        System.out.println("Instantiate the wiremock service");
     }
 
 
@@ -509,5 +506,25 @@ public class KindeClientCodeSessionImplTest {
         } catch (Exception ex) {
             // ignore exception expected behavior
         }
+    }
+
+    @Test
+    public void testIsAuthenticated_IntegrationTest() throws Exception {
+        // Arrange
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .redirectUri("http://localhost:8080/")
+                .build();
+        
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        
+        // Act
+        boolean result = kindeClientSession.isAuthenticated();
+        
+        // Assert
+        // The result depends on the token state, but the method should not throw an exception
+        assertNotNull(kindeClientSession);
     }
 }

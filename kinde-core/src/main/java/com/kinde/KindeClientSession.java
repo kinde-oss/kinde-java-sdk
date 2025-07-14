@@ -25,4 +25,6 @@ public interface KindeClientSession {
     AuthorizationUrl generatePortalUrl(String domain, String returnUrl, String subNav);
 
     UserInfo retrieveUserInfo();
+    
+    boolean isAuthenticated() throws Exception;
 }

@@ -20,10 +20,13 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.kinde.token.TokenManager;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 
+@Slf4j
 public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
     private KindeToken kindeToken;
@@ -97,5 +100,23 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
         }
 
         return new UserInfo(userInfoResponse.toSuccessResponse().getUserInfo());
+    }
+    
+    @Override
+    public boolean isAuthenticated() throws Exception {
+        KindeTokens tokens = retrieveTokens();
+        TokenManager tokenManager = new TokenManager(tokens, 5);
+        
+        if (tokenManager.needsRefresh() && tokenManager.canRefresh()) {
+            log.info("Auto-refreshing tokens due to imminent expiry");
+            KindeTokens newTokens = tokenManager.refresh();
+            this.kindeToken = newTokens.getRefreshToken();
+            return true;
+        } else if (tokenManager.needsRefresh() && !tokenManager.canRefresh()) {
+            log.warn("Token expired and no refresh token available");
+            return false;
+        }
+        
+        return true;
     }
 }
