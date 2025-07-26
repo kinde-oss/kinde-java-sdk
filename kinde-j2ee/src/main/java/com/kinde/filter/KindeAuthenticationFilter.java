@@ -28,7 +28,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
         // Handle login_link_expired error
         String errorParam = req.getParameter("error");
         if ("login_link_expired".equalsIgnoreCase(errorParam)) {
-            String reauthState = req.getParameter("reauth_state");
+            String reauthState = req.getParameter("reauth_state").replaceAll("\\s", "");
             if (reauthState != null) {
                 try {
                     String urlParams = new String(Base64.getDecoder().decode(reauthState), StandardCharsets.UTF_8);
