@@ -1,0 +1,106 @@
+# CodeRabbit configuration for Kinde Java SDK
+# This file configures what CodeRabbit should analyze and ignore during PR reviews
+
+# Ignore generated files and folders
+ignore:
+  # Generated OpenAPI client code
+  - "**/target/**"
+  - "**/generated/**"
+  - "**/api/**"
+  - "**/model/**"
+  - "**/ApiClient.java"
+  - "**/ApiException.java"
+  - "**/Configuration.java"
+  - "**/JSON.java"
+  - "**/ApiResponse.java"
+  - "**/Pair.java"
+  - "**/StringUtil.java"
+  - "**/TypeRef.java"
+  - "**/auth/**"
+  - "**/client/**"
+  - "**/model/**"
+  - "**/api/**"
+  
+  # Maven build artifacts
+  - "**/pom.xml.bak"
+  - "**/dependency-reduced-pom.xml"
+  
+  # IDE and editor files
+  - "**/.idea/**"
+  - "**/.vscode/**"
+  - "**/*.iml"
+  - "**/.DS_Store"
+  
+  # Log files
+  - "**/*.log"
+  - "**/logs/**"
+  
+  # Temporary files
+  - "**/tmp/**"
+  - "**/temp/**"
+  
+  # Documentation that doesn't need code review
+  - "**/README.md"
+  - "**/CHANGELOG.md"
+  - "**/LICENSE"
+  - "**/*.md"
+  
+  # Configuration files that are auto-generated
+  - "**/application.properties"
+  - "**/application.yml"
+  - "**/application.yaml"
+  
+  # Test resources (keep test source code but ignore test data)
+  - "**/src/test/resources/**"
+  
+  # OpenAPI specification files (these are input files, not generated)
+  # - "**/*.yaml"
+  # - "**/*.yml"
+
+# Focus on source code files
+include:
+  - "**/src/main/java/**/*.java"
+  - "**/src/test/java/**/*.java"
+  - "**/pom.xml"
+  - "**/.coderabbit.yaml"
+  - "**/*.yaml"
+  - "**/*.yml"
+
+# Review settings
+review:
+  # Focus on code quality and best practices
+  focus:
+    - "code-quality"
+    - "security"
+    - "performance"
+    - "maintainability"
+    - "test-coverage"
+  
+  # Ignore minor formatting issues
+  ignore:
+    - "formatting"
+    - "spelling"
+    - "grammar"
+
+# Custom instructions for the AI reviewer
+instructions: |
+  Please focus on:
+  1. Code quality and best practices
+  2. Security considerations
+  3. Performance implications
+  4. Test coverage and quality
+  5. API design and consistency
+  6. Error handling and edge cases
+  
+  For Java code specifically:
+  - Check for proper exception handling
+  - Verify async method implementations
+  - Review builder pattern usage
+  - Validate test coverage
+  - Check for memory leaks in async operations
+  
+  Ignore:
+  - Generated code files
+  - Build artifacts
+  - Configuration files
+  - Documentation formatting 
