@@ -1,7 +1,7 @@
 package com.kinde.accounts;
 
-import com.kinde.core.KindeClient;
-import com.kinde.core.session.KindeClientSession;
+import com.kinde.KindeClient;
+import com.kinde.KindeClientSession;
 
 /**
  * Builder for creating KindeAccountsClient instances.
@@ -47,7 +47,7 @@ public class KindeAccountsClientBuilder {
      */
     public KindeAccountsClient build() {
         if (kindeClient != null) {
-            return new KindeAccountsClient(kindeClient);
+            return new KindeAccountsClient(kindeClient.clientSession());
         } else if (session != null) {
             return new KindeAccountsClient(session);
         } else {

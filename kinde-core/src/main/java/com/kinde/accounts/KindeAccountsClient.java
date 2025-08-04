@@ -1,9 +1,8 @@
 package com.kinde.accounts;
 
-import com.kinde.accounts.api.DefaultApi;
-import com.kinde.accounts.model.*;
-import com.kinde.core.KindeClient;
-import com.kinde.core.session.KindeClientSession;
+import com.kinde.KindeClientSession;
+import org.openapitools.client.api.DefaultApi;
+import org.openapitools.client.model.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -16,18 +15,6 @@ public class KindeAccountsClient {
     
     private final DefaultApi apiClient;
     private final KindeClientSession session;
-    
-    /**
-     * Creates a new KindeAccountsClient using the provided KindeClient.
-     * 
-     * @param kindeClient The KindeClient instance to use for authentication
-     */
-    public KindeAccountsClient(KindeClient kindeClient) {
-        this.session = kindeClient.getSession();
-        this.apiClient = new DefaultApi();
-        // Configure the API client with the session's domain and access token
-        configureApiClient();
-    }
     
     /**
      * Creates a new KindeAccountsClient using the provided session.
@@ -45,13 +32,13 @@ public class KindeAccountsClient {
         // Set the base path to the session's domain
         String domain = session.getDomain();
         if (domain != null && !domain.isEmpty()) {
-            apiClient.setBasePath(domain + "/account_api/v1");
+            apiClient.getApiClient().setBasePath(domain + "/account_api/v1");
         }
         
         // Set the access token for authentication
         String accessToken = session.getAccessToken();
         if (accessToken != null && !accessToken.isEmpty()) {
-            apiClient.setBearerToken(accessToken);
+            apiClient.getApiClient().setBearerToken(accessToken);
         }
     }
     
