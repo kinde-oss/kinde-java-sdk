@@ -62,19 +62,19 @@ public class AccountsExample {
             CompletableFuture<EntitlementsResponse> entitlementsFuture = accountsClient.getEntitlements();
             EntitlementsResponse entitlements = entitlementsFuture.get();
             
-            System.out.println("Organization Code: " + entitlements.getData().getOrgCode());
-            System.out.println("Number of entitlements: " + entitlements.getData().getEntitlements().size());
+            System.out.println("Organization Code: " + entitlements.getOrgCode());
+            System.out.println("Number of entitlements: " + entitlements.getEntitlements().size());
             
             // Display entitlements
-            for (Entitlement entitlement : entitlements.getData().getEntitlements()) {
+            for (Entitlement entitlement : entitlements.getEntitlements()) {
                 System.out.println("  - " + entitlement.getFeatureName() + " (" + entitlement.getFeatureKey() + ")");
                 System.out.println("    Price: " + entitlement.getPriceName() + ", Unit Amount: " + entitlement.getUnitAmount());
                 System.out.println("    Limits: " + entitlement.getEntitlementLimitMin() + " - " + entitlement.getEntitlementLimitMax());
             }
             
             // Get specific entitlement if available
-            if (!entitlements.getData().getEntitlements().isEmpty()) {
-                String firstEntitlementKey = entitlements.getData().getEntitlements().get(0).getFeatureKey();
+            if (!entitlements.getEntitlements().isEmpty()) {
+                String firstEntitlementKey = entitlements.getEntitlements().get(0).getFeatureKey();
                 CompletableFuture<EntitlementResponse> specificEntitlementFuture = accountsClient.getEntitlement(firstEntitlementKey);
                 EntitlementResponse specificEntitlement = specificEntitlementFuture.get();
                 
