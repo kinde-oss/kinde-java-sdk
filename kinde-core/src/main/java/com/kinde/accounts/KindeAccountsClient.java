@@ -22,6 +22,9 @@ public class KindeAccountsClient {
      * @param session The KindeClientSession instance to use for authentication
      */
     public KindeAccountsClient(KindeClientSession session) {
+        if (session == null) {
+            throw new IllegalArgumentException("Session cannot be null");
+        }
         this.session = session;
         this.apiClient = new DefaultApi();
         // Configure the API client with the session's domain and access token
@@ -324,5 +327,38 @@ public class KindeAccountsClient {
         return getFeatureFlagValue(flagKey).thenApply(value -> {
             return value instanceof Boolean && (Boolean) value;
         });
+    }
+    
+    /**
+     * Gets the value of a specific feature flag as a String.
+     * 
+     * @param flagKey The feature flag key to retrieve
+     * @return A CompletableFuture containing the feature flag value as String, or null if not found or not a String
+     */
+    public CompletableFuture<String> getFeatureFlagValueAsString(String flagKey) {
+        return getFeatureFlagValue(flagKey).thenApply(value -> 
+            value instanceof String ? (String) value : null);
+    }
+    
+    /**
+     * Gets the value of a specific feature flag as an Integer.
+     * 
+     * @param flagKey The feature flag key to retrieve
+     * @return A CompletableFuture containing the feature flag value as Integer, or null if not found or not an Integer
+     */
+    public CompletableFuture<Integer> getFeatureFlagValueAsInteger(String flagKey) {
+        return getFeatureFlagValue(flagKey).thenApply(value -> 
+            value instanceof Integer ? (Integer) value : null);
+    }
+    
+    /**
+     * Gets the value of a specific feature flag as a Boolean.
+     * 
+     * @param flagKey The feature flag key to retrieve
+     * @return A CompletableFuture containing the feature flag value as Boolean, or null if not found or not a Boolean
+     */
+    public CompletableFuture<Boolean> getFeatureFlagValueAsBoolean(String flagKey) {
+        return getFeatureFlagValue(flagKey).thenApply(value -> 
+            value instanceof Boolean ? (Boolean) value : null);
     }
 } 

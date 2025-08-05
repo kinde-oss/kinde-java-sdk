@@ -6,6 +6,8 @@ info:
   contact:
     name: Kinde Support
     url: https://kinde.com/docs
+security:
+  - BearerAuth: []
 servers:
   - url: https://{domain}/account_api/v1
     description: Kinde Accounts API
@@ -322,10 +324,12 @@ components:
               description: Organization code
             plans:
               type: array
+              maxItems: 1000
               items:
                 $ref: '#/components/schemas/Plan'
             entitlements:
               type: array
+              maxItems: 1000
               items:
                 $ref: '#/components/schemas/Entitlement'
           required:
@@ -373,6 +377,7 @@ components:
           $ref: '#/components/schemas/Metadata'
         data:
           type: array
+          maxItems: 1000
           items:
             $ref: '#/components/schemas/Permission'
       required:
@@ -407,6 +412,7 @@ components:
           $ref: '#/components/schemas/Metadata'
         data:
           type: array
+          maxItems: 1000
           items:
             $ref: '#/components/schemas/Role'
       required:
@@ -450,6 +456,7 @@ components:
           properties:
             feature_flags:
               type: array
+              maxItems: 1000
               items:
                 $ref: '#/components/schemas/FeatureFlag'
           required:
@@ -487,6 +494,7 @@ components:
           $ref: '#/components/schemas/Metadata'
         data:
           type: array
+          maxItems: 1000
           items:
             $ref: '#/components/schemas/Organization'
       required:
@@ -526,4 +534,4 @@ components:
         data:
           $ref: '#/components/schemas/Organization'
       required:
-        - data 
+        - data
