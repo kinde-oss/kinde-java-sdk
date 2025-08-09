@@ -6,7 +6,6 @@ import lombok.SneakyThrows;
 import java.util.List;
 import java.util.Map;
 
-import static com.kinde.token.JwtValidator.isJwt;
 
 public class BaseToken implements KindeToken {
 
@@ -57,31 +56,86 @@ public class BaseToken implements KindeToken {
     @SuppressWarnings("unchecked")
     @Override
     public List<String> getPermissions() {
-        return (List<String>) getClaim("permissions");
+        // Prefer standard claim; fallback to Hasura-compatible claim if missing
+        List<String> permissions = (List<String>) getClaim("permissions");
+        if (permissions != null) {
+            return permissions;
+        }
+        return (List<String>) getClaim("x-hasura-permissions");
     }
 
     @Override
     public String getStringFlag(String key) {
-        return (String)getFlagClaims().get(key);
+        Object value = getFlagValue(key);
+        return value instanceof String ? (String) value : null;
     }
 
     @Override
     public Integer getIntegerFlag(String key) {
-        return getFlagClaims().get(key) != null ? ((Long)getFlagClaims().get(key)).intValue() : null;
+        Object value = getFlagValue(key);
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        if (value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+        return null;
     }
 
     @Override
     public Boolean getBooleanFlag(String key) {
-        return (Boolean) getFlagClaims().get(key);
+        Object value = getFlagValue(key);
+        return value instanceof Boolean ? (Boolean) value : null;
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String,Object> getFlagClaims() {
-        return ((Map<String,Object>)getClaim("feature_flags"));
+    private Map<String, Object> getFlagClaims() {
+        // Prefer standard claim; fallback to Hasura-compatible claim if missing
+        Map<String, Object> flags = (Map<String, Object>) getClaim("feature_flags");
+        if (flags != null) {
+            return flags;
+        }
+        return (Map<String, Object>) getClaim("x-hasura-feature-flags");
+    }
+
+    /**
+     * Extracts the concrete value for a feature flag key from the token claims.
+     * The token stores flags as an object map where each key maps to a structure
+     * containing fields like 'v' (value) and 't' (type). This method returns the
+     * 'v' field when present; otherwise returns the raw entry.
+     */
+    @SuppressWarnings("unchecked")
+    private Object getFlagValue(String key) {
+        Map<String, Object> claims = getFlagClaims();
+        if (claims == null) {
+            return null;
+        }
+        Object entry = claims.get(key);
+        if (entry instanceof Map) {
+            Object v = ((Map<String, Object>) entry).get("v");
+            return v;
+        }
+        return entry;
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String,Object> getFlags() {
-        return (Map<String,Object>) getClaim("feature_flags");
+    @Override
+    public Map<String, Object> getFlags() {
+        Map<String, Object> claims = getFlagClaims();
+        if (claims == null) {
+            return null;
+        }
+        // Convert from { key -> { v: value, t: type } } to { key -> value }
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        for (java.util.Map.Entry<String, Object> e : claims.entrySet()) {
+            Object value = e.getValue();
+            if (value instanceof Map) {
+                Object v = ((Map<String, Object>) value).get("v");
+                result.put(e.getKey(), v);
+            } else {
+                result.put(e.getKey(), value);
+            }
+        }
+        return result;
     }
 }

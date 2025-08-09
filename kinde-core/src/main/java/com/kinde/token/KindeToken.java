@@ -2,6 +2,7 @@ package com.kinde.token;
 
 
 import java.util.List;
+import java.util.Map;
 
 public interface KindeToken {
 
@@ -22,4 +23,6 @@ public interface KindeToken {
     Integer getIntegerFlag(String key);
 
     Boolean getBooleanFlag(String key);
+    
+    Map<String, Object> getFlags();
 }
