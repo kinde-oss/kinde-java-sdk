@@ -47,7 +47,7 @@ public class KindeAccountsClientBuilder {
      */
     public KindeAccountsClient build() {
         if (kindeClient != null) {
-            return new KindeAccountsClient(kindeClient.clientSession());
+            return new KindeAccountsClient(kindeClient);
         } else if (session != null) {
             return new KindeAccountsClient(session);
         } else {

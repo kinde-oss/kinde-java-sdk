@@ -1,5 +1,6 @@
 package com.kinde.accounts;
 
+import com.kinde.KindeClient;
 import com.kinde.KindeClientSession;
 import org.openapitools.client.api.DefaultApi;
 import org.openapitools.client.model.*;
@@ -15,6 +16,22 @@ public class KindeAccountsClient {
     
     private final DefaultApi apiClient;
     private final KindeClientSession session;
+    
+    /**
+     * Creates a new KindeAccountsClient using the provided KindeClient.
+     * 
+     * @param kindeClient The KindeClient instance to use for authentication
+     */
+    public KindeAccountsClient(KindeClient kindeClient) {
+        if (kindeClient == null) {
+            this.session = null;
+        } else {
+            this.session = kindeClient.clientSession();
+        }
+        this.apiClient = new DefaultApi();
+        // Configure the API client with the session's domain and access token
+        configureApiClient();
+    }
     
     /**
      * Creates a new KindeAccountsClient using the provided session.
@@ -33,15 +50,17 @@ public class KindeAccountsClient {
     
     private void configureApiClient() {
         // Set the base path to the session's domain
-        String domain = session.getDomain();
-        if (domain != null && !domain.isEmpty()) {
-            apiClient.getApiClient().setBasePath(domain + "/account_api/v1");
-        }
-        
-        // Set the access token for authentication
-        String accessToken = session.getAccessToken();
-        if (accessToken != null && !accessToken.isEmpty()) {
-            apiClient.getApiClient().setBearerToken(accessToken);
+        if (session != null) {
+            String domain = session.getDomain();
+            if (domain != null && !domain.isEmpty()) {
+                apiClient.getApiClient().setBasePath(domain + "/account_api/v1");
+            }
+            
+            // Set the access token for authentication
+            String accessToken = session.getAccessToken();
+            if (accessToken != null && !accessToken.isEmpty()) {
+                apiClient.getApiClient().setBearerToken(accessToken);
+            }
         }
     }
     
@@ -69,6 +88,9 @@ public class KindeAccountsClient {
     public CompletableFuture<EntitlementResponse> getEntitlement(String key) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                if (key == null || key.trim().isEmpty()) {
+                    throw new RuntimeException("Entitlement key cannot be null or empty");
+                }
                 return apiClient.getEntitlement(key);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get entitlement: " + key, e);
@@ -100,6 +122,9 @@ public class KindeAccountsClient {
     public CompletableFuture<PermissionResponse> getPermission(String key) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                if (key == null || key.trim().isEmpty()) {
+                    throw new RuntimeException("Permission key cannot be null or empty");
+                }
                 return apiClient.getPermission(key);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get permission: " + key, e);
@@ -146,6 +171,9 @@ public class KindeAccountsClient {
     public CompletableFuture<FeatureFlagResponse> getFeatureFlag(String key) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                if (key == null || key.trim().isEmpty()) {
+                    throw new RuntimeException("Feature flag key cannot be null or empty");
+                }
                 return apiClient.getFeatureFlag(key);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get feature flag: " + key, e);
@@ -205,6 +233,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing true if the user has the permission, false otherwise
      */
     public CompletableFuture<Boolean> hasPermission(String permissionKey) {
+        if (permissionKey == null || permissionKey.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Permission key cannot be null or empty"));
+        }
         return getPermissions().thenApply(response -> {
             if (response.getData() != null) {
                 return response.getData().stream()
@@ -221,6 +252,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing true if the user has any of the permissions, false otherwise
      */
     public CompletableFuture<Boolean> hasAnyPermission(List<String> permissionKeys) {
+        if (permissionKeys == null || permissionKeys.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        }
         return getPermissions().thenApply(response -> {
             if (response.getData() != null) {
                 return response.getData().stream()
@@ -237,6 +271,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing true if the user has all of the permissions, false otherwise
      */
     public CompletableFuture<Boolean> hasAllPermissions(List<String> permissionKeys) {
+        if (permissionKeys == null || permissionKeys.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        }
         return getPermissions().thenApply(response -> {
             if (response.getData() != null) {
                 List<String> userPermissions = response.getData().stream()
@@ -255,6 +292,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing true if the user has the role, false otherwise
      */
     public CompletableFuture<Boolean> hasRole(String roleKey) {
+        if (roleKey == null || roleKey.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Role key cannot be null or empty"));
+        }
         return getRoles().thenApply(response -> {
             if (response.getData() != null) {
                 return response.getData().stream()
@@ -271,6 +311,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing true if the user has any of the roles, false otherwise
      */
     public CompletableFuture<Boolean> hasAnyRole(List<String> roleKeys) {
+        if (roleKeys == null || roleKeys.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        }
         return getRoles().thenApply(response -> {
             if (response.getData() != null) {
                 return response.getData().stream()
@@ -287,6 +330,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing true if the user has all of the roles, false otherwise
      */
     public CompletableFuture<Boolean> hasAllRoles(List<String> roleKeys) {
+        if (roleKeys == null || roleKeys.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        }
         return getRoles().thenApply(response -> {
             if (response.getData() != null) {
                 List<String> userRoles = response.getData().stream()
@@ -305,6 +351,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the feature flag value, or null if not found
      */
     public CompletableFuture<Object> getFeatureFlagValue(String flagKey) {
+        if (flagKey == null || flagKey.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Feature flag key cannot be null or empty"));
+        }
         return getFeatureFlags().thenApply(response -> {
             if (response.getData() != null && response.getData().getFeatureFlags() != null) {
                 return response.getData().getFeatureFlags().stream()
@@ -324,6 +373,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing true if the feature flag is enabled, false otherwise
      */
     public CompletableFuture<Boolean> isFeatureFlagEnabled(String flagKey) {
+        if (flagKey == null || flagKey.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Feature flag key cannot be null or empty"));
+        }
         return getFeatureFlagValue(flagKey).thenApply(value -> {
             return value instanceof Boolean && (Boolean) value;
         });
@@ -336,6 +388,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the feature flag value as String, or null if not found or not a String
      */
     public CompletableFuture<String> getFeatureFlagValueAsString(String flagKey) {
+        if (flagKey == null || flagKey.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Feature flag key cannot be null or empty"));
+        }
         return getFeatureFlagValue(flagKey).thenApply(value -> 
             value instanceof String ? (String) value : null);
     }
@@ -347,6 +402,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the feature flag value as Integer, or null if not found or not an Integer
      */
     public CompletableFuture<Integer> getFeatureFlagValueAsInteger(String flagKey) {
+        if (flagKey == null || flagKey.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Feature flag key cannot be null or empty"));
+        }
         return getFeatureFlagValue(flagKey).thenApply(value -> 
             value instanceof Integer ? (Integer) value : null);
     }
@@ -358,6 +416,9 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the feature flag value as Boolean, or null if not found or not a Boolean
      */
     public CompletableFuture<Boolean> getFeatureFlagValueAsBoolean(String flagKey) {
+        if (flagKey == null || flagKey.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Feature flag key cannot be null or empty"));
+        }
         return getFeatureFlagValue(flagKey).thenApply(value -> 
             value instanceof Boolean ? (Boolean) value : null);
     }
