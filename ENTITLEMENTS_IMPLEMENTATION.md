@@ -154,9 +154,9 @@ Created a comprehensive example in `playground/kinde-accounts-example/`:
 ### Basic Usage
 ```java
 // Create client
-KindeClient kindeClient = new KindeClientBuilder()
-    .withDomain("your-domain.kinde.com")
-    .withClientId("your-client-id")
+KindeClient kindeClient = KindeClientBuilder.builder()
+    .domain("your-domain.kinde.com")
+    .clientId("your-client-id")
     .build();
 
 KindeAccountsClient accountsClient = new KindeAccountsClient(kindeClient);

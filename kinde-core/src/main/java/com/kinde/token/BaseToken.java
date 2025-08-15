@@ -50,6 +50,9 @@ public class BaseToken implements KindeToken {
     @SneakyThrows
     @Override
     public Object getClaim(String key) {
+        if (this.signedJWT == null) {
+            return null; // Return null for invalid tokens instead of throwing NPE
+        }
         return this.signedJWT.getJWTClaimsSet().getClaim(key);
     }
 
@@ -64,6 +67,17 @@ public class BaseToken implements KindeToken {
         return (List<String>) getClaim("x-hasura-permissions");
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getRoles() {
+        // Prefer standard claim; fallback to Hasura-compatible claim if missing
+        List<String> roles = (List<String>) getClaim("roles");
+        if (roles != null) {
+            return roles;
+        }
+        return (List<String>) getClaim("x-hasura-roles");
+    }
+
     @Override
     public String getStringFlag(String key) {
         Object value = getFlagValue(key);
@@ -73,11 +87,12 @@ public class BaseToken implements KindeToken {
     @Override
     public Integer getIntegerFlag(String key) {
         Object value = getFlagValue(key);
-        if (value instanceof Integer) {
-            return (Integer) value;
-        }
-        if (value instanceof Long) {
-            return ((Long) value).intValue();
+        if (value instanceof Number) {
+            long lv = ((Number) value).longValue();
+            if (lv > Integer.MAX_VALUE || lv < Integer.MIN_VALUE) {
+                return null; // avoid silent overflow
+            }
+            return ((Number) value).intValue();
         }
         return null;
     }

@@ -31,20 +31,27 @@ public interface KindeClientSession {
      * Gets the entitlements functionality for this session.
      *
      * @return The KindeEntitlements instance
+     * @throws UnsupportedOperationException if entitlements functionality is not implemented
      */
-    KindeEntitlements entitlements();
+    default KindeEntitlements entitlements() {
+        throw new UnsupportedOperationException("entitlements() not implemented");
+    }
 
     /**
      * Gets the domain for this session.
      *
-     * @return The domain string
+     * @return The domain string, or null if not available
      */
-    String getDomain();
+    default String getDomain() {
+        return null;
+    }
 
     /**
      * Gets the access token for this session.
      *
-     * @return The access token string
+     * @return The access token string, or null if not available
      */
-    String getAccessToken();
+    default String getAccessToken() {
+        return null;
+    }
 }

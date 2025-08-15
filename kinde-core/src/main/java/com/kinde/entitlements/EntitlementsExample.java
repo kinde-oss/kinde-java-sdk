@@ -34,12 +34,21 @@ public class EntitlementsExample {
         CompletableFuture<EntitlementsResponse> allEntitlements = entitlements.getEntitlements();
         allEntitlements.thenAccept(result -> {
             System.out.println("All entitlements: " + result);
+        }).exceptionally(e -> {
+            System.err.println("Failed to fetch entitlements: " + e.getMessage());
+            return null;
         });
 
         // Get a specific entitlement
         CompletableFuture<EntitlementResponse> specificEntitlement = entitlements.getEntitlement("premium-feature");
         specificEntitlement.thenAccept(result -> {
             System.out.println("Premium feature entitlement: " + result);
+        }).exceptionally(e -> {
+            System.err.println("Failed to fetch specific entitlement: " + e.getMessage());
+            return null;
         });
+
+        // Ensure async work completes before exiting
+        CompletableFuture.allOf(allEntitlements, specificEntitlement).join();
     }
 } 

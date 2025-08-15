@@ -2,9 +2,9 @@ package com.kinde.accounts.example;
 
 import com.kinde.accounts.KindeAccountsClient;
 import com.kinde.accounts.KindeAccountsClientBuilder;
-import com.kinde.core.KindeClient;
-import com.kinde.core.KindeClientBuilder;
-import com.kinde.accounts.model.*;
+import com.kinde.KindeClient;
+import com.kinde.KindeClientBuilder;
+import org.openapitools.client.model.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,18 +19,18 @@ public class AccountsExample {
     
     public static void main(String[] args) {
         // Configuration - replace with your actual values
-        String domain = "your-domain.kinde.com";
+        String domain = "https://your-domain.kinde.com";
         String clientId = "your-client-id";
         String clientSecret = "your-client-secret";
         String redirectUrl = "http://localhost:8080/callback";
         
         try {
             // Create KindeClient
-            KindeClient kindeClient = new KindeClientBuilder()
-                .withDomain(domain)
-                .withClientId(clientId)
-                .withClientSecret(clientSecret)
-                .withRedirectUrl(redirectUrl)
+            KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain(domain)
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .redirectUri(redirectUrl)
                 .build();
             
             // Create KindeAccountsClient
@@ -62,19 +62,19 @@ public class AccountsExample {
             CompletableFuture<EntitlementsResponse> entitlementsFuture = accountsClient.getEntitlements();
             EntitlementsResponse entitlements = entitlementsFuture.get();
             
-            System.out.println("Organization Code: " + entitlements.getOrgCode());
-            System.out.println("Number of entitlements: " + entitlements.getEntitlements().size());
+            System.out.println("Organization Code: " + entitlements.getData().getOrgCode());
+            System.out.println("Number of entitlements: " + entitlements.getData().getEntitlements().size());
             
             // Display entitlements
-            for (Entitlement entitlement : entitlements.getEntitlements()) {
+            for (Entitlement entitlement : entitlements.getData().getEntitlements()) {
                 System.out.println("  - " + entitlement.getFeatureName() + " (" + entitlement.getFeatureKey() + ")");
                 System.out.println("    Price: " + entitlement.getPriceName() + ", Unit Amount: " + entitlement.getUnitAmount());
                 System.out.println("    Limits: " + entitlement.getEntitlementLimitMin() + " - " + entitlement.getEntitlementLimitMax());
             }
             
             // Get specific entitlement if available
-            if (!entitlements.getEntitlements().isEmpty()) {
-                String firstEntitlementKey = entitlements.getEntitlements().get(0).getFeatureKey();
+            if (!entitlements.getData().getEntitlements().isEmpty()) {
+                String firstEntitlementKey = entitlements.getData().getEntitlements().get(0).getFeatureKey();
                 CompletableFuture<EntitlementResponse> specificEntitlementFuture = accountsClient.getEntitlement(firstEntitlementKey);
                 EntitlementResponse specificEntitlement = specificEntitlementFuture.get();
                 

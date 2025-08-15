@@ -1,5 +1,6 @@
 package com.kinde.token;
 
+import com.kinde.KindeClientSession;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,10 +25,11 @@ class KindeTokenCheckerTest {
     @Test
     void testBuilderPattern_WithNullSession_ThrowsException() {
         // Given: Null session
+        KindeToken token = org.mockito.Mockito.mock(KindeToken.class);
         // When & Then: Should throw exception
         assertThrows(IllegalArgumentException.class, () -> {
             KindeTokenCheckerBuilder.builder()
-                    .token(null)
+                    .token(token)
                     .session(null)
                     .build();
         });
@@ -43,8 +45,8 @@ class KindeTokenCheckerTest {
     }
 
     @Test
-    void testBuilderPattern_WithValidParameters() {
-        // Given: Valid token and session (using null for testing purposes)
+    void testBuilderPattern_WithNullParameters_ThrowsException() {
+        // Given: Null token and session
         KindeToken token = null;
 
         // When & Then: Should throw exception for null parameters
@@ -54,6 +56,22 @@ class KindeTokenCheckerTest {
                     .session(null)
                     .build();
         });
+    }
+
+    @Test
+    void testBuild_WithValidParameters_ReturnsChecker() {
+        // Given: Valid token and session
+        KindeToken token = org.mockito.Mockito.mock(KindeToken.class);
+        KindeClientSession session = org.mockito.Mockito.mock(KindeClientSession.class);
+
+        // When: Build with valid parameters
+        KindeTokenChecker checker = KindeTokenCheckerBuilder.builder()
+                .token(token)
+                .session(session)
+                .build();
+
+        // Then: Should return a valid checker instance
+        assertNotNull(checker);
     }
 
     @Test
@@ -118,7 +136,7 @@ class KindeTokenCheckerTest {
             // Expected
         }
 
-        // When: Try to build again with valid parameters
+        // When: Try to build again with null parameters
         // Then: Should still throw exception for null parameters
         assertThrows(IllegalArgumentException.class, () -> {
             builder.build();
@@ -161,9 +179,11 @@ class KindeTokenCheckerTest {
         KindeTokenCheckerBuilder builder1 = KindeTokenCheckerBuilder.builder();
         KindeTokenCheckerBuilder builder2 = KindeTokenCheckerBuilder.builder();
 
-        // When: Set same parameters
-        builder1.token(null).session(null);
-        builder2.token(null).session(null);
+        // When: Set same parameters (using mocks for consistency)
+        KindeToken token = org.mockito.Mockito.mock(KindeToken.class);
+        KindeClientSession session = org.mockito.Mockito.mock(KindeClientSession.class);
+        builder1.token(token).session(session);
+        builder2.token(token).session(session);
 
         // Then: Should have same hash code (if equals is implemented)
         // Note: Hash codes may differ due to object identity, so we just verify they're not null
@@ -174,10 +194,15 @@ class KindeTokenCheckerTest {
     @Test
     void testBuilderPattern_ThreadSafety() {
         // Given: Multiple threads creating builders
+        java.util.concurrent.atomic.AtomicReference<AssertionError> error = new java.util.concurrent.atomic.AtomicReference<>();
         Runnable task = () -> {
-            for (int i = 0; i < 100; i++) {
-                KindeTokenCheckerBuilder builder = KindeTokenCheckerBuilder.builder();
-                assertNotNull(builder);
+            try {
+                for (int i = 0; i < 100; i++) {
+                    KindeTokenCheckerBuilder builder = KindeTokenCheckerBuilder.builder();
+                    assertNotNull(builder);
+                }
+            } catch (AssertionError e) {
+                error.set(e);
             }
         };
 
@@ -196,7 +221,7 @@ class KindeTokenCheckerTest {
         }
 
         // Then: Should complete without errors
-        assertTrue(true); // If we get here, no exceptions were thrown
+        assertNull(error.get(), "Assertion failed in background thread");
     }
 
     @Test
@@ -204,15 +229,17 @@ class KindeTokenCheckerTest {
         // Given: Builder with various null combinations
         KindeTokenCheckerBuilder builder = KindeTokenCheckerBuilder.builder();
 
-        // When & Then: Should validate token parameter
+        // When & Then: Should validate token parameter (null token, valid session)
+        KindeClientSession session = org.mockito.Mockito.mock(KindeClientSession.class);
         assertThrows(IllegalArgumentException.class, () -> {
-            builder.token(null).session(null).build();
+            builder.token(null).session(session).build();
         });
 
-        // When & Then: Should validate session parameter
+        // When & Then: Should validate session parameter (valid token, null session)
+        KindeToken token = org.mockito.Mockito.mock(KindeToken.class);
         assertThrows(IllegalArgumentException.class, () -> {
             KindeTokenCheckerBuilder.builder()
-                    .token(null)
+                    .token(token)
                     .session(null)
                     .build();
         });
@@ -221,9 +248,11 @@ class KindeTokenCheckerTest {
     @Test
     void testBuilderPattern_ResetBehavior() {
         // Given: Builder with parameters set
+        KindeToken token = org.mockito.Mockito.mock(KindeToken.class);
+        KindeClientSession session = org.mockito.Mockito.mock(KindeClientSession.class);
         KindeTokenCheckerBuilder builder = KindeTokenCheckerBuilder.builder()
-                .token(null)
-                .session(null);
+                .token(token)
+                .session(session);
 
         // When: Create new builder
         KindeTokenCheckerBuilder newBuilder = KindeTokenCheckerBuilder.builder();

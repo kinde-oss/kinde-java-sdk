@@ -2,11 +2,13 @@ package com.kinde.accounts;
 
 import com.kinde.KindeClient;
 import com.kinde.KindeClientSession;
+import org.openapitools.client.ApiException;
 import org.openapitools.client.api.DefaultApi;
 import org.openapitools.client.model.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * Client for accessing Kinde Accounts API functionality.
@@ -24,10 +26,9 @@ public class KindeAccountsClient {
      */
     public KindeAccountsClient(KindeClient kindeClient) {
         if (kindeClient == null) {
-            this.session = null;
-        } else {
-            this.session = kindeClient.clientSession();
+            throw new IllegalArgumentException("KindeClient cannot be null");
         }
+        this.session = kindeClient.clientSession();
         this.apiClient = new DefaultApi();
         // Configure the API client with the session's domain and access token
         configureApiClient();
@@ -53,6 +54,14 @@ public class KindeAccountsClient {
         if (session != null) {
             String domain = session.getDomain();
             if (domain != null && !domain.isEmpty()) {
+                // Ensure scheme
+                if (!domain.startsWith("http://") && !domain.startsWith("https://")) {
+                    domain = "https://" + domain;
+                }
+                // Trim trailing slash
+                if (domain.endsWith("/")) {
+                    domain = domain.substring(0, domain.length() - 1);
+                }
                 apiClient.getApiClient().setBasePath(domain + "/account_api/v1");
             }
             
@@ -73,6 +82,8 @@ public class KindeAccountsClient {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getEntitlements();
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get entitlements (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get entitlements", e);
             }
@@ -86,12 +97,14 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the entitlement response
      */
     public CompletableFuture<EntitlementResponse> getEntitlement(String key) {
+        if (key == null || key.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Entitlement key cannot be null or empty"));
+        }
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if (key == null || key.trim().isEmpty()) {
-                    throw new RuntimeException("Entitlement key cannot be null or empty");
-                }
                 return apiClient.getEntitlement(key);
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get entitlement: " + key + " (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get entitlement: " + key, e);
             }
@@ -107,6 +120,8 @@ public class KindeAccountsClient {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getPermissions();
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get permissions (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get permissions", e);
             }
@@ -120,12 +135,14 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the permission response
      */
     public CompletableFuture<PermissionResponse> getPermission(String key) {
+        if (key == null || key.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Permission key cannot be null or empty"));
+        }
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if (key == null || key.trim().isEmpty()) {
-                    throw new RuntimeException("Permission key cannot be null or empty");
-                }
                 return apiClient.getPermission(key);
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get permission: " + key + " (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get permission: " + key, e);
             }
@@ -141,6 +158,8 @@ public class KindeAccountsClient {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getRoles();
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get roles (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get roles", e);
             }
@@ -156,6 +175,8 @@ public class KindeAccountsClient {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getFeatureFlags();
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get feature flags (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get feature flags", e);
             }
@@ -169,12 +190,14 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the feature flag response
      */
     public CompletableFuture<FeatureFlagResponse> getFeatureFlag(String key) {
+        if (key == null || key.trim().isEmpty()) {
+            return CompletableFuture.failedFuture(new RuntimeException("Feature flag key cannot be null or empty"));
+        }
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if (key == null || key.trim().isEmpty()) {
-                    throw new RuntimeException("Feature flag key cannot be null or empty");
-                }
                 return apiClient.getFeatureFlag(key);
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get feature flag: " + key + " (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get feature flag: " + key, e);
             }
@@ -190,6 +213,8 @@ public class KindeAccountsClient {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getUserOrganizations();
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get user organizations (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get user organizations", e);
             }
@@ -205,6 +230,8 @@ public class KindeAccountsClient {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getUserProfile();
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get user profile (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get user profile", e);
             }
@@ -220,6 +247,8 @@ public class KindeAccountsClient {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getCurrentOrganization();
+            } catch (ApiException ae) {
+                throw new RuntimeException("Failed to get current organization (status " + ae.getCode() + ")", ae);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get current organization", e);
             }
@@ -337,7 +366,7 @@ public class KindeAccountsClient {
             if (response.getData() != null) {
                 List<String> userRoles = response.getData().stream()
                     .map(Role::getName)
-                    .toList();
+                    .collect(Collectors.toList());
                 return roleKeys.stream().allMatch(userRoles::contains);
             }
             return false;
@@ -405,8 +434,19 @@ public class KindeAccountsClient {
         if (flagKey == null || flagKey.trim().isEmpty()) {
             return CompletableFuture.failedFuture(new RuntimeException("Feature flag key cannot be null or empty"));
         }
-        return getFeatureFlagValue(flagKey).thenApply(value -> 
-            value instanceof Integer ? (Integer) value : null);
+        return getFeatureFlagValue(flagKey).thenApply(value -> {
+            if (value instanceof Number) {
+                return ((Number) value).intValue();
+            }
+            if (value instanceof String) {
+                try {
+                    return Integer.valueOf((String) value);
+                } catch (NumberFormatException ignored) {
+                    return null;
+                }
+            }
+            return null;
+        });
     }
     
     /**

@@ -2,9 +2,9 @@ package com.kinde.accounts.example;
 
 import com.kinde.accounts.KindeAccountsClient;
 import com.kinde.accounts.KindeAccountsClientBuilder;
-import com.kinde.accounts.model.*;
-import com.kinde.core.KindeClient;
-import com.kinde.core.session.KindeClientSession;
+import org.openapitools.client.model.*;
+import com.kinde.KindeClient;
+import com.kinde.KindeClientSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

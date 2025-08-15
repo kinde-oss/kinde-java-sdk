@@ -40,31 +40,24 @@ public class HardCheckExample {
                 .session(session)
                 .build();
         
-        // Example 1: Check a single permission
-        checkSinglePermission(checker);
-        
-        // Example 2: Check multiple permissions
-        checkMultiplePermissions(checker);
-        
-        // Example 3: Check roles
-        checkRoles(checker);
-        
-        // Example 4: Check feature flags
-        checkFeatureFlags(checker);
-        
-        // Example 5: Comprehensive checks
-        comprehensiveChecks(checker);
+        // Kick off all checks and wait for completion
+        CompletableFuture<Void> f1 = checkSinglePermission(checker);
+        CompletableFuture<Void> f2 = checkMultiplePermissions(checker);
+        CompletableFuture<Void> f3 = checkRoles(checker);
+        CompletableFuture<Void> f4 = checkFeatureFlags(checker);
+        CompletableFuture<Void> f5 = comprehensiveChecks(checker);
+        CompletableFuture.allOf(f1, f2, f3, f4, f5).join();
     }
     
     /**
      * Example: Check a single permission with API fallback.
      */
-    private static void checkSinglePermission(KindeTokenChecker checker) {
+    private static CompletableFuture<Void> checkSinglePermission(KindeTokenChecker checker) {
         log.info("=== Checking Single Permission ===");
         
         CompletableFuture<Boolean> hasPermission = checker.hasPermission("read:users");
         
-        hasPermission.thenAccept(hasAccess -> {
+        return hasPermission.thenAccept(hasAccess -> {
             if (hasAccess) {
                 log.info("✅ User has 'read:users' permission");
             } else {
@@ -79,14 +72,14 @@ public class HardCheckExample {
     /**
      * Example: Check multiple permissions with API fallback.
      */
-    private static void checkMultiplePermissions(KindeTokenChecker checker) {
+    private static CompletableFuture<Void> checkMultiplePermissions(KindeTokenChecker checker) {
         log.info("=== Checking Multiple Permissions ===");
         
         List<String> permissions = Arrays.asList("read:users", "write:users", "delete:users");
         
         // Check if user has any of the permissions
         CompletableFuture<Boolean> hasAnyPermission = checker.hasAnyPermission(permissions);
-        hasAnyPermission.thenAccept(hasAccess -> {
+        CompletableFuture<Void> anyPermissionFuture = hasAnyPermission.thenAccept(hasAccess -> {
             if (hasAccess) {
                 log.info("✅ User has at least one of the permissions: {}", permissions);
             } else {
@@ -96,26 +89,28 @@ public class HardCheckExample {
         
         // Check if user has all of the permissions
         CompletableFuture<Boolean> hasAllPermissions = checker.hasAllPermissions(permissions);
-        hasAllPermissions.thenAccept(hasAccess -> {
+        CompletableFuture<Void> allPermissionsFuture = hasAllPermissions.thenAccept(hasAccess -> {
             if (hasAccess) {
                 log.info("✅ User has all permissions: {}", permissions);
             } else {
                 log.info("❌ User does not have all permissions: {}", permissions);
             }
         });
+        
+        return CompletableFuture.allOf(anyPermissionFuture, allPermissionsFuture);
     }
     
     /**
      * Example: Check roles with API fallback.
      */
-    private static void checkRoles(KindeTokenChecker checker) {
+    private static CompletableFuture<Void> checkRoles(KindeTokenChecker checker) {
         log.info("=== Checking Roles ===");
         
         List<String> roles = Arrays.asList("admin", "moderator", "user");
         
         // Check if user has any of the roles
         CompletableFuture<Boolean> hasAnyRole = checker.hasAnyRole(roles);
-        hasAnyRole.thenAccept(hasRole -> {
+        CompletableFuture<Void> anyRoleFuture = hasAnyRole.thenAccept(hasRole -> {
             if (hasRole) {
                 log.info("✅ User has at least one of the roles: {}", roles);
             } else {
@@ -125,24 +120,26 @@ public class HardCheckExample {
         
         // Check if user has all of the roles
         CompletableFuture<Boolean> hasAllRoles = checker.hasAllRoles(roles);
-        hasAllRoles.thenAccept(hasRole -> {
+        CompletableFuture<Void> allRolesFuture = hasAllRoles.thenAccept(hasRole -> {
             if (hasRole) {
                 log.info("✅ User has all roles: {}", roles);
             } else {
                 log.info("❌ User does not have all roles: {}", roles);
             }
         });
+        
+        return CompletableFuture.allOf(anyRoleFuture, allRolesFuture);
     }
     
     /**
      * Example: Check feature flags with API fallback.
      */
-    private static void checkFeatureFlags(KindeTokenChecker checker) {
+    private static CompletableFuture<Void> checkFeatureFlags(KindeTokenChecker checker) {
         log.info("=== Checking Feature Flags ===");
         
         // Check if a feature flag is enabled
         CompletableFuture<Boolean> isDarkModeEnabled = checker.isFeatureFlagEnabled("dark_mode");
-        isDarkModeEnabled.thenAccept(enabled -> {
+        CompletableFuture<Void> darkModeFuture = isDarkModeEnabled.thenAccept(enabled -> {
             if (enabled) {
                 log.info("✅ Dark mode feature flag is enabled");
             } else {
@@ -152,19 +149,21 @@ public class HardCheckExample {
         
         // Get the value of a feature flag
         CompletableFuture<Object> betaFeaturesValue = checker.getFeatureFlagValue("beta_features");
-        betaFeaturesValue.thenAccept(value -> {
+        CompletableFuture<Void> betaFeaturesFuture = betaFeaturesValue.thenAccept(value -> {
             if (value != null) {
                 log.info("✅ Beta features flag value: {}", value);
             } else {
                 log.info("❌ Beta features flag not found or null");
             }
         });
+        
+        return CompletableFuture.allOf(darkModeFuture, betaFeaturesFuture);
     }
     
     /**
      * Example: Comprehensive checks combining permissions, roles, and feature flags.
      */
-    private static void comprehensiveChecks(KindeTokenChecker checker) {
+    private static CompletableFuture<Void> comprehensiveChecks(KindeTokenChecker checker) {
         log.info("=== Comprehensive Checks ===");
         
         List<String> requiredPermissions = Arrays.asList("read:users", "write:users");
@@ -178,7 +177,7 @@ public class HardCheckExample {
                 requiredFeatureFlags
         );
         
-        hasAllRequirements.thenAccept(hasAccess -> {
+        CompletableFuture<Void> allRequirementsFuture = hasAllRequirements.thenAccept(hasAccess -> {
             if (hasAccess) {
                 log.info("✅ User has ALL requirements:");
                 log.info("   - Permissions: {}", requiredPermissions);
@@ -196,13 +195,15 @@ public class HardCheckExample {
                 requiredFeatureFlags
         );
         
-        hasAnyRequirements.thenAccept(hasAccess -> {
+        CompletableFuture<Void> anyRequirementsFuture = hasAnyRequirements.thenAccept(hasAccess -> {
             if (hasAccess) {
                 log.info("✅ User has at least one requirement from each category");
             } else {
                 log.info("❌ User does not have any requirements from each category");
             }
         });
+        
+        return CompletableFuture.allOf(allRequirementsFuture, anyRequirementsFuture);
     }
     
     /**

@@ -34,13 +34,13 @@ KindeClientSession session = client.clientSession();
 KindeEntitlements entitlements = session.entitlements();
 
 // Get all entitlements
-CompletableFuture<Object> allEntitlements = entitlements.getEntitlements();
+CompletableFuture<EntitlementsResponse> allEntitlements = entitlements.getEntitlements();
 allEntitlements.thenAccept(result -> {
     System.out.println("All entitlements: " + result);
 });
 
 // Get a specific entitlement
-CompletableFuture<Object> specificEntitlement = entitlements.getEntitlement("premium-feature");
+CompletableFuture<EntitlementResponse> specificEntitlement = entitlements.getEntitlement("premium-feature");
 specificEntitlement.thenAccept(result -> {
     System.out.println("Premium feature entitlement: " + result);
 });

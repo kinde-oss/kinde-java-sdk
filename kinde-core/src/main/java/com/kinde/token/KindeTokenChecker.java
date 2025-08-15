@@ -2,11 +2,14 @@ package com.kinde.token;
 
 import com.kinde.KindeClientSession;
 import com.kinde.accounts.KindeAccountsClient;
+import org.openapitools.client.model.FeatureFlagResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -40,26 +43,22 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing true if the user has the permission, false otherwise
      */
     public CompletableFuture<Boolean> hasPermission(String permissionKey) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // First, try to get permissions from token
-                List<String> tokenPermissions = token.getPermissions();
-                
-                if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
-                    // Check if permission is in token
-                    boolean hasPermission = tokenPermissions.contains(permissionKey);
-                    log.debug("Permission '{}' found in token: {}", permissionKey, hasPermission);
-                    return hasPermission;
-                } else {
-                    // Fall back to API call
-                    log.debug("No permissions in token, falling back to API for permission: {}", permissionKey);
-                    return accountsClient.hasPermission(permissionKey).join();
-                }
-            } catch (Exception e) {
-                log.error("Error checking permission '{}': {}", permissionKey, e.getMessage());
+        if (permissionKey == null || permissionKey.isBlank()) {
+            log.warn("Permission key was null/blank");
+            return CompletableFuture.completedFuture(false);
+        }
+        List<String> tokenPermissions = token.getPermissions();
+        if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
+            boolean has = tokenPermissions.contains(permissionKey);
+            log.debug("Permission '{}' found in token: {}", permissionKey, has);
+            return CompletableFuture.completedFuture(has);
+        }
+        log.debug("No permissions in token, falling back to API for permission: {}", permissionKey);
+        return accountsClient.hasPermission(permissionKey)
+            .exceptionally(e -> {
+                log.error("Error checking permission '{}'", permissionKey, e);
                 return false;
-            }
-        });
+            });
     }
     
     /**
@@ -69,27 +68,22 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing true if the user has any of the permissions, false otherwise
      */
     public CompletableFuture<Boolean> hasAnyPermission(List<String> permissionKeys) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // First, try to get permissions from token
-                List<String> tokenPermissions = token.getPermissions();
-                
-                if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
-                    // Check if any permission is in token
-                    boolean hasAnyPermission = permissionKeys.stream()
-                            .anyMatch(tokenPermissions::contains);
-                    log.debug("Any permission check in token: {}", hasAnyPermission);
-                    return hasAnyPermission;
-                } else {
-                    // Fall back to API call
-                    log.debug("No permissions in token, falling back to API for any permission check");
-                    return accountsClient.hasAnyPermission(permissionKeys).join();
-                }
-            } catch (Exception e) {
-                log.error("Error checking any permission: {}", e.getMessage());
+        if (permissionKeys == null || permissionKeys.isEmpty()) {
+            log.debug("No permission keys provided for hasAnyPermission; returning false");
+            return CompletableFuture.completedFuture(false);
+        }
+        List<String> tokenPermissions = token.getPermissions();
+        if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
+            boolean any = permissionKeys.stream().anyMatch(tokenPermissions::contains);
+            log.debug("Any permission check in token: {}", any);
+            return CompletableFuture.completedFuture(any);
+        }
+        log.debug("No permissions in token, falling back to API for any permission check");
+        return accountsClient.hasAnyPermission(permissionKeys)
+            .exceptionally(e -> {
+                log.error("Error checking any permission", e);
                 return false;
-            }
-        });
+            });
     }
     
     /**
@@ -99,27 +93,22 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing true if the user has all of the permissions, false otherwise
      */
     public CompletableFuture<Boolean> hasAllPermissions(List<String> permissionKeys) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // First, try to get permissions from token
-                List<String> tokenPermissions = token.getPermissions();
-                
-                if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
-                    // Check if all permissions are in token
-                    boolean hasAllPermissions = permissionKeys.stream()
-                            .allMatch(tokenPermissions::contains);
-                    log.debug("All permissions check in token: {}", hasAllPermissions);
-                    return hasAllPermissions;
-                } else {
-                    // Fall back to API call
-                    log.debug("No permissions in token, falling back to API for all permissions check");
-                    return accountsClient.hasAllPermissions(permissionKeys).join();
-                }
-            } catch (Exception e) {
-                log.error("Error checking all permissions: {}", e.getMessage());
+        if (permissionKeys == null || permissionKeys.isEmpty()) {
+            log.debug("No permission keys provided for hasAllPermissions; returning true");
+            return CompletableFuture.completedFuture(true);
+        }
+        List<String> tokenPermissions = token.getPermissions();
+        if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
+            boolean all = permissionKeys.stream().allMatch(tokenPermissions::contains);
+            log.debug("All permissions check in token: {}", all);
+            return CompletableFuture.completedFuture(all);
+        }
+        log.debug("No permissions in token, falling back to API for all permissions check");
+        return accountsClient.hasAllPermissions(permissionKeys)
+            .exceptionally(e -> {
+                log.error("Error checking all permissions", e);
                 return false;
-            }
-        });
+            });
     }
     
     /**
@@ -129,26 +118,22 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing true if the user has the role, false otherwise
      */
     public CompletableFuture<Boolean> hasRole(String roleKey) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // First, try to get roles from token
-                List<String> tokenRoles = getTokenRoles();
-                
-                if (tokenRoles != null && !tokenRoles.isEmpty()) {
-                    // Check if role is in token
-                    boolean hasRole = tokenRoles.contains(roleKey);
-                    log.debug("Role '{}' found in token: {}", roleKey, hasRole);
-                    return hasRole;
-                } else {
-                    // Fall back to API call
-                    log.debug("No roles in token, falling back to API for role: {}", roleKey);
-                    return accountsClient.hasRole(roleKey).join();
-                }
-            } catch (Exception e) {
-                log.error("Error checking role '{}': {}", roleKey, e.getMessage());
+        if (roleKey == null || roleKey.isBlank()) {
+            log.warn("Role key was null/blank");
+            return CompletableFuture.completedFuture(false);
+        }
+        List<String> tokenRoles = getTokenRoles();
+        if (!tokenRoles.isEmpty()) {
+            boolean has = tokenRoles.contains(roleKey);
+            log.debug("Role '{}' found in token: {}", roleKey, has);
+            return CompletableFuture.completedFuture(has);
+        }
+        log.debug("No roles in token, falling back to API for role: {}", roleKey);
+        return accountsClient.hasRole(roleKey)
+            .exceptionally(e -> {
+                log.error("Error checking role '{}'", roleKey, e);
                 return false;
-            }
-        });
+            });
     }
     
     /**
@@ -158,27 +143,22 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing true if the user has any of the roles, false otherwise
      */
     public CompletableFuture<Boolean> hasAnyRole(List<String> roleKeys) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // First, try to get roles from token
-                List<String> tokenRoles = getTokenRoles();
-                
-                if (tokenRoles != null && !tokenRoles.isEmpty()) {
-                    // Check if any role is in token
-                    boolean hasAnyRole = roleKeys.stream()
-                            .anyMatch(tokenRoles::contains);
-                    log.debug("Any role check in token: {}", hasAnyRole);
-                    return hasAnyRole;
-                } else {
-                    // Fall back to API call
-                    log.debug("No roles in token, falling back to API for any role check");
-                    return accountsClient.hasAnyRole(roleKeys).join();
-                }
-            } catch (Exception e) {
-                log.error("Error checking any role: {}", e.getMessage());
+        if (roleKeys == null || roleKeys.isEmpty()) {
+            log.debug("No role keys provided for hasAnyRole; returning false");
+            return CompletableFuture.completedFuture(false);
+        }
+        List<String> tokenRoles = getTokenRoles();
+        if (!tokenRoles.isEmpty()) {
+            boolean any = roleKeys.stream().anyMatch(tokenRoles::contains);
+            log.debug("Any role check in token: {}", any);
+            return CompletableFuture.completedFuture(any);
+        }
+        log.debug("No roles in token, falling back to API for any role check");
+        return accountsClient.hasAnyRole(roleKeys)
+            .exceptionally(e -> {
+                log.error("Error checking any role", e);
                 return false;
-            }
-        });
+            });
     }
     
     /**
@@ -188,40 +168,46 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing true if the user has all of the roles, false otherwise
      */
     public CompletableFuture<Boolean> hasAllRoles(List<String> roleKeys) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // First, try to get roles from token
-                List<String> tokenRoles = getTokenRoles();
-                
-                if (tokenRoles != null && !tokenRoles.isEmpty()) {
-                    // Check if all roles are in token
-                    boolean hasAllRoles = roleKeys.stream()
-                            .allMatch(tokenRoles::contains);
-                    log.debug("All roles check in token: {}", hasAllRoles);
-                    return hasAllRoles;
-                } else {
-                    // Fall back to API call
-                    log.debug("No roles in token, falling back to API for all roles check");
-                    return accountsClient.hasAllRoles(roleKeys).join();
-                }
-            } catch (Exception e) {
-                log.error("Error checking all roles: {}", e.getMessage());
+        if (roleKeys == null || roleKeys.isEmpty()) {
+            log.debug("No role keys provided for hasAllRoles; returning true");
+            return CompletableFuture.completedFuture(true);
+        }
+        List<String> tokenRoles = getTokenRoles();
+        if (!tokenRoles.isEmpty()) {
+            boolean all = roleKeys.stream().allMatch(tokenRoles::contains);
+            log.debug("All roles check in token: {}", all);
+            return CompletableFuture.completedFuture(all);
+        }
+        log.debug("No roles in token, falling back to API for all roles check");
+        return accountsClient.hasAllRoles(roleKeys)
+            .exceptionally(e -> {
+                log.error("Error checking all roles", e);
                 return false;
-            }
-        });
+            });
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Gets roles from the token using the typed accessor.
+     * This method is now deprecated in favor of using token.getRoles() directly.
+     * 
+     * @return List of role strings, or empty list if no roles are found
+     * @deprecated Use token.getRoles() instead
+     */
+    @Deprecated
     private List<String> getTokenRoles() {
         Object roles = token.getClaim("roles");
         if (roles instanceof java.util.List) {
             return (java.util.List<String>) roles;
         }
+        Object hasuraAllowedRoles = token.getClaim("x-hasura-allowed-roles");
+        if (hasuraAllowedRoles instanceof java.util.List) {
+            return (java.util.List<String>) hasuraAllowedRoles;
+        }
         Object hasuraRoles = token.getClaim("x-hasura-roles");
         if (hasuraRoles instanceof java.util.List) {
             return (java.util.List<String>) hasuraRoles;
         }
-        return null;
+        return java.util.Collections.emptyList();
     }
     
     /**
@@ -231,31 +217,30 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing true if the feature flag is enabled, false otherwise
      */
     public CompletableFuture<Boolean> isFeatureFlagEnabled(String flagKey) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // First, try to get feature flag from token
-                Boolean tokenFlag = token.getBooleanFlag(flagKey);
-                
-                if (tokenFlag != null) {
-                    log.debug("Feature flag '{}' found in token: {}", flagKey, tokenFlag);
-                    return tokenFlag;
-                } else {
-                    // Fall back to API call
-                    log.debug("Feature flag '{}' not in token, falling back to API", flagKey);
-                    return accountsClient.getFeatureFlag(flagKey)
-                            .thenApply(response -> {
-                                if (response.getData() != null) {
-                                    return Boolean.TRUE.equals(response.getData().getValue());
-                                }
-                                return false;
-                            })
-                            .join();
-                }
-            } catch (Exception e) {
-                log.error("Error checking feature flag '{}': {}", flagKey, e.getMessage());
-                return false;
-            }
-        });
+        if (flagKey == null || flagKey.isBlank()) {
+            log.warn("Feature flag key was null/blank");
+            return CompletableFuture.completedFuture(false);
+        }
+        // First, try to get feature flag from token
+        Boolean tokenFlag = token.getBooleanFlag(flagKey);
+        
+        if (tokenFlag != null) {
+            log.debug("Feature flag '{}' found in token: {}", flagKey, tokenFlag);
+            return CompletableFuture.completedFuture(tokenFlag);
+        }
+        // Fall back to API call
+        log.debug("Feature flag '{}' not in token, falling back to API", flagKey);
+        return accountsClient.getFeatureFlag(flagKey)
+                .thenApply(response -> {
+                    if (response.getData() != null) {
+                        return Boolean.TRUE.equals(response.getData().getValue());
+                    }
+                    return false;
+                })
+                .exceptionally(e -> {
+                    log.error("Error checking feature flag '{}'", flagKey, e);
+                    return false;
+                });
     }
     
     /**
@@ -265,32 +250,31 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing the feature flag value, or null if not found
      */
     public CompletableFuture<Object> getFeatureFlagValue(String flagKey) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // First, try to get feature flag from token
-                Map<String, Object> tokenFlags = token.getFlags();
-                
-                if (tokenFlags != null && tokenFlags.containsKey(flagKey)) {
-                    Object value = tokenFlags.get(flagKey);
-                    log.debug("Feature flag '{}' found in token: {}", flagKey, value);
-                    return value;
-                } else {
-                    // Fall back to API call
-                    log.debug("Feature flag '{}' not in token, falling back to API", flagKey);
-                    return accountsClient.getFeatureFlag(flagKey)
-                            .thenApply(response -> {
-                                if (response.getData() != null) {
-                                    return response.getData().getValue();
-                                }
-                                return null;
-                            })
-                            .join();
-                }
-            } catch (Exception e) {
-                log.error("Error getting feature flag '{}': {}", flagKey, e.getMessage());
-                return null;
-            }
-        });
+        if (flagKey == null || flagKey.isBlank()) {
+            log.warn("Feature flag key was null/blank");
+            return CompletableFuture.completedFuture(null);
+        }
+        // First, try to get feature flag from token
+        Map<String, Object> tokenFlags = token.getFlags();
+        
+        if (tokenFlags != null && tokenFlags.containsKey(flagKey)) {
+            Object value = tokenFlags.get(flagKey);
+            log.debug("Feature flag '{}' found in token: {}", flagKey, value);
+            return CompletableFuture.completedFuture(value);
+        }
+        // Fall back to API call
+        log.debug("Feature flag '{}' not in token, falling back to API", flagKey);
+        return accountsClient.getFeatureFlag(flagKey)
+                .thenApply(response -> {
+                    if (response.getData() != null) {
+                        return (Object) response.getData().getValue();
+                    }
+                    return null;
+                })
+                .exceptionally(e -> {
+                    log.error("Error getting feature flag '{}'", flagKey, e);
+                    return null;
+                });
     }
     
     /**
@@ -303,46 +287,31 @@ public class KindeTokenChecker {
      * @return A CompletableFuture containing true if all checks pass, false otherwise
      */
     public CompletableFuture<Boolean> hasAll(List<String> permissions, List<String> roles, List<String> featureFlags) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                boolean allChecksPass = true;
-                
-                // Check permissions if provided
-                if (permissions != null && !permissions.isEmpty()) {
-                    boolean permissionsCheck = hasAllPermissions(permissions).join();
-                    if (!permissionsCheck) {
-                        log.debug("Permission check failed for: {}", permissions);
-                        allChecksPass = false;
-                    }
-                }
-                
-                // Check roles if provided
-                if (roles != null && !roles.isEmpty()) {
-                    boolean rolesCheck = hasAllRoles(roles).join();
-                    if (!rolesCheck) {
-                        log.debug("Role check failed for: {}", roles);
-                        allChecksPass = false;
-                    }
-                }
-                
-                // Check feature flags if provided
-                if (featureFlags != null && !featureFlags.isEmpty()) {
-                    for (String flag : featureFlags) {
-                        boolean flagCheck = isFeatureFlagEnabled(flag).join();
-                        if (!flagCheck) {
-                            log.debug("Feature flag check failed for: {}", flag);
-                            allChecksPass = false;
-                            break;
-                        }
-                    }
-                }
-                
-                return allChecksPass;
-            } catch (Exception e) {
-                log.error("Error in comprehensive check: {}", e.getMessage());
-                return false;
-            }
-        });
+        CompletableFuture<Boolean> pFut = (permissions == null || permissions.isEmpty())
+            ? CompletableFuture.completedFuture(true)
+            : hasAllPermissions(permissions);
+
+        CompletableFuture<Boolean> rFut = (roles == null || roles.isEmpty())
+            ? CompletableFuture.completedFuture(true)
+            : hasAllRoles(roles);
+
+        CompletableFuture<Boolean> fFut;
+        if (featureFlags == null || featureFlags.isEmpty()) {
+            fFut = CompletableFuture.completedFuture(true);
+        } else {
+            List<CompletableFuture<Boolean>> futures = featureFlags.stream()
+                .map(this::isFeatureFlagEnabled)
+                .toList();
+            fFut = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream().allMatch(f -> f.getNow(false)));
+        }
+
+        return pFut.thenCombine(rFut, (p, r) -> p && r)
+                   .thenCombine(fFut, (pr, f) -> pr && f)
+                   .exceptionally(e -> {
+                       log.error("Error in comprehensive check (hasAll)", e);
+                       return false;
+                   });
     }
     
     /**
@@ -354,39 +323,31 @@ public class KindeTokenChecker {
      * @param featureFlags List of feature flags to check (optional)
      * @return A CompletableFuture containing true if at least one check from each category passes, false otherwise
      */
-    public CompletableFuture<Boolean> hasAny(List<String> permissions, List<String> roles, List<String> featureFlags) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                boolean permissionsCheck = true;
-                boolean rolesCheck = true;
-                boolean featureFlagsCheck = true;
-                
-                // Check permissions if provided
-                if (permissions != null && !permissions.isEmpty()) {
-                    permissionsCheck = hasAnyPermission(permissions).join();
-                }
-                
-                // Check roles if provided
-                if (roles != null && !roles.isEmpty()) {
-                    rolesCheck = hasAnyRole(roles).join();
-                }
-                
-                // Check feature flags if provided
-                if (featureFlags != null && !featureFlags.isEmpty()) {
-                    featureFlagsCheck = false;
-                    for (String flag : featureFlags) {
-                        if (isFeatureFlagEnabled(flag).join()) {
-                            featureFlagsCheck = true;
-                            break;
-                        }
-                    }
-                }
-                
-                return permissionsCheck && rolesCheck && featureFlagsCheck;
-            } catch (Exception e) {
-                log.error("Error in comprehensive check: {}", e.getMessage());
-                return false;
-            }
-        });
+        public CompletableFuture<Boolean> hasAny(List<String> permissions, List<String> roles, List<String> featureFlags) {
+        CompletableFuture<Boolean> pFut = (permissions == null || permissions.isEmpty())
+            ? CompletableFuture.completedFuture(true)
+            : hasAnyPermission(permissions);
+
+        CompletableFuture<Boolean> rFut = (roles == null || roles.isEmpty())
+            ? CompletableFuture.completedFuture(true)
+            : hasAnyRole(roles);
+
+        CompletableFuture<Boolean> fFut;
+        if (featureFlags == null || featureFlags.isEmpty()) {
+            fFut = CompletableFuture.completedFuture(true);
+        } else {
+            List<CompletableFuture<Boolean>> futures = featureFlags.stream()
+                .map(this::isFeatureFlagEnabled)
+                .toList();
+            fFut = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream().anyMatch(f -> f.getNow(false)));
+        }
+
+        return pFut.thenCombine(rFut, (p, r) -> p && r)
+                   .thenCombine(fFut, (pr, f) -> pr && f)
+                   .exceptionally(e -> {
+                       log.error("Error in comprehensive check (hasAny)", e);
+                       return false;
+                   });
     }
 }

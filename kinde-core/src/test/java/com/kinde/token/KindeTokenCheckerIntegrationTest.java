@@ -150,7 +150,7 @@ class KindeTokenCheckerIntegrationTest {
     void testHasRole_WithTokenData_ReturnsTrue() {
         // Given: Token contains the required role
         List<String> tokenRoles = Arrays.asList("admin", "user", "moderator");
-        when(mockToken.getClaim("roles")).thenReturn(tokenRoles);
+        when(mockToken.getRoles()).thenReturn(tokenRoles);
 
         // When: Check for role that exists in token
         CompletableFuture<Boolean> future = checker.hasRole("admin");
@@ -164,7 +164,7 @@ class KindeTokenCheckerIntegrationTest {
     void testHasRole_WithTokenData_ReturnsFalse() {
         // Given: Token contains roles but not the required one
         List<String> tokenRoles = Arrays.asList("user", "moderator");
-        when(mockToken.getClaim("roles")).thenReturn(tokenRoles);
+        when(mockToken.getRoles()).thenReturn(tokenRoles);
 
         // When: Check for role that doesn't exist in token
         CompletableFuture<Boolean> future = checker.hasRole("admin");
@@ -178,7 +178,7 @@ class KindeTokenCheckerIntegrationTest {
     void testHasAnyRole_WithTokenData_ReturnsTrue() {
         // Given: Token contains one of the required roles
         List<String> tokenRoles = Arrays.asList("admin", "user");
-        when(mockToken.getClaim("roles")).thenReturn(tokenRoles);
+        when(mockToken.getRoles()).thenReturn(tokenRoles);
 
         // When: Check for any of multiple roles
         CompletableFuture<Boolean> future = checker.hasAnyRole(Arrays.asList("admin", "superuser"));
@@ -192,7 +192,7 @@ class KindeTokenCheckerIntegrationTest {
     void testHasAllRoles_WithTokenData_ReturnsTrue() {
         // Given: Token contains all required roles
         List<String> tokenRoles = Arrays.asList("admin", "user", "moderator");
-        when(mockToken.getClaim("roles")).thenReturn(tokenRoles);
+        when(mockToken.getRoles()).thenReturn(tokenRoles);
 
         // When: Check for all roles
         CompletableFuture<Boolean> future = checker.hasAllRoles(Arrays.asList("admin", "user"));
@@ -200,6 +200,33 @@ class KindeTokenCheckerIntegrationTest {
 
         // Then: Should return true
         assertTrue(result);
+    }
+
+    @Test
+    void testHasRole_WithFallbackToHasuraRoles_ReturnsTrue() {
+        // Given: Token uses Hasura-compatible role claim format
+        List<String> hasuraRoles = Arrays.asList("admin", "user", "moderator");
+        when(mockToken.getRoles()).thenReturn(hasuraRoles);
+
+        // When: Check for role that exists in Hasura roles
+        CompletableFuture<Boolean> future = checker.hasRole("admin");
+        boolean result = future.join();
+
+        // Then: Should return true
+        assertTrue(result);
+    }
+
+    @Test
+    void testHasRole_WithNoRoles_ReturnsFalse() {
+        // Given: Token contains no roles
+        when(mockToken.getRoles()).thenReturn(null);
+
+        // When: Check for any role
+        CompletableFuture<Boolean> future = checker.hasRole("admin");
+        boolean result = future.join();
+
+        // Then: Should return false
+        assertFalse(result);
     }
 
     // ==================== FEATURE FLAG TESTS ====================
@@ -269,7 +296,7 @@ class KindeTokenCheckerIntegrationTest {
     void testHasAll_WithAllRequirementsMet_ReturnsTrue() {
         // Given: Token contains all required permissions, roles, and feature flags
         when(mockToken.getPermissions()).thenReturn(Arrays.asList("read:users", "write:users"));
-        when(mockToken.getClaim("roles")).thenReturn(Arrays.asList("admin", "user"));
+        when(mockToken.getRoles()).thenReturn(Arrays.asList("admin", "user"));
         when(mockToken.getBooleanFlag("new_ui")).thenReturn(true);
 
         // When: Check for all requirements
@@ -364,7 +391,7 @@ class KindeTokenCheckerIntegrationTest {
     @Test
     void testEdgeCase_EmptyRoleKeys() {
         // Given: Empty role keys list
-        when(mockToken.getClaim("roles")).thenReturn(Arrays.asList("admin"));
+        when(mockToken.getRoles()).thenReturn(Arrays.asList("admin"));
 
         // When: Check for empty roles list
         CompletableFuture<Boolean> future = checker.hasAnyRole(Collections.emptyList());
@@ -390,7 +417,7 @@ class KindeTokenCheckerIntegrationTest {
     @Test
     void testEdgeCase_NullRoleKeys() {
         // Given: Null role keys list
-        when(mockToken.getClaim("roles")).thenReturn(Arrays.asList("admin"));
+        when(mockToken.getRoles()).thenReturn(Arrays.asList("admin"));
 
         // When: Check for null roles list
         CompletableFuture<Boolean> future = checker.hasAnyRole(null);
@@ -418,7 +445,7 @@ class KindeTokenCheckerIntegrationTest {
     @Test
     void testErrorHandling_WhenTokenThrowsExceptionForRoles() {
         // Given: Token throws exception when accessing roles
-        when(mockToken.getClaim("roles")).thenThrow(new RuntimeException("Invalid token"));
+        when(mockToken.getRoles()).thenThrow(new RuntimeException("Invalid token"));
 
         // When: Check for role
         CompletableFuture<Boolean> future = checker.hasRole("admin");
@@ -430,8 +457,8 @@ class KindeTokenCheckerIntegrationTest {
 
     @Test
     void testErrorHandling_WhenTokenThrowsExceptionForFlags() {
-        // Given: Token throws exception when accessing flags
-        when(mockToken.getFlags()).thenThrow(new RuntimeException("Invalid token"));
+        // Given: Token throws exception when accessing boolean flag
+        when(mockToken.getBooleanFlag("new_ui")).thenThrow(new RuntimeException("Invalid token"));
 
         // When: Check for feature flag
         CompletableFuture<Boolean> future = checker.isFeatureFlagEnabled("new_ui");
@@ -439,5 +466,18 @@ class KindeTokenCheckerIntegrationTest {
 
         // Then: Should return false due to token error
         assertFalse(result);
+    }
+
+    @Test
+    void testErrorHandling_WhenTokenThrowsExceptionForFeatureFlagValue() {
+        // Given: Token throws exception when accessing flags
+        when(mockToken.getFlags()).thenThrow(new RuntimeException("Invalid token"));
+
+        // When: Get feature flag value
+        CompletableFuture<Object> future = checker.getFeatureFlagValue("new_ui");
+        Object result = future.join();
+
+        // Then: Should return null due to token error
+        assertNull(result);
     }
 }
