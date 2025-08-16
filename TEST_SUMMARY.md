@@ -135,16 +135,16 @@ mvn test
 ## Test Quality Metrics
 
 ### Coverage Statistics
-- **Total Test Files**: 36+ (excluding generated tests)
-- **Test Classes**: 35+ across all modules
-- **Lines of Test Code**: 3,000+
-- **Mock Objects**: 50+
-- **Assertion Points**: 500+
+- **Total Test Files**: 40 (excluding generated tests; see [JaCoCo report]() for latest metrics)
+- **Test Classes**: 40 across all modules
+- **Total @Test annotations**: 164 (consider renaming from "Assertion Points")
+- **Lines of Test Code**: 3,000+ (approximate)
+- **Mock Objects**: 50+ (approximate)
 
 ### Test Categories
-- **Unit Tests**: 80%
-- **Integration Tests**: 15%
-- **Error Handling Tests**: 5%
+- **Unit Tests**: 80% (approximate)
+- **Integration Tests**: 15% (approximate)
+- **Error Handling Tests**: 5% (approximate)
 
 ### Test Patterns Used
 - **Mocking**: Extensive use of Mockito for API client mocking
@@ -213,10 +213,19 @@ mvn test
 - Performance monitoring
 - Coverage reporting
 - Continuous integration integration
+- **Automated Metrics Generation**: CI step to automatically count and update test statistics
+- **Dynamic Documentation**: Auto-update test metrics in documentation from CI builds
 
 ## Conclusion
 
 The comprehensive test suite provides excellent coverage of the Kinde Java SDK functionality, ensuring code quality, maintainability, and developer confidence. The tests follow best practices and provide clear examples of how to use the API endpoints and helper methods.
 
 ### Coverage Note
-While the test suite is comprehensive, specific coverage percentages would require running a coverage tool like JaCoCo during CI/CD. The test structure ensures that all major functionality is tested, but exact coverage metrics should be measured through automated coverage reporting. 
+The metrics above are current as of the last update but may drift over time. For the most accurate and up-to-date test statistics:
+
+1. **Run locally**: Use `find . -name "*Test.java" | wc -l` to count test files
+2. **Count test methods**: Use `find . -name "*Test.java" -exec grep -c "@Test" {} \; | awk '{sum += $1} END {print sum}'` to count @Test annotations
+3. **CI Integration**: Consider adding a CI step to automatically generate and update these metrics
+4. **JaCoCo Reports**: For detailed coverage analysis, refer to the latest JaCoCo coverage reports generated during CI/CD builds
+
+The test structure ensures that all major functionality is tested, but exact coverage metrics should be measured through automated coverage reporting. 
