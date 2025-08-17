@@ -53,6 +53,16 @@ ignore:
   # Test resources (keep test source code but ignore test data)
   - "**/src/test/resources/**"
   
+  # Generated entitlements and hard check code
+  - "**/org/openapitools/client/model/Entitlement*.java"
+  - "**/org/openapitools/client/model/Entitlements*.java"
+  - "**/org/openapitools/client/api/*Entitlement*.java"
+  - "**/org/openapitools/client/model/GetBillingEntitlements*.java"
+  - "**/org/openapitools/client/api/BillingEntitlements*.java"
+  - "**/org/openapitools/client/model/FeatureFlag*.java"
+  - "**/org/openapitools/client/model/Permission*.java"
+  - "**/org/openapitools/client/model/Role*.java"
+  
   # OpenAPI specification files (these are input files, not generated)
   # - "**/*.yaml"
   # - "**/*.yml"
