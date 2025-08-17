@@ -6,8 +6,6 @@ ignore:
   # Generated OpenAPI client code
   - "**/target/**"
   - "**/generated/**"
-  - "**/api/**"
-  - "**/model/**"
   - "**/ApiClient.java"
   - "**/ApiException.java"
   - "**/Configuration.java"
@@ -16,10 +14,9 @@ ignore:
   - "**/Pair.java"
   - "**/StringUtil.java"
   - "**/TypeRef.java"
-  - "**/auth/**"
-  - "**/client/**"
-  - "**/model/**"
-  - "**/api/**"
+  - "**/org/openapitools/**"
+  - "**/build/generated-sources/openapi/**"
+  - "**/src/gen/java/main/**"
   
   # Maven build artifacts
   - "**/pom.xml.bak"
@@ -77,20 +74,11 @@ include:
   - "**/*.yml"
 
 # Review settings
-review:
-  # Focus on code quality and best practices
-  focus:
-    - "code-quality"
-    - "security"
-    - "performance"
-    - "maintainability"
-    - "test-coverage"
-  
-  # Ignore minor formatting issues
-  ignore:
-    - "formatting"
-    - "spelling"
-    - "grammar"
+reviews:
+  profile: chill
+  tools:
+    languagetool:
+      enabled: false
 
 # Custom instructions for the AI reviewer
 instructions: |

@@ -15,15 +15,15 @@ This document summarizes the comprehensive unit tests in the Kinde Java SDK. The
 - ✅ `IDTokenTest.java` - Tests ID token handling
 - ✅ `RefreshTokenTest.java` - Tests refresh token operations
 - ✅ `JwtValidatorTest.java` - Tests JWT validation logic
-- ✅ `KindTokenFactoryImplTest.java` - Tests token factory implementation
+- ✅ `KindeTokenFactoryImplTest.java` - Tests token factory implementation
 
 #### Token Checker Tests
 - ✅ `KindeTokenCheckerTest.java` - Tests token checker builder pattern and validation
 - ✅ `KindeTokenCheckerIntegrationTest.java` - Tests comprehensive token checking functionality
 
 #### Client Tests
-- ✅ `KindClientImplTest.java` - Tests client implementation
-- ✅ `KindClientBuilderTest.java` - Tests client builder pattern
+- ✅ `KindeClientImplTest.java` - Tests client implementation
+- ✅ `KindeClientBuilderTest.java` - Tests client builder pattern
 - ✅ `OidcMetaDataImplTest.java` - Tests OIDC metadata handling
 
 #### Session Tests

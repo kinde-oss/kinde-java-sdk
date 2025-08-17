@@ -47,11 +47,15 @@ public class KindeTokenChecker {
             log.warn("Permission key was null/blank");
             return CompletableFuture.completedFuture(false);
         }
-        List<String> tokenPermissions = token.getPermissions();
-        if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
-            boolean has = tokenPermissions.contains(permissionKey);
-            log.debug("Permission '{}' found in token: {}", permissionKey, has);
-            return CompletableFuture.completedFuture(has);
+        try {
+            List<String> tokenPermissions = token.getPermissions();
+            if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
+                boolean has = tokenPermissions.contains(permissionKey);
+                log.debug("Permission '{}' found in token: {}", permissionKey, has);
+                return CompletableFuture.completedFuture(has);
+            }
+        } catch (Exception e) {
+            log.debug("Error getting permissions from token, falling back to API: {}", e.getMessage());
         }
         log.debug("No permissions in token, falling back to API for permission: {}", permissionKey);
         return accountsClient.hasPermission(permissionKey)
@@ -122,11 +126,15 @@ public class KindeTokenChecker {
             log.warn("Role key was null/blank");
             return CompletableFuture.completedFuture(false);
         }
-        List<String> tokenRoles = getTokenRoles();
-        if (!tokenRoles.isEmpty()) {
-            boolean has = tokenRoles.contains(roleKey);
-            log.debug("Role '{}' found in token: {}", roleKey, has);
-            return CompletableFuture.completedFuture(has);
+        try {
+            List<String> tokenRoles = getTokenRoles();
+            if (!tokenRoles.isEmpty()) {
+                boolean has = tokenRoles.contains(roleKey);
+                log.debug("Role '{}' found in token: {}", roleKey, has);
+                return CompletableFuture.completedFuture(has);
+            }
+        } catch (Exception e) {
+            log.debug("Error getting roles from token, falling back to API: {}", e.getMessage());
         }
         log.debug("No roles in token, falling back to API for role: {}", roleKey);
         return accountsClient.hasRole(roleKey)
@@ -195,19 +203,8 @@ public class KindeTokenChecker {
      */
     @Deprecated
     private List<String> getTokenRoles() {
-        Object roles = token.getClaim("roles");
-        if (roles instanceof java.util.List) {
-            return (java.util.List<String>) roles;
-        }
-        Object hasuraAllowedRoles = token.getClaim("x-hasura-allowed-roles");
-        if (hasuraAllowedRoles instanceof java.util.List) {
-            return (java.util.List<String>) hasuraAllowedRoles;
-        }
-        Object hasuraRoles = token.getClaim("x-hasura-roles");
-        if (hasuraRoles instanceof java.util.List) {
-            return (java.util.List<String>) hasuraRoles;
-        }
-        return java.util.Collections.emptyList();
+        List<String> roles = token.getRoles();
+        return roles != null ? roles : Collections.emptyList();
     }
     
     /**
@@ -221,12 +218,16 @@ public class KindeTokenChecker {
             log.warn("Feature flag key was null/blank");
             return CompletableFuture.completedFuture(false);
         }
-        // First, try to get feature flag from token
-        Boolean tokenFlag = token.getBooleanFlag(flagKey);
-        
-        if (tokenFlag != null) {
-            log.debug("Feature flag '{}' found in token: {}", flagKey, tokenFlag);
-            return CompletableFuture.completedFuture(tokenFlag);
+        try {
+            // First, try to get feature flag from token
+            Boolean tokenFlag = token.getBooleanFlag(flagKey);
+            
+            if (tokenFlag != null) {
+                log.debug("Feature flag '{}' found in token: {}", flagKey, tokenFlag);
+                return CompletableFuture.completedFuture(tokenFlag);
+            }
+        } catch (Exception e) {
+            log.debug("Error getting feature flag from token, falling back to API: {}", e.getMessage());
         }
         // Fall back to API call
         log.debug("Feature flag '{}' not in token, falling back to API", flagKey);
@@ -254,13 +255,17 @@ public class KindeTokenChecker {
             log.warn("Feature flag key was null/blank");
             return CompletableFuture.completedFuture(null);
         }
-        // First, try to get feature flag from token
-        Map<String, Object> tokenFlags = token.getFlags();
-        
-        if (tokenFlags != null && tokenFlags.containsKey(flagKey)) {
-            Object value = tokenFlags.get(flagKey);
-            log.debug("Feature flag '{}' found in token: {}", flagKey, value);
-            return CompletableFuture.completedFuture(value);
+        try {
+            // First, try to get feature flag from token
+            Map<String, Object> tokenFlags = token.getFlags();
+            
+            if (tokenFlags != null && tokenFlags.containsKey(flagKey)) {
+                Object value = tokenFlags.get(flagKey);
+                log.debug("Feature flag '{}' found in token: {}", flagKey, value);
+                return CompletableFuture.completedFuture(value);
+            }
+        } catch (Exception e) {
+            log.debug("Error getting feature flags from token, falling back to API: {}", e.getMessage());
         }
         // Fall back to API call
         log.debug("Feature flag '{}' not in token, falling back to API", flagKey);

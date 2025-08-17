@@ -7,8 +7,10 @@ import org.openapitools.client.api.DefaultApi;
 import org.openapitools.client.model.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Client for accessing Kinde Accounts API functionality.
@@ -268,7 +270,8 @@ public class KindeAccountsClient {
         return getPermissions().thenApply(response -> {
             if (response.getData() != null) {
                 return response.getData().stream()
-                    .anyMatch(permission -> permissionKey.equals(permission.getName()));
+                    .anyMatch(p -> permissionKey.equals(p.getId())
+                                 || permissionKey.equals(p.getName()));
             }
             return false;
         });
@@ -287,7 +290,7 @@ public class KindeAccountsClient {
         return getPermissions().thenApply(response -> {
             if (response.getData() != null) {
                 return response.getData().stream()
-                    .anyMatch(permission -> permissionKeys.contains(permission.getName()));
+                    .anyMatch(p -> permissionKeys.contains(p.getId()) || permissionKeys.contains(p.getName()));
             }
             return false;
         });
@@ -306,8 +309,9 @@ public class KindeAccountsClient {
         return getPermissions().thenApply(response -> {
             if (response.getData() != null) {
                 List<String> userPermissions = response.getData().stream()
-                    .map(Permission::getName)
-                    .toList();
+                    .flatMap(p -> Stream.of(p.getId(), p.getName()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
                 return permissionKeys.stream().allMatch(userPermissions::contains);
             }
             return false;
@@ -327,7 +331,7 @@ public class KindeAccountsClient {
         return getRoles().thenApply(response -> {
             if (response.getData() != null) {
                 return response.getData().stream()
-                    .anyMatch(role -> roleKey.equals(role.getName()));
+                    .anyMatch(r -> roleKey.equals(r.getId()) || roleKey.equals(r.getName()));
             }
             return false;
         });
@@ -346,7 +350,7 @@ public class KindeAccountsClient {
         return getRoles().thenApply(response -> {
             if (response.getData() != null) {
                 return response.getData().stream()
-                    .anyMatch(role -> roleKeys.contains(role.getName()));
+                    .anyMatch(r -> roleKeys.contains(r.getId()) || roleKeys.contains(r.getName()));
             }
             return false;
         });
@@ -365,7 +369,8 @@ public class KindeAccountsClient {
         return getRoles().thenApply(response -> {
             if (response.getData() != null) {
                 List<String> userRoles = response.getData().stream()
-                    .map(Role::getName)
+                    .flatMap(r -> Stream.of(r.getId(), r.getName()))
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
                 return roleKeys.stream().allMatch(userRoles::contains);
             }

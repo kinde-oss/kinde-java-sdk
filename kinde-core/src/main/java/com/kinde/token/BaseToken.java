@@ -3,6 +3,7 @@ package com.kinde.token;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -72,10 +73,10 @@ public class BaseToken implements KindeToken {
     public List<String> getRoles() {
         // Prefer standard claim; fallback to Hasura-compatible claim if missing
         List<String> roles = (List<String>) getClaim("roles");
-        if (roles != null) {
-            return roles;
+        if (roles == null) {
+            roles = (List<String>) getClaim("x-hasura-roles");
         }
-        return (List<String>) getClaim("x-hasura-roles");
+        return roles != null ? roles : Collections.emptyList();
     }
 
     @Override
@@ -138,7 +139,7 @@ public class BaseToken implements KindeToken {
     public Map<String, Object> getFlags() {
         Map<String, Object> claims = getFlagClaims();
         if (claims == null) {
-            return null;
+            return Collections.emptyMap();
         }
         // Convert from { key -> { v: value, t: type } } to { key -> value }
         java.util.Map<String, Object> result = new java.util.HashMap<>();

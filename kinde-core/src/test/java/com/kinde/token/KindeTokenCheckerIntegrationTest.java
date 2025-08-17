@@ -204,7 +204,7 @@ class KindeTokenCheckerIntegrationTest {
 
     @Test
     void testHasRole_WithFallbackToHasuraRoles_ReturnsTrue() {
-        // Given: Token uses Hasura-compatible role claim format
+        // Given: Token has Hasura-compatible roles
         List<String> hasuraRoles = Arrays.asList("admin", "user", "moderator");
         when(mockToken.getRoles()).thenReturn(hasuraRoles);
 
@@ -336,7 +336,7 @@ class KindeTokenCheckerIntegrationTest {
     void testHasAny_WithSomeRequirementsMet_ReturnsTrue() {
         // Given: Token contains some of the required permissions, roles, and feature flags
         when(mockToken.getPermissions()).thenReturn(Arrays.asList("read:users"));
-        when(mockToken.getClaim("roles")).thenReturn(Arrays.asList("admin"));
+        when(mockToken.getRoles()).thenReturn(Arrays.asList("admin"));
         when(mockToken.getBooleanFlag("new_ui")).thenReturn(true);
         when(mockToken.getBooleanFlag("beta_features")).thenReturn(false);
 
@@ -356,7 +356,7 @@ class KindeTokenCheckerIntegrationTest {
     void testHasAny_WithNoRequirementsMet_ReturnsFalse() {
         // Given: Token contains none of the required permissions, roles, or feature flags
         when(mockToken.getPermissions()).thenReturn(Arrays.asList("other:permission"));
-        when(mockToken.getClaim("roles")).thenReturn(Arrays.asList("other:role"));
+        when(mockToken.getRoles()).thenReturn(Arrays.asList("other:role"));
         Map<String, Object> tokenFlags = new HashMap<>();
         tokenFlags.put("other_flag", true);
         when(mockToken.getFlags()).thenReturn(tokenFlags);
@@ -438,7 +438,7 @@ class KindeTokenCheckerIntegrationTest {
         CompletableFuture<Boolean> future = checker.hasPermission("read:users");
         boolean result = future.join();
 
-        // Then: Should return false due to token error
+        // Then: Should return false due to token error (falls back to API)
         assertFalse(result);
     }
 
@@ -451,7 +451,7 @@ class KindeTokenCheckerIntegrationTest {
         CompletableFuture<Boolean> future = checker.hasRole("admin");
         boolean result = future.join();
 
-        // Then: Should return false due to token error
+        // Then: Should return false due to token error (falls back to API)
         assertFalse(result);
     }
 
@@ -464,7 +464,7 @@ class KindeTokenCheckerIntegrationTest {
         CompletableFuture<Boolean> future = checker.isFeatureFlagEnabled("new_ui");
         boolean result = future.join();
 
-        // Then: Should return false due to token error
+        // Then: Should return false due to token error (falls back to API)
         assertFalse(result);
     }
 
@@ -477,7 +477,7 @@ class KindeTokenCheckerIntegrationTest {
         CompletableFuture<Object> future = checker.getFeatureFlagValue("new_ui");
         Object result = future.join();
 
-        // Then: Should return null due to token error
+        // Then: Should return null due to token error (falls back to API)
         assertNull(result);
     }
 }
