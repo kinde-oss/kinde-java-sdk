@@ -51,7 +51,7 @@ public class KindeAccountsClient {
         configureApiClient();
     }
     
-    private void configureApiClient() {
+        private void configureApiClient() {
         // Set the base path to the session's domain
         if (session != null) {
             String domain = session.getDomain();
@@ -66,8 +66,20 @@ public class KindeAccountsClient {
                 }
                 apiClient.getApiClient().setBasePath(domain + "/account_api/v1");
             }
-            
+
             // Set the access token for authentication
+            String accessToken = session.getAccessToken();
+            if (accessToken != null && !accessToken.isEmpty()) {
+                apiClient.getApiClient().setBearerToken(accessToken);
+            }
+        }
+    }
+
+    /**
+     * Refreshes the bearer token from the session, if present.
+     */
+    private void refreshAuth() {
+        if (session != null) {
             String accessToken = session.getAccessToken();
             if (accessToken != null && !accessToken.isEmpty()) {
                 apiClient.getApiClient().setBearerToken(accessToken);
@@ -81,6 +93,7 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the entitlements response
      */
     public CompletableFuture<EntitlementsResponse> getEntitlements() {
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getEntitlements();
@@ -102,6 +115,7 @@ public class KindeAccountsClient {
         if (key == null || key.trim().isEmpty()) {
             return CompletableFuture.failedFuture(new RuntimeException("Entitlement key cannot be null or empty"));
         }
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getEntitlement(key);
@@ -119,6 +133,7 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the permissions response
      */
     public CompletableFuture<PermissionsResponse> getPermissions() {
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getPermissions();
@@ -140,6 +155,7 @@ public class KindeAccountsClient {
         if (key == null || key.trim().isEmpty()) {
             return CompletableFuture.failedFuture(new RuntimeException("Permission key cannot be null or empty"));
         }
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getPermission(key);
@@ -157,6 +173,7 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the roles response
      */
     public CompletableFuture<RolesResponse> getRoles() {
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getRoles();
@@ -174,6 +191,7 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the feature flags response
      */
     public CompletableFuture<FeatureFlagsResponse> getFeatureFlags() {
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getFeatureFlags();
@@ -195,6 +213,7 @@ public class KindeAccountsClient {
         if (key == null || key.trim().isEmpty()) {
             return CompletableFuture.failedFuture(new RuntimeException("Feature flag key cannot be null or empty"));
         }
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getFeatureFlag(key);
@@ -212,6 +231,7 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the user organizations response
      */
     public CompletableFuture<UserOrganizationsResponse> getUserOrganizations() {
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getUserOrganizations();
@@ -229,6 +249,7 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the user profile response
      */
     public CompletableFuture<UserProfileResponse> getUserProfile() {
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getUserProfile();
@@ -246,6 +267,7 @@ public class KindeAccountsClient {
      * @return A CompletableFuture containing the current organization response
      */
     public CompletableFuture<CurrentOrganizationResponse> getCurrentOrganization() {
+        refreshAuth();
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return apiClient.getCurrentOrganization();

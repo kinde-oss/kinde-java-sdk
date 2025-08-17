@@ -135,7 +135,7 @@ mvn test
 ## Test Quality Metrics
 
 ### Coverage Statistics
-- **Total Test Files**: 40 (excluding generated tests; see [JaCoCo report]() for latest metrics)
+- **Total Test Files**: 40 (excluding generated tests; see [JaCoCo report](target/site/jacoco/index.html) for latest metrics)
 - **Test Classes**: 40 across all modules
 - **Total @Test annotations**: 164 (consider renaming from "Assertion Points")
 - **Lines of Test Code**: 3,000+ (approximate)

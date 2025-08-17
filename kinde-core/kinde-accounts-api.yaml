@@ -13,6 +13,8 @@ servers:
       domain:
         description: Your Kinde domain
         default: your-domain.kinde.com
+security:
+  - BearerAuth: []
 paths:
   /entitlements:
     get:

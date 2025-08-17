@@ -47,15 +47,11 @@ public class KindeTokenChecker {
             log.warn("Permission key was null/blank");
             return CompletableFuture.completedFuture(false);
         }
-        try {
-            List<String> tokenPermissions = token.getPermissions();
-            if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
-                boolean has = tokenPermissions.contains(permissionKey);
-                log.debug("Permission '{}' found in token: {}", permissionKey, has);
-                return CompletableFuture.completedFuture(has);
-            }
-        } catch (Exception e) {
-            log.debug("Error getting permissions from token, falling back to API: {}", e.getMessage());
+        List<String> tokenPermissions = getTokenPermissionsSafe();
+        if (!tokenPermissions.isEmpty()) {
+            boolean has = tokenPermissions.contains(permissionKey);
+            log.debug("Permission '{}' found in token: {}", permissionKey, has);
+            return CompletableFuture.completedFuture(has);
         }
         log.debug("No permissions in token, falling back to API for permission: {}", permissionKey);
         return accountsClient.hasPermission(permissionKey)
@@ -76,8 +72,8 @@ public class KindeTokenChecker {
             log.debug("No permission keys provided for hasAnyPermission; returning false");
             return CompletableFuture.completedFuture(false);
         }
-        List<String> tokenPermissions = token.getPermissions();
-        if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
+        List<String> tokenPermissions = getTokenPermissionsSafe();
+        if (!tokenPermissions.isEmpty()) {
             boolean any = permissionKeys.stream().anyMatch(tokenPermissions::contains);
             log.debug("Any permission check in token: {}", any);
             return CompletableFuture.completedFuture(any);
@@ -101,8 +97,8 @@ public class KindeTokenChecker {
             log.debug("No permission keys provided for hasAllPermissions; returning true");
             return CompletableFuture.completedFuture(true);
         }
-        List<String> tokenPermissions = token.getPermissions();
-        if (tokenPermissions != null && !tokenPermissions.isEmpty()) {
+        List<String> tokenPermissions = getTokenPermissionsSafe();
+        if (!tokenPermissions.isEmpty()) {
             boolean all = permissionKeys.stream().allMatch(tokenPermissions::contains);
             log.debug("All permissions check in token: {}", all);
             return CompletableFuture.completedFuture(all);
@@ -201,10 +197,19 @@ public class KindeTokenChecker {
      * @return List of role strings, or empty list if no roles are found
      * @deprecated Use token.getRoles() instead
      */
-    @Deprecated
     private List<String> getTokenRoles() {
-        List<String> roles = token.getRoles();
+        List<String> roles = (token != null) ? token.getRoles() : null;
         return roles != null ? roles : Collections.emptyList();
+    }
+
+    private List<String> getTokenPermissionsSafe() {
+        try {
+            List<String> perms = (token != null) ? token.getPermissions() : null;
+            return perms != null ? perms : Collections.emptyList();
+        } catch (Exception e) {
+            log.debug("Error getting permissions from token, treating as empty: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
     
     /**
