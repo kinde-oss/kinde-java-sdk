@@ -528,4 +528,4 @@ components:
         data:
           $ref: '#/components/schemas/Organization'
       required:
-        - data 
+        - data
