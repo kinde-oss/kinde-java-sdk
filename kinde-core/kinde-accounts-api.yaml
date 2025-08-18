@@ -23,6 +23,21 @@ paths:
       operationId: getEntitlements
       security:
         - BearerAuth: []
+      parameters:
+        - name: starting_after
+          in: query
+          required: false
+          description: Token from metadata.next_page_starting_after to fetch the next page
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
       responses:
         '200':
           description: Successful response
@@ -72,6 +87,21 @@ paths:
       operationId: getPermissions
       security:
         - BearerAuth: []
+      parameters:
+        - name: starting_after
+          in: query
+          required: false
+          description: Token from metadata.next_page_starting_after to fetch the next page
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
       responses:
         '200':
           description: Successful response
@@ -121,6 +151,21 @@ paths:
       operationId: getRoles
       security:
         - BearerAuth: []
+      parameters:
+        - name: starting_after
+          in: query
+          required: false
+          description: Token from metadata.next_page_starting_after to fetch the next page
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
       responses:
         '200':
           description: Successful response
@@ -141,6 +186,21 @@ paths:
       operationId: getFeatureFlags
       security:
         - BearerAuth: []
+      parameters:
+        - name: starting_after
+          in: query
+          required: false
+          description: Token from metadata.next_page_starting_after to fetch the next page
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
       responses:
         '200':
           description: Successful response
@@ -190,6 +250,21 @@ paths:
       operationId: getUserOrganizations
       security:
         - BearerAuth: []
+      parameters:
+        - name: starting_after
+          in: query
+          required: false
+          description: Token from metadata.next_page_starting_after to fetch the next page
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
       responses:
         '200':
           description: Successful response
