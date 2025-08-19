@@ -27,21 +27,19 @@ public class KindeAuthenticationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp, KindeAuthenticationAction kindeAuthenticationAction) throws ServletException, IOException {
         String errorParam = req.getParameter("error");
         if ("login_link_expired".equalsIgnoreCase(errorParam)) {
-            String reauthState = req.getParameter("reauth_state").replaceAll("\\s", "");
-            if (reauthState != null) {
+            String reauthStateParam = req.getParameter("reauth_state");
+            if (reauthStateParam != null && !reauthStateParam.isBlank()) {
                 try {
-                    String urlParams = new String(Base64.getDecoder().decode(reauthState), StandardCharsets.UTF_8);
+                    String normalized = reauthStateParam.replaceAll("\\s", "");
+                    String urlParams = new String(Base64.getUrlDecoder().decode(normalized), StandardCharsets.UTF_8);
                     KindeClientSession kindeClientSession = createKindeClientSession(req);
                     AuthorizationUrl authorizationUrl = kindeClientSession.login();
                     req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
                     String redirectUrl = authorizationUrl.getUrl().toString();
-                    if (redirectUrl.contains("?")) {
-                        redirectUrl = redirectUrl + "&" + urlParams;
-                    } else {
-                        redirectUrl = redirectUrl + "?" + urlParams;
-                    }
+                    redirectUrl = redirectUrl + (redirectUrl.contains("?") ? "&" : "?") + urlParams;
                     resp.sendRedirect(redirectUrl);
-                } catch (Exception ex) {
+                    return;
+                } catch (IllegalArgumentException ex) {
                     throw new ServletException("Error parsing reauth state: " + ex.getMessage(), ex);
                 }
             }

@@ -28,10 +28,11 @@ public abstract class KindeAuthenticationFilter implements Filter {
         // Handle login_link_expired error
         String errorParam = req.getParameter("error");
         if ("login_link_expired".equalsIgnoreCase(errorParam)) {
-            String reauthState = req.getParameter("reauth_state").replaceAll("\\s", "");
-            if (reauthState != null) {
+            String reauthStateParam = req.getParameter("reauth_state");
+            if (reauthStateParam != null && !reauthStateParam.isBlank()) {
                 try {
-                    String urlParams = new String(Base64.getDecoder().decode(reauthState), StandardCharsets.UTF_8);
+                    String normalized = reauthStateParam.replaceAll("\\s", "");
+                    String urlParams = new String(Base64.getUrlDecoder().decode(normalized), StandardCharsets.UTF_8);
                     KindeClientSession kindeClientSession = createKindeClientSession(req);
                     AuthorizationUrl authorizationUrl = kindeClientSession.login();
                     req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);

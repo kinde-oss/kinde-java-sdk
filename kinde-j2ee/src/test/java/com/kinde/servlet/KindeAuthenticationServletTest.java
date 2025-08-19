@@ -19,6 +19,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import static com.kinde.constants.KindeJ2eeConstants.AUTHORIZATION_URL;
 import static com.kinde.constants.KindeJ2eeConstants.POST_LOGIN_URL;
@@ -85,7 +87,10 @@ public class KindeAuthenticationServletTest {
     @Test
     public void testDoGet_LoginLinkExpired() throws Exception {
         when(request.getParameter("error")).thenReturn("login_link_expired");
-        when(request.getParameter("reauth_state")).thenReturn("encodedState");
+        String encodedState = Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString("foo=bar".getBytes(StandardCharsets.UTF_8));
+        when(request.getParameter("reauth_state")).thenReturn(encodedState);
         when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com");
         when(mockAuthUrl.getUrl()).thenReturn(new URL("http://example.com"));
         when(mockSession.login()).thenReturn(mockAuthUrl);
