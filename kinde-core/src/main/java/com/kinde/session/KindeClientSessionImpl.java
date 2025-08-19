@@ -9,6 +9,8 @@ import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
+import com.kinde.entitlements.KindeEntitlements;
+import com.kinde.entitlements.KindeEntitlementsImpl;
 import com.kinde.exceptions.KindeClientSessionException;
 import com.kinde.token.AccessToken;
 import com.kinde.token.KindeTokens;
@@ -259,5 +261,28 @@ public class KindeClientSessionImpl implements KindeClientSession {
      */
     protected HttpURLConnection openConnection(URL url) throws IOException {
         return (HttpURLConnection) url.openConnection();
+    }
+
+    @Override
+    public KindeEntitlements entitlements() {
+        return new KindeEntitlementsImpl(this);
+    }
+
+    @Override
+    public String getDomain() {
+        return this.kindeConfig.domain();
+    }
+
+    @Override
+    public String getAccessToken() {
+        try {
+            KindeTokens tokens = retrieveTokens();
+            if (tokens != null && tokens.getAccessToken() != null) {
+                return tokens.getAccessToken().token();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve access token", e);
+        }
+        return null;
     }
 }
