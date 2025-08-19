@@ -21,6 +21,8 @@ public interface KindeClientSession {
     AuthorizationUrl register();
 
     AuthorizationUrl logout() throws Exception;
+    
+    AuthorizationUrl logout(String logoutRedirectUri) throws Exception;
 
     AuthorizationUrl generatePortalUrl(String domain, String returnUrl, String subNav);
 
