@@ -88,7 +88,9 @@ public class KindeClientSessionImpl implements KindeClientSession {
     @Override
     @SneakyThrows
     public AuthorizationUrl authorizationUrl() {
-        return authorizationUrlWithParameters(new HashMap<>());
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("supports_reauth", "true");
+        return authorizationUrlWithParameters(parameters);
     }
 
     @Override
@@ -142,7 +144,9 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public AuthorizationUrl login() {
-        return authorizationUrlWithParameters(new HashMap<>());
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("supports_reauth", "true");
+        return authorizationUrlWithParameters(parameters);
     }
 
     @Override
@@ -158,6 +162,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
     public AuthorizationUrl register() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt", Prompt.Type.CREATE.toString());
+        parameters.put("supports_reauth", "true");
         return authorizationUrlWithParameters(parameters);
     }
 
