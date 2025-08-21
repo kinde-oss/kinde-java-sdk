@@ -1,28 +1,31 @@
 package com.kinde.entitlements;
 
-import org.openapitools.client.model.EntitlementResponse;
-import org.openapitools.client.model.EntitlementsResponse;
+import com.kinde.accounts.dto.EntitlementDto;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 /**
- * Interface for accessing entitlements functionality.
- * This provides methods to query the current user's entitlements from the Kinde Accounts API.
+ * Interface for accessing Kinde entitlements functionality.
+ * This interface provides methods to query entitlements from the Kinde Accounts API
+ * using clean DTOs without exposing OpenAPI internals.
  */
 public interface KindeEntitlements {
 
-        /**
+    /**
      * Gets all entitlements for the current user's organization.
-     *
-     * @return A CompletableFuture containing the entitlements response
+     * This method automatically handles pagination to retrieve all entitlements.
+     * 
+     * @return List of entitlement DTOs
+     * @throws RuntimeException if the API call fails
      */
-    CompletableFuture<EntitlementsResponse> getEntitlements();
+    List<EntitlementDto> getEntitlements();
 
     /**
      * Gets a specific entitlement by key.
-     *
-     * @param key The entitlement key to retrieve
-     * @return A CompletableFuture containing the entitlement response
+     * 
+     * @param key The entitlement key
+     * @return The entitlement DTO, or null if not found
+     * @throws RuntimeException if the API call fails
      */
-    CompletableFuture<EntitlementResponse> getEntitlement(String key);
+    EntitlementDto getEntitlement(String key);
 } 

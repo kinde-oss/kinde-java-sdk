@@ -69,8 +69,8 @@ Main client class that provides a clean interface for accessing the Accounts API
   - `getUserProfile()` - Get user profile
   - `getCurrentOrganization()` - Get current organization
 
-#### `KindeAccountsClientBuilder.java`
-Builder class for creating `KindeAccountsClient` instances with fluent API.
+#### `KindeAccountsClient.java`
+Main client class that provides a clean interface for accessing the Accounts API with Guice dependency injection support.
 
 ### 4. Data Models
 
@@ -151,15 +151,24 @@ Created a comprehensive example in `playground/kinde-accounts-example/`:
 
 ## Usage Examples
 
-### Basic Usage
+### Basic Usage with Guice Dependency Injection
 ```java
-// Create client
-KindeClient kindeClient = KindeClientBuilder.builder()
-    .domain("your-domain.kinde.com")
-    .clientId("your-client-id")
-    .build();
+// Create configuration parameters
+Map<String, Object> parameters = new HashMap<>();
+parameters.put("domain", "your-domain.kinde.com");
+parameters.put("clientId", "your-client-id");
+parameters.put("clientSecret", "your-client-secret");
+parameters.put("redirectUri", "http://localhost:8080/callback");
 
-KindeAccountsClient accountsClient = new KindeAccountsClient(kindeClient);
+// Create Guice injector with all necessary modules
+Injector injector = Guice.createInjector(
+    new KindeClientGuiceModule(parameters),
+    new KindeSessionGuiceModule(),
+    new KindeEntitlementsGuiceModule()
+);
+
+// Get the KindeAccountsClient from Guice
+KindeAccountsClient accountsClient = injector.getInstance(KindeAccountsClient.class);
 
 // Get entitlements
 CompletableFuture<EntitlementsResponse> entitlements = accountsClient.getEntitlements();

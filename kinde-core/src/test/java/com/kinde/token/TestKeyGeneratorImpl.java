@@ -38,7 +38,7 @@ public class TestKeyGeneratorImpl implements TestKeyGenerator{
         this.jwk = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
                 .privateKey((RSAPrivateKey)keyPair.getPrivate())
                 .keyUse(KeyUse.SIGNATURE)
-                .keyID(UUID.randomUUID().toString())
+                .keyID("test-key-123") // Use a consistent key ID for testing
                 .issueTime(new Date())
                 .build();
         JWKSet jwkSet = new JWKSet(jwk);

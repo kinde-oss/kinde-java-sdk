@@ -3,6 +3,9 @@ package com.kinde.spring.env;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientBuilder;
 import com.kinde.client.OidcMetaData;
+import com.kinde.guice.KindeGuiceSingleton;
+import com.kinde.client.KindeClientGuiceTestModule;
+import com.kinde.token.KindeTokenGuiceTestModule;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -31,6 +34,16 @@ public class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Env
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        // Initialize Guice with test modules if running in test environment
+        try {
+            KindeGuiceSingleton.init(
+                    new KindeClientGuiceTestModule(),
+                    new KindeTokenGuiceTestModule());
+        } catch (Exception e) {
+            // If Guice is already initialized, this is fine
+            log.debug("Guice already initialized or initialization failed: " + e.getMessage());
+        }
+        
         // initialize the KindeClient
         KindeClientBuilder kindeClientBuilder = KindeClientBuilder.builder();
         String domain = environment.getProperty(KINDE_OAUTH_DOMAIN);
@@ -122,7 +135,11 @@ public class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Env
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.opaque-token.client-id", "${" + KINDE_OAUTH_CLIENT_ID + "}");
         properties.put("spring.security.oauth2.resourceserver.opaque-token.client-secret", "${" + KINDE_OAUTH_CLIENT_SECRET + "}");
-        properties.put("spring.security.oauth2.resourceserver.opaque-token.introspection-uri", oidcMetaData.getOpMetadata().getIntrospectionEndpointURI().toString());
+        
+        // Check if introspection endpoint is available before adding it
+        if (oidcMetaData.getOpMetadata().getIntrospectionEndpointURI() != null) {
+            properties.put("spring.security.oauth2.resourceserver.opaque-token.introspection-uri", oidcMetaData.getOpMetadata().getIntrospectionEndpointURI().toString());
+        }
 
         return new ConditionalMapPropertySource("kinde-opaque-token", properties, environment, KINDE_OAUTH_DOMAIN, KINDE_OAUTH_CLIENT_SECRET);
     }

@@ -11,10 +11,13 @@ import com.kinde.client.KindeClientGuiceTestModule;
 import com.kinde.client.oidc.OidcMetaDataImplTest;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
+import com.kinde.token.KindeTokenGuiceTestModule;
 import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.token.RefreshToken;
+import com.kinde.token.TestKeyGenerator;
+import com.kinde.token.TestTokenGenerator;
 import com.kinde.token.jwt.JwtGenerator;
 import com.kinde.user.UserInfo;
 import org.junit.jupiter.api.*;
@@ -29,12 +32,28 @@ import static org.junit.jupiter.api.Assertions.*;
 public class KindeClientCodeSessionImplTest {
 
     private WireMockServer wireMockServer;
+    private TestTokenGenerator testTokenGenerator;
+    private TestKeyGenerator testKeyGenerator;
 
     @BeforeEach
     public void setUp() {
         KindeGuiceSingleton.fin();
         KindeEnvironmentSingleton.fin();
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.ACTIVE);
+        
+        // Initialize Guice with test modules
+        KindeGuiceSingleton.init(
+                new KindeClientGuiceTestModule(),
+                new KindeTokenGuiceTestModule());
+        
+        // Get the TestKeyGenerator and TestTokenGenerator instances
+        testKeyGenerator = KindeGuiceSingleton.getInstance().getInjector().getInstance(TestKeyGenerator.class);
+        testTokenGenerator = KindeGuiceSingleton.getInstance().getInjector().getInstance(TestTokenGenerator.class);
+        
+        // Ensure the key is generated before using the token generator
+        // This triggers the TestKeyGenerator to create the RSA key pair
+        testKeyGenerator.regenerateKey();
+        
         wireMockServer = new WireMockServer(8089); // you can specify the port
         wireMockServer.start();
         WireMock.configureFor("localhost", 8089);
@@ -71,11 +90,11 @@ public class KindeClientCodeSessionImplTest {
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("{\n" +
-                                        "  \"access_token\": \"" + JwtGenerator.generateAccessToken() + "\",\n" +
+                                        "  \"access_token\": \"" + testTokenGenerator.generateAccessToken() + "\",\n" +
                                         "  \"token_type\": \"Bearer\",\n" +
                                         "  \"expires_in\": 3600,\n" +
-                                        "  \"id_token\": \"" + JwtGenerator.generateIDToken() + "\",\n" +
-                                        "  \"refresh_token\": \"" + JwtGenerator.refreshToken() + "\",\n" +
+                                        "  \"id_token\": \"" + testTokenGenerator.generateIdToken() + "\",\n" +
+                                        "  \"refresh_token\": \"" + testTokenGenerator.generateRefreshToken() + "\",\n" +
                                         "  \"scope\": \"openid profile email\"\n" +
                                         "}")));
 
@@ -96,6 +115,7 @@ public class KindeClientCodeSessionImplTest {
                                                           "updated_at": 1611693980
                                                         }
                                         """)));
+        
         ///oauth2/token
         System.out.println("Instanciate the wiremock service");
     }

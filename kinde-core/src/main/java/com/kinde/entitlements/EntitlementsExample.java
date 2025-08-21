@@ -3,12 +3,9 @@ package com.kinde.entitlements;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientSession;
 import com.kinde.KindeClientBuilder;
-import com.kinde.config.KindeConfig;
+import com.kinde.accounts.dto.EntitlementDto;
 
-import org.openapitools.client.model.EntitlementResponse;
-import org.openapitools.client.model.EntitlementsResponse;
-
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 /**
  * Example demonstrating how to use the entitlements functionality in the core library.
@@ -31,24 +28,10 @@ public class EntitlementsExample {
         KindeEntitlements entitlements = session.entitlements();
 
         // Get all entitlements
-        CompletableFuture<EntitlementsResponse> allEntitlements = entitlements.getEntitlements();
-        allEntitlements.thenAccept(result -> {
-            System.out.println("All entitlements: " + result);
-        }).exceptionally(e -> {
-            System.err.println("Failed to fetch entitlements: " + e.getMessage());
-            return null;
-        });
-
-        // Get a specific entitlement
-        CompletableFuture<EntitlementResponse> specificEntitlement = entitlements.getEntitlement("premium-feature");
-        specificEntitlement.thenAccept(result -> {
-            System.out.println("Premium feature entitlement: " + result);
-        }).exceptionally(e -> {
-            System.err.println("Failed to fetch specific entitlement: " + e.getMessage());
-            return null;
-        });
-
-        // Ensure async work completes before exiting
-        CompletableFuture.allOf(allEntitlements, specificEntitlement).join();
+        List<EntitlementDto> allEntitlements = entitlements.getEntitlements();
+        System.out.println("Found " + allEntitlements.size() + " entitlements:");
+        for (EntitlementDto entitlement : allEntitlements) {
+            System.out.println("  - " + entitlement.getKey() + ": " + entitlement.getName());
+        }
     }
 } 

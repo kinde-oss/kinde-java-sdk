@@ -5,15 +5,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.kinde.KindeClientSession;
+import com.kinde.KindeTokenFactory;
+import com.kinde.accounts.KindeAccountsClient;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.entitlements.KindeEntitlements;
-import com.kinde.entitlements.KindeEntitlementsImpl;
 import com.kinde.exceptions.KindeClientSessionException;
-import com.kinde.token.AccessToken;
 import com.kinde.token.KindeTokens;
+import com.kinde.token.KindeTokenFactoryImpl;
+import com.kinde.token.KindeToken;
+import com.kinde.token.AccessToken;
+import com.kinde.token.jwk.KindeJwkStore;
+import com.kinde.token.jwk.KindeJwkStoreImpl;
 import com.kinde.user.UserInfo;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
@@ -43,11 +48,81 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     protected KindeConfig kindeConfig;
     protected OidcMetaData oidcMetaData;
+    private KindeEntitlements entitlements;
+    private KindeTokenFactory tokenFactory;
 
     @Inject
     public KindeClientSessionImpl(KindeConfig kindeConfig, OidcMetaData oidcMetaData) {
         this.kindeConfig = kindeConfig;
         this.oidcMetaData = oidcMetaData;
+    }
+
+    /**
+     * Sets the entitlements instance. This method is called by Guice after construction
+     * to inject the KindeEntitlements dependency.
+     * 
+     * @param entitlements The KindeEntitlements instance to inject
+     */
+    @Inject
+    public void setEntitlements(KindeEntitlements entitlements) {
+        this.entitlements = entitlements;
+    }
+
+    /**
+     * Sets the token factory instance. This method is called by Guice after construction
+     * to inject the KindeTokenFactory dependency.
+     * 
+     * @param tokenFactory The KindeTokenFactory instance to inject
+     */
+    @Inject
+    public void setTokenFactory(KindeTokenFactory tokenFactory) {
+        this.tokenFactory = tokenFactory;
+    }
+
+    /**
+     * Creates a KindeTokenFactory for token parsing.
+     * This method creates the factory manually when Guice injection is not available.
+     * 
+     * @return KindeTokenFactory instance, or null if creation fails
+     */
+    private KindeTokenFactory createTokenFactory() {
+        try {
+            // Create KindeJwkStore and KindeTokenFactory manually
+            KindeJwkStore jwkStore = new KindeJwkStoreImpl(this.oidcMetaData);
+            return new KindeTokenFactoryImpl(jwkStore);
+        } catch (Exception e) {
+            log.warn("Failed to create KindeTokenFactory: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Creates a KindeAccountsClient for hard check functionality.
+     * This method creates the client lazily to avoid circular dependencies.
+     * 
+     * @return KindeAccountsClient instance, or null if creation fails
+     */
+    private KindeAccountsClient createAccountsClient() {
+        try {
+            // Create KindeAccountsClient using the backward compatibility constructor
+            // This avoids circular dependency issues
+            return new KindeAccountsClient(this, true);
+        } catch (Exception e) {
+            log.warn("Failed to create KindeAccountsClient for hard check functionality: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Gets the token factory, creating it if necessary.
+     * 
+     * @return KindeTokenFactory instance, or null if creation fails
+     */
+    private KindeTokenFactory getTokenFactory() {
+        if (tokenFactory != null) {
+            return tokenFactory;
+        }
+        return createTokenFactory();
     }
 
     @Override
@@ -80,11 +155,40 @@ public class KindeClientSessionImpl implements KindeClientSession {
         }
 
         AccessTokenResponse successResponse = response.toSuccessResponse();
+        String accessTokenValue = successResponse.getTokens().getAccessToken().getValue();
 
-        return new KindeTokens(null, null,
-                AccessToken.init(successResponse.getTokens().getAccessToken().getValue(), true),
-                null);
-
+        // Use token factory to create tokens with hard check capabilities
+        KindeTokenFactory factory = getTokenFactory();
+        if (factory != null) {
+            try {
+                // Try to create token with hard check functionality
+                KindeAccountsClient accountsClient = createAccountsClient();
+                if (accountsClient != null) {
+                    KindeToken token = factory.parse(accessTokenValue, accountsClient);
+                    if (token instanceof AccessToken) {
+                        return new KindeTokens(null, null, (AccessToken) token, null);
+                    } else {
+                        log.warn("Expected AccessToken but got: {}", token.getClass().getSimpleName());
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Failed to create token with hard check functionality, falling back to basic token: {}", e.getMessage());
+            }
+            
+            // Fallback to basic token creation
+            KindeToken token = factory.parse(accessTokenValue);
+            if (token instanceof AccessToken) {
+                return new KindeTokens(null, null, (AccessToken) token, null);
+            } else {
+                log.warn("Expected AccessToken but got: {}", token.getClass().getSimpleName());
+            }
+        } else {
+            // Fallback when token factory is not available
+            log.warn("TokenFactory not available, creating basic token without hard check functionality");
+        }
+        
+        // Final fallback - create basic AccessToken
+        return new KindeTokens(null, null, AccessToken.init(accessTokenValue, true), null);
     }
 
     @Override
@@ -265,7 +369,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public KindeEntitlements entitlements() {
-        return new KindeEntitlementsImpl(this);
+        return this.entitlements;
     }
 
     @Override

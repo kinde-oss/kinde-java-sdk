@@ -205,7 +205,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/kinde-accounts-api.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/../kinde-accounts-api.yaml</inputSpec>
                             <generatorName>java</generatorName>
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
