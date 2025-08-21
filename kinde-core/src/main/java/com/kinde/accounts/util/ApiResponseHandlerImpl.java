@@ -29,8 +29,9 @@ public class ApiResponseHandlerImpl implements ApiResponseHandler {
     @Override
     public void validateKey(String key, String keyType) {
         if (key == null || key.trim().isEmpty()) {
-            // Capitalize the first letter of the key type for consistent error messages
-            String capitalizedKeyType = keyType.substring(0, 1).toUpperCase() + keyType.substring(1);
+            final String kt = (keyType == null) ? "" : keyType.trim();
+            final String capitalizedKeyType =
+                kt.isEmpty() ? "Key" : kt.substring(0, 1).toUpperCase() + kt.substring(1);
             throw new IllegalArgumentException(String.format("%s key cannot be null or empty", capitalizedKeyType));
         }
     }

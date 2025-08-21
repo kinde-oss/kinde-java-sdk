@@ -218,6 +218,7 @@
         <module>kinde-management</module>
         <module>kinde-j2ee</module>
         <module>kinde-springboot</module>
+        <module>kinde-test-utils</module>
         <module>playground/kinde-core-example</module>
         <module>playground/kinde-management-example</module>
         <module>playground/kinde-accounts-example</module>
@@ -355,6 +356,7 @@
                                 <excludeArtifact>kinde-core-example</excludeArtifact>
                                 <excludeArtifact>kinde-j2ee-app</excludeArtifact>
                                 <excludeArtifact>kinde-management-example</excludeArtifact>
+                                <excludeArtifact>kinde-accounts-example</excludeArtifact> 
                                 <excludeArtifact>kinde-springboot-pkce-client-example</excludeArtifact>
                                 <excludeArtifact>kinde-springboot-starter-example</excludeArtifact>
                                 <excludeArtifact>kinde-springboot-thymeleaf-full-example</excludeArtifact>
