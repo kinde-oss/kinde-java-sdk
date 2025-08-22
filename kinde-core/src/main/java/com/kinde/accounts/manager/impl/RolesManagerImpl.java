@@ -45,7 +45,9 @@ public class RolesManagerImpl implements RolesManager {
         try {
             return getAllRolesAsync().get();
         } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new RuntimeException("Failed to get roles", e);
         }
     }
