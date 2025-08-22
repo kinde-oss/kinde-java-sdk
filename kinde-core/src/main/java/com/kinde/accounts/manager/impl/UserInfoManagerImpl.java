@@ -48,7 +48,9 @@ public class UserInfoManagerImpl implements UserInfoManager {
         try {
             return getUserOrganizationsAsync().get();
         } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new RuntimeException("Failed to get user organizations", e);
         }
     }
@@ -58,7 +60,9 @@ public class UserInfoManagerImpl implements UserInfoManager {
         try {
             return getUserProfileAsync().get();
         } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new RuntimeException("Failed to get user profile", e);
         }
     }
@@ -68,7 +72,9 @@ public class UserInfoManagerImpl implements UserInfoManager {
         try {
             return getCurrentOrganizationAsync().get();
         } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new RuntimeException("Failed to get current organization", e);
         }
     }
