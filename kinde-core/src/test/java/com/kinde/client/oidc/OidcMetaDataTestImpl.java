@@ -3,6 +3,7 @@ package com.kinde.client.oidc;
 import com.google.inject.Inject;
 import com.kinde.client.OidcMetaData;
 import com.kinde.token.TestKeyGenerator;
+
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.id.Issuer;

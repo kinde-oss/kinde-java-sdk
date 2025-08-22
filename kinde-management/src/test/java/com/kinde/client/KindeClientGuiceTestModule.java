@@ -1,10 +1,10 @@
-package test.java.com.kinde.client;
+package com.kinde.client;
 
 import com.google.inject.AbstractModule;
 import com.kinde.client.OidcMetaData;
-import test.java.com.kinde.client.oidc.OidcMetaDataTestImpl;
-import test.java.com.kinde.token.TestKeyGenerator;
-import test.java.com.kinde.token.TestKeyGeneratorImpl;
+import com.kinde.client.oidc.OidcMetaDataTestImpl;
+import com.kinde.token.TestKeyGenerator;
+import com.kinde.token.TestKeyGeneratorImpl;
 
 public class KindeClientGuiceTestModule extends AbstractModule {
     @Override

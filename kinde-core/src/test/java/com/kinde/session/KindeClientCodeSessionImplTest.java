@@ -16,9 +16,9 @@ import com.kinde.token.AccessToken;
 import com.kinde.token.KindeToken;
 import com.kinde.token.KindeTokens;
 import com.kinde.token.RefreshToken;
+import com.kinde.token.jwt.JwtGenerator;
 import com.kinde.token.TestKeyGenerator;
 import com.kinde.token.TestTokenGenerator;
-import com.kinde.token.jwt.JwtGenerator;
 import com.kinde.user.UserInfo;
 import org.junit.jupiter.api.*;
 

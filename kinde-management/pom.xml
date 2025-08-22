@@ -126,6 +126,15 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.3.2</version>
         </dependency>
+        
+        <!-- Shared test utilities -->
+        <dependency>
+            <groupId>com.kinde</groupId>
+            <artifactId>kinde-test-utils</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

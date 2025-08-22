@@ -31,13 +31,7 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- Core module for token classes -->
-        <dependency>
-            <groupId>com.kinde</groupId>
-            <artifactId>kinde-core</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+
         
         <!-- Nimbus JOSE+JWT for JWT handling -->
         <dependency>

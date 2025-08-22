@@ -1,8 +1,8 @@
-package test.java.com.kinde.client.oidc;
+package com.kinde.client.oidc;
 
 import com.google.inject.Inject;
 import com.kinde.client.OidcMetaData;
-import test.java.com.kinde.token.TestKeyGenerator;
+import com.kinde.token.TestKeyGenerator;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 

@@ -9,6 +9,7 @@ import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
 import com.kinde.token.jwt.JwtGenerator;
 import com.kinde.token.KindeTokenGuiceTestModule;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

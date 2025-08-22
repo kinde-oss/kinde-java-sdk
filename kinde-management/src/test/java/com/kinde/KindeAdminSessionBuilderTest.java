@@ -1,7 +1,7 @@
 package com.kinde;
 
-import test.java.com.kinde.client.KindeClientGuiceTestModule;
-import test.java.com.kinde.token.KindeTokenGuiceTestModule;
+import com.kinde.client.KindeClientGuiceTestModule;
+import com.kinde.token.KindeTokenGuiceTestModule;
 import com.kinde.guice.KindeGuiceSingleton;
 import junit.framework.Test;
 import junit.framework.TestCase;
