@@ -47,7 +47,9 @@ public class FeatureFlagsManagerImpl implements FeatureFlagsManager {
         try {
             return getAllFeatureFlagsAsync().get();
         } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new RuntimeException("Failed to get feature flags", e);
         }
     }
@@ -58,7 +60,9 @@ public class FeatureFlagsManagerImpl implements FeatureFlagsManager {
         try {
             return getFeatureFlagAsync(key).get();
         } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new RuntimeException("Failed to get feature flag: " + key, e);
         }
     }
