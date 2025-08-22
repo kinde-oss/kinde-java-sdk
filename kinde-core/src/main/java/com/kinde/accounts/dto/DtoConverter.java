@@ -120,7 +120,7 @@ public class DtoConverter {
         dto.setName(featureFlag.getName());
         dto.setDescription(null); // Not available in this structure
         dto.setType(featureFlag.getType());
-        dto.setValue(featureFlag.getValue().toString());
+        dto.setValue(featureFlag.getValue() != null ? featureFlag.getValue().toString() : null);
         dto.setEnabled(true); // Assume enabled if present
         
         return dto;
