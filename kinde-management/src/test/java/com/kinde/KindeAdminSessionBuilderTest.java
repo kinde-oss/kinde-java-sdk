@@ -1,6 +1,6 @@
 package com.kinde;
 
-import com.kinde.client.KindeClientGuiceTestModule;
+import com.kinde.client.KindeManagementGuiceTestModule;
 import com.kinde.token.KindeTokenGuiceTestModule;
 import com.kinde.guice.KindeGuiceSingleton;
 import junit.framework.Test;
@@ -37,7 +37,7 @@ public class KindeAdminSessionBuilderTest
     public void testApp() {
         // Initialize Guice with test modules
         KindeGuiceSingleton.init(
-                new KindeClientGuiceTestModule(),
+                new KindeManagementGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
         
         KindeClient kindeClient = KindeClientBuilder.builder().build();

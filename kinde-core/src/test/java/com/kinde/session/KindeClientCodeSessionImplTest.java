@@ -7,7 +7,7 @@ import com.kinde.KindeClientBuilder;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
-import com.kinde.client.KindeClientGuiceTestModule;
+import com.kinde.client.KindeCoreGuiceTestModule;
 import com.kinde.client.oidc.OidcMetaDataImplTest;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
@@ -43,7 +43,7 @@ public class KindeClientCodeSessionImplTest {
         
         // Initialize Guice with test modules
         KindeGuiceSingleton.init(
-                new KindeClientGuiceTestModule(),
+                new KindeCoreGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
         
         // Get the TestKeyGenerator and TestTokenGenerator instances

@@ -73,14 +73,13 @@
         <scope>test</scope>
     </dependency>
     
-    <!-- Shared test utilities -->
-    <dependency>
-        <groupId>com.kinde</groupId>
-        <artifactId>kinde-test-utils</artifactId>
-        <version>${project.version}</version>
-        <classifier>tests</classifier>
-        <scope>test</scope>
-    </dependency>
+            <!-- Shared test utilities -->
+        <dependency>
+            <groupId>com.kinde</groupId>
+            <artifactId>kinde-test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
   </dependencies>
 
   <build>
