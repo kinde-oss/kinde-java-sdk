@@ -24,7 +24,9 @@ public class DtoConverter {
         dto.setName(entitlement.getFeatureName());
         dto.setDescription(entitlement.getPriceName());
         dto.setType("entitlement");
-        dto.setValue(entitlement.getEntitlementLimitMax().toString());
+        dto.setValue(entitlement.getEntitlementLimitMax() != null
+                ? entitlement.getEntitlementLimitMax().toString()
+                : null);
         dto.setOrgCode(null); // Not available in this structure
         dto.setPlans(null); // Not available in this structure
         
