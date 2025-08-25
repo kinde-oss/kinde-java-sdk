@@ -1,0 +1,86 @@
+# CodeRabbit configuration for Kinde Java SDK
+# This file configures what CodeRabbit should analyze and ignore during PR reviews
+
+reviews:
+  profile: chill
+  path_filters:
+    # Include primary sources/configs
+    - "**/src/main/java/**"
+    - "**/src/test/java/**"
+    - "**/pom.xml"
+    - "**/.coderabbit.yaml"
+    - "**/*.yaml"
+    - "**/*.yml"
+    # Exclude generated and non-source artifacts
+    - "!**/target/**"
+    - "!**/generated/**"
+    - "!**/ApiClient.java"
+    - "!**/ApiException.java"
+    - "!**/Configuration.java"
+    - "!**/JSON.java"
+    - "!**/ApiResponse.java"
+    - "!**/Pair.java"
+    - "!**/StringUtil.java"
+    - "!**/TypeRef.java"
+    - "!**/org/openapitools/**"
+    - "!**/build/generated-sources/openapi/**"
+    - "!**/src/gen/java/main/**"
+    # Maven build artifacts
+    - "!**/pom.xml.bak"
+    - "!**/dependency-reduced-pom.xml"
+    # IDE/editor files
+    - "!**/.idea/**"
+    - "!**/.vscode/**"
+    - "!**/*.iml"
+    - "!**/.DS_Store"
+    # Logs and temp
+    - "!**/*.log"
+    - "!**/logs/**"
+    - "!**/tmp/**"
+    - "!**/temp/**"
+    # Documentation out of scope
+    - "!**/README.md"
+    - "!**/CHANGELOG.md"
+    - "!**/LICENSE"
+    - "!**/*.md"
+    # Configs that don't need review
+    - "!**/application.properties"
+    - "!**/application.yml"
+    - "!**/application.yaml"
+    # Test resources (keep tests, exclude data)
+    - "!**/src/test/resources/**"
+    # Explicit entitlements/hard-check generated code
+    - "!**/org/openapitools/client/model/Entitlement*.java"
+    - "!**/org/openapitools/client/model/Entitlements*.java"
+    - "!**/org/openapitools/client/api/*Entitlement*.java"
+    - "!**/org/openapitools/client/model/GetBillingEntitlements*.java"
+    - "!**/org/openapitools/client/api/BillingEntitlements*.java"
+    - "!**/org/openapitools/client/model/FeatureFlag*.java"
+    - "!**/org/openapitools/client/model/Permission*.java"
+    - "!**/org/openapitools/client/model/Role*.java"
+  tools:
+    languagetool:
+      enabled: false
+  path_instructions:
+    - path: "**/*"
+      instructions: |
+        Please focus on:
+        1. Code quality and best practices
+        2. Security considerations
+        3. Performance implications
+        4. Test coverage and quality
+        5. API design and consistency
+        6. Error handling and edge cases
+
+        For Java code specifically:
+        - Check for proper exception handling
+        - Verify async method implementations
+        - Review builder pattern usage
+        - Validate test coverage
+        - Check for memory leaks in async operations
+
+        Ignore:
+        - Generated code files
+        - Build artifacts
+        - Configuration files
+        - Documentation formatting 

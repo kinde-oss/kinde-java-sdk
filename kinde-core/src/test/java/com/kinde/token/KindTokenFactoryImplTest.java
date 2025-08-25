@@ -3,7 +3,7 @@ package com.kinde.token;
 import com.kinde.KindeClient;
 import com.kinde.KindeTokenFactory;
 import com.kinde.client.KindeClientGuiceModule;
-import com.kinde.client.KindeClientGuiceTestModule;
+import com.kinde.client.KindeCoreGuiceTestModule;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ public class KindTokenFactoryImplTest {
     @BeforeEach
     public void setup() {
         KindeGuiceSingleton.init(
-                new KindeClientGuiceTestModule(),
+                new KindeCoreGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
     }

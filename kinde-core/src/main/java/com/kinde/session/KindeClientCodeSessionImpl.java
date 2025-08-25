@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
+import com.kinde.entitlements.KindeEntitlements;
 import com.kinde.guice.KindeAnnotations;
 import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
@@ -25,6 +26,11 @@ import lombok.SneakyThrows;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import java.net.URI;
 
+/**
+ * Implementation of KindeClientSession for authorization code-based sessions.
+ * This implementation extends KindeClientSessionImpl and inherits entitlements functionality
+ * through Guice dependency injection.
+ */
 public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
 
     private final String code;
@@ -40,6 +46,17 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
         super(kindeConfig, oidcMetaData);
         this.code = code;
         this.authorizationUrl = authorizationUrl;
+    }
+
+    /**
+     * Sets the entitlements instance. This method is called by Guice after construction
+     * to inject the KindeEntitlements dependency.
+     * 
+     * @param entitlements The KindeEntitlements instance to inject
+     */
+    @Inject
+    public void setEntitlements(KindeEntitlements entitlements) {
+        super.setEntitlements(entitlements);
     }
 
     @Override

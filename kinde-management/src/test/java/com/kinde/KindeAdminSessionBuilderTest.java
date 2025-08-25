@@ -1,5 +1,8 @@
 package com.kinde;
 
+import com.kinde.client.KindeManagementGuiceTestModule;
+import com.kinde.token.KindeTokenGuiceTestModule;
+import com.kinde.guice.KindeGuiceSingleton;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -32,11 +35,17 @@ public class KindeAdminSessionBuilderTest
      * Rigourous Test :-)
      */
     public void testApp() {
+        // Initialize Guice with test modules
+        KindeGuiceSingleton.init(
+                new KindeManagementGuiceTestModule(),
+                new KindeTokenGuiceTestModule());
+        
         KindeClient kindeClient = KindeClientBuilder.builder().build();
         KindeAdminSession kindeAdminSession1 = KindeAdminSessionBuilder.builder().build();
         KindeAdminSession kindeAdminSession2 = KindeAdminSessionBuilder.builder().client(kindeClient).build();
         assertTrue( kindeAdminSession1 != kindeAdminSession2 );
-
-
+        
+        // Clean up
+        KindeGuiceSingleton.fin();
     }
 }
