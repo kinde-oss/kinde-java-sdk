@@ -103,7 +103,8 @@ public class FeatureFlags extends BaseAuth {
                 if (flagData instanceof Map) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> flagMap = (Map<String, Object>) flagData;
-                    return parseFlagValue(flagMap, null);
+                    FeatureFlag parsed = parseFlagValue(flagMap, null);
+                    return new FeatureFlag(flagKey, parsed.getType(), parsed.getValue(), parsed.isDefault());
                 } else {
                     // Simple value
                     return new FeatureFlag(flagKey, "string", flagData, false);
@@ -270,18 +271,35 @@ public class FeatureFlags extends BaseAuth {
             return null;
         }
         
+        String declaredType = apiFlag.getType();
+        String raw = apiFlag.getValue();
+
         String type = "string"; // default
-        Object value = apiFlag.getValue();
-        
-        // Determine type from the value
-        if (value instanceof Boolean) {
-            type = "boolean";
-        } else if (value instanceof Number) {
-            type = "integer";
-        } else if (value instanceof String) {
-            type = "string";
+        Object value = raw;
+
+        try {
+            if ("boolean".equalsIgnoreCase(declaredType)) {
+                type = "boolean";
+                boolean v;
+                if (raw != null) {
+                    v = "true".equalsIgnoreCase(raw) || "1".equals(raw) || "yes".equalsIgnoreCase(raw);
+                } else {
+                    v = apiFlag.isEnabled();
+                }
+                value = v;
+            } else if ("integer".equalsIgnoreCase(declaredType) || "int".equalsIgnoreCase(declaredType)) {
+                type = "integer";
+                value = raw != null ? Integer.valueOf(raw.trim()) : 0;
+            } else {
+                type = "string";
+                value = raw;
+            }
+        } catch (Exception e) {
+            logger.warn("Error parsing API feature flag {}: {}", apiFlag.getKey(), e.getMessage());
+            type = "error";
+            value = raw;
         }
-        
-                 return new FeatureFlag(apiFlag.getKey(), type, value, false);
+
+        return new FeatureFlag(apiFlag.getKey(), type, value, false);
     }
 }

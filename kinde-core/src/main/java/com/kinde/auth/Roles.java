@@ -59,12 +59,12 @@ public class Roles extends BaseAuth {
             
             if (apiRoles != null) {
                 boolean hasRole = apiRoles.stream()
-                    .anyMatch(role -> roleKey.equals(role.getId()) || roleKey.equals(role.getName()));
+                    .anyMatch(role -> roleKey.equals(role.getKey()) || roleKey.equalsIgnoreCase(role.getName()));
                 
                 if (hasRole) {
                     result.put("isGranted", true);
                     RoleDto foundRole = apiRoles.stream()
-                        .filter(role -> roleKey.equals(role.getId()) || roleKey.equals(role.getName()))
+                        .filter(role -> roleKey.equals(role.getKey()) || roleKey.equalsIgnoreCase(role.getName()))
                         .findFirst()
                         .orElse(null);
                     
@@ -116,13 +116,15 @@ public class Roles extends BaseAuth {
             
             if (apiRoles != null && !apiRoles.isEmpty()) {
                 List<String> apiRoleKeys = apiRoles.stream()
-                    .map(RoleDto::getId)
-                    .filter(id -> id != null)
+                    .map(RoleDto::getKey)
+                    .filter(key -> key != null)
                     .collect(Collectors.toList());
-                
+
                 @SuppressWarnings("unchecked")
                 List<String> existingRoles = (List<String>) result.get("roles");
-                existingRoles.addAll(apiRoleKeys);
+                java.util.LinkedHashSet<String> merged = new java.util.LinkedHashSet<>(existingRoles);
+                merged.addAll(apiRoleKeys);
+                result.put("roles", new java.util.ArrayList<>(merged));
             }
         } catch (Exception e) {
             logger.debug("Error retrieving roles from API: {}", e.getMessage());
@@ -162,7 +164,7 @@ public class Roles extends BaseAuth {
             
             if (apiRoles != null) {
                 return apiRoles.stream()
-                    .anyMatch(role -> roleKey.equals(role.getId()) || roleKey.equals(role.getName()));
+                    .anyMatch(role -> roleKey.equals(role.getKey()) || roleKey.equalsIgnoreCase(role.getName()));
             }
         } catch (Exception e) {
             logger.debug("Error checking role from API: {}", e.getMessage());

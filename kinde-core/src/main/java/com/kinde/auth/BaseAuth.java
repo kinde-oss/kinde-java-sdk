@@ -52,12 +52,22 @@ public abstract class BaseAuth {
      * @return Optional containing the token if available
      */
     protected Optional<com.kinde.token.KindeToken> getToken() {
-        return getSession().map(session -> {
+        return getSession().flatMap(session -> {
             try {
-                return session.retrieveTokens().getAccessToken();
+                com.kinde.token.KindeTokens tokens = session.retrieveTokens();
+                if (tokens == null) {
+                    logger.debug("No tokens available in session");
+                    return Optional.empty();
+                }
+                com.kinde.token.KindeToken accessToken = tokens.getAccessToken();
+                if (accessToken == null) {
+                    logger.debug("No access token available in tokens");
+                    return Optional.empty();
+                }
+                return Optional.of(accessToken);
             } catch (Exception e) {
-                logger.debug("Could not get token from session: {}", e.getMessage());
-                return null;
+                logger.debug("Could not get token from session", e);
+                return Optional.empty();
             }
         });
     }

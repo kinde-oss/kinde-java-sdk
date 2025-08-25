@@ -104,13 +104,16 @@ public class Permissions extends BaseAuth {
             
             if (apiPermissions != null && !apiPermissions.isEmpty()) {
                 List<String> apiPermissionKeys = apiPermissions.stream()
-                    .map(PermissionDto::getId)
-                    .filter(id -> id != null)
+                    .map(PermissionDto::getKey)
+                    .filter(key -> key != null)
                     .collect(Collectors.toList());
-                
+
                 @SuppressWarnings("unchecked")
                 List<String> existingPermissions = (List<String>) result.get("permissions");
-                existingPermissions.addAll(apiPermissionKeys);
+                // De-duplicate while preserving existing order
+                java.util.LinkedHashSet<String> merged = new java.util.LinkedHashSet<>(existingPermissions);
+                merged.addAll(apiPermissionKeys);
+                result.put("permissions", new java.util.ArrayList<>(merged));
             }
         } catch (Exception e) {
             logger.debug("Error retrieving permissions from API: {}", e.getMessage());

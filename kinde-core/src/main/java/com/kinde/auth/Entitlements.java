@@ -86,14 +86,32 @@ public class Entitlements extends BaseAuth {
             return false;
         }
         
-        // Check if the entitlement is active/enabled
+        // Determine active/enabled state from 'status' or fallback to 'value' and 'type'
         Object status = entitlement.get("status");
         if (status != null) {
-            return "active".equalsIgnoreCase(String.valueOf(status)) || 
-                   "enabled".equalsIgnoreCase(String.valueOf(status)) ||
-                   Boolean.TRUE.equals(status);
+            if (status instanceof Boolean) {
+                return (Boolean) status;
+            }
+            String s = String.valueOf(status).trim();
+            return s.equalsIgnoreCase("active") ||
+                   s.equalsIgnoreCase("enabled") ||
+                   s.equalsIgnoreCase("true") ||
+                   s.equals("1") ||
+                   s.equalsIgnoreCase("yes") ||
+                   s.equalsIgnoreCase("on");
         }
-        
+
+        Object value = entitlement.get("value");
+        Object type = entitlement.get("type");
+        if (value != null) {
+            String v = String.valueOf(value).trim();
+            if (type != null && "boolean".equalsIgnoreCase(String.valueOf(type))) {
+                return v.equalsIgnoreCase("true") || v.equals("1") || v.equalsIgnoreCase("yes") || v.equalsIgnoreCase("on");
+            }
+            // Heuristic: treat active-like string values as enabled when type is not boolean
+            return v.equalsIgnoreCase("active") || v.equalsIgnoreCase("enabled");
+        }
+
         return false;
     }
     
@@ -135,13 +153,19 @@ public class Entitlements extends BaseAuth {
         Map<String, Object> result = new HashMap<>();
         
         if (entitlement != null) {
-                         result.put("key", entitlement.getKey());
-             result.put("name", entitlement.getName());
-             result.put("description", entitlement.getDescription());
-             result.put("type", entitlement.getType());
-             result.put("value", entitlement.getValue());
-             result.put("orgCode", entitlement.getOrgCode());
-             result.put("plans", entitlement.getPlans());
+            result.put("key", entitlement.getKey());
+            result.put("name", entitlement.getName());
+            result.put("description", entitlement.getDescription());
+            result.put("type", entitlement.getType());
+            result.put("value", entitlement.getValue());
+            result.put("orgCode", entitlement.getOrgCode());
+            result.put("plans", entitlement.getPlans());
+            // Derive a boolean status for easy checks when type is boolean
+            if (entitlement.getType() != null && "boolean".equalsIgnoreCase(entitlement.getType())) {
+                String v = String.valueOf(entitlement.getValue());
+                boolean enabled = v != null && (v.equalsIgnoreCase("true") || v.equals("1") || v.equalsIgnoreCase("yes") || v.equalsIgnoreCase("on"));
+                result.put("status", enabled);
+            }
         }
         
         return result;
