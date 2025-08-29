@@ -22,7 +22,6 @@ public class TestTokenGeneratorImpl implements TestTokenGenerator {
         System.out.println("The test token generator");
     }
 
-
     @Override
     @SneakyThrows
     public String generateAccessToken() {

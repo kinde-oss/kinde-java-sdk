@@ -4,10 +4,10 @@ spring:
       client:
         provider:
           kinde:
-            issuer-uri: https://<replace>.kinde.com
+            issuer-uri: https://burntjam.kinde.com
         registration: 
           pkce: 
             provider: kinde
-            client-id: <replace>
-            client-secret: <replace>
+            client-id: d129efa11ffe436ca46e66aa16753e02
+            client-secret: x9kxMgGeMuHD5rgs3xK4aulij5qnpqM6zRaRz4RsWwCt4Bu1e0a
             scope: openid,email

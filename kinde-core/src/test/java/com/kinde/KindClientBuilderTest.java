@@ -1,6 +1,6 @@
 package com.kinde;
 
-import com.kinde.client.KindeClientGuiceTestModule;
+import com.kinde.client.KindeCoreGuiceTestModule;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,7 @@ public class KindClientBuilderTest {
     @BeforeEach
     public void setUp()
     {
-        KindeGuiceSingleton.init(new KindeClientGuiceTestModule());
+        KindeGuiceSingleton.init(new KindeCoreGuiceTestModule());
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
     }
 

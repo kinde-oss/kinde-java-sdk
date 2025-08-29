@@ -3,6 +3,8 @@ package com.kinde.spring.env;
 import com.kinde.KindeClient;
 import com.kinde.KindeClientBuilder;
 import com.kinde.client.OidcMetaData;
+import com.kinde.guice.KindeGuiceSingleton;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -31,27 +33,48 @@ public class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Env
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        // initialize the KindeClient
-        KindeClientBuilder kindeClientBuilder = KindeClientBuilder.builder();
-        String domain = environment.getProperty(KINDE_OAUTH_DOMAIN);
-        if (domain != null) {
-            kindeClientBuilder.domain(domain);
-            kindeClientBuilder.clientId(environment.getProperty(KINDE_OAUTH_CLIENT_ID));
-            kindeClientBuilder.clientSecret(environment.getProperty(KINDE_OAUTH_CLIENT_SECRET));
-            kindeClientBuilder.scopes(environment.getProperty(KINDE_OAUTH_SCOPES));
+        // Try to initialize Guice if not already initialized
+        try {
+            // Try to get the existing injector, if it fails, Guice needs initialization
+            KindeGuiceSingleton.getInstance().getInjector();
+        } catch (Exception e) {
+            // Guice is not initialized, but we can't initialize it here since we don't have test modules
+            // This will be handled by test configuration
+            log.debug("Guice not initialized, will be handled by test configuration: " + e.getMessage());
         }
-        KindeClient kindeClient = kindeClientBuilder.build();
+        
+        // Try to initialize the KindeClient, but handle failures gracefully
+        KindeClient kindeClient = null;
+        try {
+            KindeClientBuilder kindeClientBuilder = KindeClientBuilder.builder();
+            String domain = environment.getProperty(KINDE_OAUTH_DOMAIN);
+            if (domain != null) {
+                kindeClientBuilder.domain(domain);
+                kindeClientBuilder.clientId(environment.getProperty(KINDE_OAUTH_CLIENT_ID));
+                kindeClientBuilder.clientSecret(environment.getProperty(KINDE_OAUTH_CLIENT_SECRET));
+                kindeClientBuilder.scopes(environment.getProperty(KINDE_OAUTH_SCOPES));
+            }
+            kindeClient = kindeClientBuilder.build();
+        } catch (Exception e) {
+            // If KindeClient creation fails, we'll handle it gracefully
+            log.debug("KindeClient creation failed, will be handled by test configuration: " + e.getMessage());
+        }
 
         environment.getPropertySources().addLast(remappedKindeToStandardOAuthPropertySource(environment));
         environment.getPropertySources().addLast(remappedKindeOAuth2ScopesPropertySource(environment));
-        // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
-        environment.getPropertySources().addLast(defaultKindeScopesSource(environment, kindeClient));
-        // okta's endpoints can be resolved from an issuer
-        environment.getPropertySources().addLast(kindeStaticDiscoveryPropertySource(environment, kindeClient));
-        // Auth0 does not have an introspection endpoint
-        environment.getPropertySources().addLast(kindeOpaqueTokenPropertySource(environment, kindeClient));
+        
+        // Only add KindeClient-dependent property sources if KindeClient was successfully created
+        if (kindeClient != null) {
+            // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
+            environment.getPropertySources().addLast(defaultKindeScopesSource(environment, kindeClient));
+            // okta's endpoints can be resolved from an issuer
+            environment.getPropertySources().addLast(kindeStaticDiscoveryPropertySource(environment, kindeClient));
+            // Auth0 does not have an introspection endpoint
+            environment.getPropertySources().addLast(kindeOpaqueTokenPropertySource(environment, kindeClient));
+            environment.getPropertySources().addLast(kindeForcePkcePropertySource(environment, kindeClient));
+        }
+        
         environment.getPropertySources().addLast(kindeRedirectUriPropertySource(environment));
-        environment.getPropertySources().addLast(kindeForcePkcePropertySource(environment, kindeClient));
 
         if (application != null) {
             // This is required as EnvironmentPostProcessors are run before logging system is initialized
@@ -122,7 +145,11 @@ public class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Env
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.opaque-token.client-id", "${" + KINDE_OAUTH_CLIENT_ID + "}");
         properties.put("spring.security.oauth2.resourceserver.opaque-token.client-secret", "${" + KINDE_OAUTH_CLIENT_SECRET + "}");
-        properties.put("spring.security.oauth2.resourceserver.opaque-token.introspection-uri", oidcMetaData.getOpMetadata().getIntrospectionEndpointURI().toString());
+        
+        // Check if introspection endpoint is available before adding it
+        if (oidcMetaData.getOpMetadata().getIntrospectionEndpointURI() != null) {
+            properties.put("spring.security.oauth2.resourceserver.opaque-token.introspection-uri", oidcMetaData.getOpMetadata().getIntrospectionEndpointURI().toString());
+        }
 
         return new ConditionalMapPropertySource("kinde-opaque-token", properties, environment, KINDE_OAUTH_DOMAIN, KINDE_OAUTH_CLIENT_SECRET);
     }

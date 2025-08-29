@@ -14,9 +14,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
+    @Bean(name = "applicationSecurityFilterChain")
     SecurityFilterChain securityFilterChain(HttpSecurity http, OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver) throws Exception {
         http
+                .securityMatcher("/**") // Explicitly match all requests to avoid conflict
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/","/index.css", "/registration", "/oauth2/authorization/**").permitAll()
                         .anyRequest().authenticated())

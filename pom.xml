@@ -51,6 +51,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Jackson BOM for consistent versioning -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>2.19.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- https://mvnrepository.com/artifact/com.nimbusds/oauth2-oidc-sdk -->
             <dependency>
                 <groupId>com.nimbusds</groupId>
@@ -94,6 +102,12 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
+                <version>5.17.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
                 <version>5.17.0</version>
                 <scope>test</scope>
             </dependency>
@@ -169,6 +183,55 @@
                 <artifactId>kinde-springboot-core</artifactId>
                 <version>2.1.0</version>
             </dependency>
+            
+            <!-- Jackson dependencies with consistent versions -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.19.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.19.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.19.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-joda</artifactId>
+                <version>2.19.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>2.19.0</version>
+            </dependency>
+            
+            <!-- Force latest Kotlin stdlib version to minimize security vulnerability -->
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>2.2.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk8</artifactId>
+                <version>2.2.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk7</artifactId>
+                <version>2.2.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-common</artifactId>
+                <version>2.2.10</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -177,8 +240,10 @@
         <module>kinde-management</module>
         <module>kinde-j2ee</module>
         <module>kinde-springboot</module>
+        <module>kinde-test-utils</module>
         <module>playground/kinde-core-example</module>
         <module>playground/kinde-management-example</module>
+        <module>playground/kinde-accounts-example</module>
         <module>playground/kinde-j2ee-app</module>
         <module>playground/kinde-springboot-starter-example</module>
         <module>playground/kinde-springboot-pkce-client-example</module>
@@ -198,7 +263,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
+                <version>3.12.1</version>
                 <configuration>
                     <source>17</source>
                     <target>17</target>
@@ -313,6 +378,7 @@
                                 <excludeArtifact>kinde-core-example</excludeArtifact>
                                 <excludeArtifact>kinde-j2ee-app</excludeArtifact>
                                 <excludeArtifact>kinde-management-example</excludeArtifact>
+                                <excludeArtifact>kinde-accounts-example</excludeArtifact> 
                                 <excludeArtifact>kinde-springboot-pkce-client-example</excludeArtifact>
                                 <excludeArtifact>kinde-springboot-starter-example</excludeArtifact>
                                 <excludeArtifact>kinde-springboot-thymeleaf-full-example</excludeArtifact>

@@ -3,6 +3,7 @@ package com.kinde.session;
 import com.google.inject.Inject;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
+import com.kinde.entitlements.KindeEntitlements;
 import com.kinde.guice.KindeAnnotations;
 import com.kinde.token.AccessToken;
 import com.kinde.token.IDToken;
@@ -24,6 +25,11 @@ import lombok.SneakyThrows;
 
 import java.net.URI;
 
+/**
+ * Implementation of KindeClientSession for token-based sessions.
+ * This implementation extends KindeClientSessionImpl and inherits entitlements functionality
+ * through Guice dependency injection.
+ */
 public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
 
     private KindeToken kindeToken;
@@ -35,6 +41,17 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
             @KindeAnnotations.KindeToken KindeToken kindeToken) {
         super(kindeConfig, oidcMetaData);
         this.kindeToken = kindeToken;
+    }
+
+    /**
+     * Sets the entitlements instance. This method is called by Guice after construction
+     * to inject the KindeEntitlements dependency.
+     * 
+     * @param entitlements The KindeEntitlements instance to inject
+     */
+    @Inject
+    public void setEntitlements(KindeEntitlements entitlements) {
+        super.setEntitlements(entitlements);
     }
 
     @Override
