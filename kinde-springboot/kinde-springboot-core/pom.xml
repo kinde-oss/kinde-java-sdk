@@ -30,14 +30,14 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
       <optional>true</optional>
-      <version>3.4.6</version>
+      <version>3.5.5</version>
     </dependency>
 
           <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-webflux</artifactId>
         <optional>true</optional>
-        <version>3.4.7</version>
+        <version>3.5.5</version>
       </dependency>
 
     <dependency>
@@ -50,40 +50,40 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
-      <version>6.4.6</version>
+      <version>6.5.3</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.4.6</version>
+      <version>3.5.5</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-client</artifactId>
-      <version>6.4.6</version>
+      <version>6.5.3</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-jose</artifactId>
-      <version>6.4.6</version>
+      <version>6.5.3</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-resource-server</artifactId>
-      <version>6.4.6</version>
+      <version>6.5.3</version>
     </dependency>
 
     <!-- Spring deps-->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.4.6</version>
+      <version>3.5.5</version>
     </dependency>
           <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-configuration-processor</artifactId>
         <optional>true</optional>
-        <version>3.4.6</version>
+        <version>3.5.5</version>
       </dependency>
 
     <!-- Test deps -->
@@ -91,7 +91,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-test</artifactId>
         <scope>test</scope>
-        <version>3.4.6</version>
+        <version>3.5.5</version>
       </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
