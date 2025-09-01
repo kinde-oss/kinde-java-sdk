@@ -190,7 +190,7 @@
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <!-- RELEASE_VERSION -->
-                <version>7.13.0</version>
+                <version>7.15.0</version>
                 <!-- /RELEASE_VERSION -->
                 <executions>
                     <execution>
