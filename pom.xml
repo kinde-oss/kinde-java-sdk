@@ -137,7 +137,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.36</version>
+                <version>1.18.38</version>
                 <scope>provided</scope>
             </dependency>
             <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
@@ -188,17 +188,17 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.19.0</version>
+                <version>2.20.0</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.19.0</version>
+                <version>2.20</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.19.0</version>
+                <version>2.20.0</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -208,7 +208,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>2.19.0</version>
+                <version>2.20.0</version>
             </dependency>
             
             <!-- Force latest Kotlin stdlib version to minimize security vulnerability -->
@@ -271,7 +271,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.36</version> <!-- Use the version you need -->
+                            <version>1.18.38</version> <!-- Use the version you need -->
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
