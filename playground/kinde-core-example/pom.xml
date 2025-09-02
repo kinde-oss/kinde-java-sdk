@@ -25,12 +25,12 @@
     <dependency>
       <groupId>com.nimbusds</groupId>
       <artifactId>oauth2-oidc-sdk</artifactId>
-      <version>11.23.1</version>
+      <version>11.28</version>
     </dependency>
     <dependency>
       <groupId>com.nimbusds</groupId>
       <artifactId>nimbus-jose-jwt</artifactId>
-      <version>9.48</version>
+      <version>10.4.2</version>
     </dependency>
     <dependency>
       <groupId>com.kinde</groupId>
@@ -67,7 +67,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.5.3</version>
         <configuration>
           <!-- Ignore test failures -->
           <testFailureIgnore>true</testFailureIgnore>
