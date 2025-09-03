@@ -1,9 +1,9 @@
 kinde:
   oauth2:
-    domain: https://burntjam.kinde.com
-    client-id: d129efa11ffe436ca46e66aa16753e02
-    client-secret: x9kxMgGeMuHD5rgs3xK4aulij5qnpqM6zRaRz4RsWwCt4Bu1e0a
-    scopes: openid,email,profile
+    domain: ${KINDE_DOMAIN:https://your-domain.kinde.com}
+    client-id: ${KINDE_CLIENT_ID:your-client-id-here}
+    client-secret: ${KINDE_CLIENT_SECRET:your-client-secret-here}
+    scopes: openid,email,profile,offline
     auto-config:
-      enabled: false
+      enabled: true
 
