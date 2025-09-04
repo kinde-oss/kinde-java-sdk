@@ -1,10 +1,7 @@
 package com.kinde.config;
 
-import com.kinde.KindeClientBuilder;
 import com.kinde.authorization.AuthorizationType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

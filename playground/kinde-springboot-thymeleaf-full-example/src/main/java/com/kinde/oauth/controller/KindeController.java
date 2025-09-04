@@ -83,6 +83,17 @@ public class KindeController {
     }
 
     /**
+     * Handles requests to the read endpoint, restricted to users with the 'read' role.
+     *
+     * @return the name of the "read" view.
+     */
+    @GetMapping("/edit")
+    @PreAuthorize("hasRole('edit')")
+    public String editEndpoint() {
+        return "edit";
+    }
+
+    /**
      * Handles requests to the write endpoint, restricted to users with the 'write' role.
      * See SecurityConfig for 'write' role definition.
      *
