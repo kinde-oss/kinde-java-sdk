@@ -6,13 +6,14 @@
     <parent>
         <groupId>com.kinde</groupId>
         <artifactId>kinde-parent-pom</artifactId>
-        <version>2.1.0</version>
+        <version>2.2.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <groupId>com.kinde</groupId>
     <artifactId>kinde-accounts-example</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
     <name>kinde-accounts-example</name>
     <description>Example application demonstrating Kinde Accounts API usage</description>
 
