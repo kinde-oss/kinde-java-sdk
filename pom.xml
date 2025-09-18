@@ -137,7 +137,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.40</version>
+                <version>1.18.42</version>
                 <scope>provided</scope>
             </dependency>
             <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
@@ -271,7 +271,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.40</version> <!-- Use the version you need -->
+                            <version>1.18.42</version> <!-- Use the version you need -->
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
