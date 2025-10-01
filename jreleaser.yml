@@ -23,7 +23,7 @@ release:
     owner: kinde-oss
     name: kinde-java-sdk
     tagName: '{{projectVersion}}'
-    name: '{{projectName}} {{projectVersion}}'
+    releaseName: '{{projectName}} {{projectVersion}}'
     body: |
       ## What's Changed
       {{changelog}}

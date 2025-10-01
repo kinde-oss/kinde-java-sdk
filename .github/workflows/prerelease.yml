@@ -73,10 +73,10 @@ jobs:
 
       - name: Setup GPG
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import --batch --yes
-          echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --pinentry-mode loopback --passphrase-fd 0 --batch --yes --armor --export-secret-keys > private.key
-          gpg --import private.key
-          rm private.key
+          echo "${{ secrets.GPG_SECRET_KEY }}" | gpg --batch --yes --import
+          echo "${{ secrets.GPG_PUBLIC_KEY }}" | gpg --batch --yes --import
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --reload gpg-agent
 
       - name: Configure Git
         run: |
