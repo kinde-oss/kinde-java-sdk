@@ -30,13 +30,40 @@ release:
       
       **Full Changelog**: https://github.com/kinde-oss/kinde-java-sdk/compare/{{previousTag}}...{{tagName}}
     draft: false
-    prerelease: false
+    prerelease:
+      enabled: false
     overwrite: false
-    update: true
+    update:
+      enabled: true
     skipTag: false
     skipRelease: false
     discussionCategoryName: 'Announcements'
-    generateReleaseNotes: true
+    releaseNotes:
+      enabled: true
+
+signing:
+  active: ALWAYS
+  armored: true
+  publicKey: '{{env.GPG_PUBLIC_KEY}}'
+  secretKey: '{{env.GPG_SECRET_KEY}}'
+  passphrase: '{{env.GPG_PASSPHRASE}}'
+
+deploy:
+  maven:
+    # Portal publisher for releases
+    mavenCentral:
+      sonatype:
+        active: RELEASE
+        url: https://central.sonatype.com/api/v1/publisher
+        # JReleaser will read staged artifacts from target/staging-deploy
+        stagingRepositories:
+          - target/staging-deploy
+    # Nexus2 for snapshots (and optionally releases if you prefer)
+    nexus2:
+      ossrh:
+        active: SNAPSHOT
+        url: https://s01.oss.sonatype.org/service/local
+        snapshotUrl: https://s01.oss.sonatype.org/content/repositories/snapshots/
 
 distributions:
   kinde-core:
@@ -49,29 +76,6 @@ distributions:
       groupId: com.kinde
       artifactId: kinde-core
       version: '{{projectVersion}}'
-    maven:
-      enabled: true
-      central:
-        enabled: true
-        sync:
-          enabled: true
-          user: '{{env.OSSRH_USERNAME}}'
-          token: '{{env.OSSRH_TOKEN}}'
-          close: true
-          publish: true
-          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
-        signing:
-          enabled: true
-          armored: true
-          keyring: '{{env.GPG_KEYRING}}'
-          passphrase: '{{env.GPG_PASSPHRASE}}'
-          publicKey: '{{env.GPG_PUBLIC_KEY}}'
-          secretKey: '{{env.GPG_SECRET_KEY}}'
-        nexus:
-          url: 'https://s01.oss.sonatype.org'
-          username: '{{env.OSSRH_USERNAME}}'
-          password: '{{env.OSSRH_TOKEN}}'
-        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
 
   kinde-management:
     name: kinde-management
@@ -83,29 +87,6 @@ distributions:
       groupId: com.kinde
       artifactId: kinde-management
       version: '{{projectVersion}}'
-    maven:
-      enabled: true
-      central:
-        enabled: true
-        sync:
-          enabled: true
-          user: '{{env.OSSRH_USERNAME}}'
-          token: '{{env.OSSRH_TOKEN}}'
-          close: true
-          publish: true
-          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
-        signing:
-          enabled: true
-          armored: true
-          keyring: '{{env.GPG_KEYRING}}'
-          passphrase: '{{env.GPG_PASSPHRASE}}'
-          publicKey: '{{env.GPG_PUBLIC_KEY}}'
-          secretKey: '{{env.GPG_SECRET_KEY}}'
-        nexus:
-          url: 'https://s01.oss.sonatype.org'
-          username: '{{env.OSSRH_USERNAME}}'
-          password: '{{env.OSSRH_TOKEN}}'
-        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
 
   kinde-j2ee:
     name: kinde-j2ee
@@ -117,29 +98,6 @@ distributions:
       groupId: com.kinde
       artifactId: kinde-j2ee
       version: '{{projectVersion}}'
-    maven:
-      enabled: true
-      central:
-        enabled: true
-        sync:
-          enabled: true
-          user: '{{env.OSSRH_USERNAME}}'
-          token: '{{env.OSSRH_TOKEN}}'
-          close: true
-          publish: true
-          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
-        signing:
-          enabled: true
-          armored: true
-          keyring: '{{env.GPG_KEYRING}}'
-          passphrase: '{{env.GPG_PASSPHRASE}}'
-          publicKey: '{{env.GPG_PUBLIC_KEY}}'
-          secretKey: '{{env.GPG_SECRET_KEY}}'
-        nexus:
-          url: 'https://s01.oss.sonatype.org'
-          username: '{{env.OSSRH_USERNAME}}'
-          password: '{{env.OSSRH_TOKEN}}'
-        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
 
   kinde-springboot-core:
     name: kinde-springboot-core
@@ -151,29 +109,6 @@ distributions:
       groupId: com.kinde.spring
       artifactId: kinde-springboot-core
       version: '{{projectVersion}}'
-    maven:
-      enabled: true
-      central:
-        enabled: true
-        sync:
-          enabled: true
-          user: '{{env.OSSRH_USERNAME}}'
-          token: '{{env.OSSRH_TOKEN}}'
-          close: true
-          publish: true
-          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
-        signing:
-          enabled: true
-          armored: true
-          keyring: '{{env.GPG_KEYRING}}'
-          passphrase: '{{env.GPG_PASSPHRASE}}'
-          publicKey: '{{env.GPG_PUBLIC_KEY}}'
-          secretKey: '{{env.GPG_SECRET_KEY}}'
-        nexus:
-          url: 'https://s01.oss.sonatype.org'
-          username: '{{env.OSSRH_USERNAME}}'
-          password: '{{env.OSSRH_TOKEN}}'
-        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
 
   kinde-test-utils:
     name: kinde-test-utils
@@ -185,29 +120,6 @@ distributions:
       groupId: com.kinde
       artifactId: kinde-test-utils
       version: '{{projectVersion}}'
-    maven:
-      enabled: true
-      central:
-        enabled: true
-        sync:
-          enabled: true
-          user: '{{env.OSSRH_USERNAME}}'
-          token: '{{env.OSSRH_TOKEN}}'
-          close: true
-          publish: true
-          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
-        signing:
-          enabled: true
-          armored: true
-          keyring: '{{env.GPG_KEYRING}}'
-          passphrase: '{{env.GPG_PASSPHRASE}}'
-          publicKey: '{{env.GPG_PUBLIC_KEY}}'
-          secretKey: '{{env.GPG_SECRET_KEY}}'
-        nexus:
-          url: 'https://s01.oss.sonatype.org'
-          username: '{{env.OSSRH_USERNAME}}'
-          password: '{{env.OSSRH_TOKEN}}'
-        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
 
 changelog:
   enabled: true
