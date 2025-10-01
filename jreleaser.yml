@@ -1,0 +1,303 @@
+project:
+  name: kinde-java-sdk
+  description: Kinde Java SDK
+  longDescription: Official Java SDK for Kinde authentication and authorization
+  website: https://kinde.com
+  license: MIT
+  copyright: "© 2024 Kinde"
+  authors:
+    - name: Kinde Engineering
+      email: engineering@kinde.com
+  links:
+    homepage: https://kinde.com
+    documentation: https://kinde.com/docs
+    repository: https://github.com/kinde-oss/kinde-java-sdk
+  java:
+    groupId: com.kinde
+    artifactId: kinde-parent-pom
+    version: '{{projectVersion}}'
+    mainClass: com.kinde.KindeClient
+
+release:
+  github:
+    owner: kinde-oss
+    name: kinde-java-sdk
+    tagName: '{{projectVersion}}'
+    name: '{{projectName}} {{projectVersion}}'
+    body: |
+      ## What's Changed
+      {{changelog}}
+      
+      **Full Changelog**: https://github.com/kinde-oss/kinde-java-sdk/compare/{{previousTag}}...{{tagName}}
+    draft: false
+    prerelease: false
+    overwrite: false
+    update: true
+    skipTag: false
+    skipRelease: false
+    discussionCategoryName: 'Announcements'
+    generateReleaseNotes: true
+
+distributions:
+  kinde-core:
+    name: kinde-core
+    executable: false
+    artifacts:
+      - path: 'kinde-core/target/{{distributionArtifactFile}}'
+        platform: '{{os}}'
+    java:
+      groupId: com.kinde
+      artifactId: kinde-core
+      version: '{{projectVersion}}'
+    maven:
+      enabled: true
+      central:
+        enabled: true
+        sync:
+          enabled: true
+          user: '{{env.OSSRH_USERNAME}}'
+          token: '{{env.OSSRH_TOKEN}}'
+          close: true
+          publish: true
+          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
+        signing:
+          enabled: true
+          armored: true
+          keyring: '{{env.GPG_KEYRING}}'
+          passphrase: '{{env.GPG_PASSPHRASE}}'
+          publicKey: '{{env.GPG_PUBLIC_KEY}}'
+          secretKey: '{{env.GPG_SECRET_KEY}}'
+        nexus:
+          url: 'https://s01.oss.sonatype.org'
+          username: '{{env.OSSRH_USERNAME}}'
+          password: '{{env.OSSRH_TOKEN}}'
+        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+
+  kinde-management:
+    name: kinde-management
+    executable: false
+    artifacts:
+      - path: 'kinde-management/target/{{distributionArtifactFile}}'
+        platform: '{{os}}'
+    java:
+      groupId: com.kinde
+      artifactId: kinde-management
+      version: '{{projectVersion}}'
+    maven:
+      enabled: true
+      central:
+        enabled: true
+        sync:
+          enabled: true
+          user: '{{env.OSSRH_USERNAME}}'
+          token: '{{env.OSSRH_TOKEN}}'
+          close: true
+          publish: true
+          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
+        signing:
+          enabled: true
+          armored: true
+          keyring: '{{env.GPG_KEYRING}}'
+          passphrase: '{{env.GPG_PASSPHRASE}}'
+          publicKey: '{{env.GPG_PUBLIC_KEY}}'
+          secretKey: '{{env.GPG_SECRET_KEY}}'
+        nexus:
+          url: 'https://s01.oss.sonatype.org'
+          username: '{{env.OSSRH_USERNAME}}'
+          password: '{{env.OSSRH_TOKEN}}'
+        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+
+  kinde-j2ee:
+    name: kinde-j2ee
+    executable: false
+    artifacts:
+      - path: 'kinde-j2ee/target/{{distributionArtifactFile}}'
+        platform: '{{os}}'
+    java:
+      groupId: com.kinde
+      artifactId: kinde-j2ee
+      version: '{{projectVersion}}'
+    maven:
+      enabled: true
+      central:
+        enabled: true
+        sync:
+          enabled: true
+          user: '{{env.OSSRH_USERNAME}}'
+          token: '{{env.OSSRH_TOKEN}}'
+          close: true
+          publish: true
+          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
+        signing:
+          enabled: true
+          armored: true
+          keyring: '{{env.GPG_KEYRING}}'
+          passphrase: '{{env.GPG_PASSPHRASE}}'
+          publicKey: '{{env.GPG_PUBLIC_KEY}}'
+          secretKey: '{{env.GPG_SECRET_KEY}}'
+        nexus:
+          url: 'https://s01.oss.sonatype.org'
+          username: '{{env.OSSRH_USERNAME}}'
+          password: '{{env.OSSRH_TOKEN}}'
+        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+
+  kinde-springboot-core:
+    name: kinde-springboot-core
+    executable: false
+    artifacts:
+      - path: 'kinde-springboot/kinde-springboot-core/target/{{distributionArtifactFile}}'
+        platform: '{{os}}'
+    java:
+      groupId: com.kinde.spring
+      artifactId: kinde-springboot-core
+      version: '{{projectVersion}}'
+    maven:
+      enabled: true
+      central:
+        enabled: true
+        sync:
+          enabled: true
+          user: '{{env.OSSRH_USERNAME}}'
+          token: '{{env.OSSRH_TOKEN}}'
+          close: true
+          publish: true
+          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
+        signing:
+          enabled: true
+          armored: true
+          keyring: '{{env.GPG_KEYRING}}'
+          passphrase: '{{env.GPG_PASSPHRASE}}'
+          publicKey: '{{env.GPG_PUBLIC_KEY}}'
+          secretKey: '{{env.GPG_SECRET_KEY}}'
+        nexus:
+          url: 'https://s01.oss.sonatype.org'
+          username: '{{env.OSSRH_USERNAME}}'
+          password: '{{env.OSSRH_TOKEN}}'
+        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+
+  kinde-test-utils:
+    name: kinde-test-utils
+    executable: false
+    artifacts:
+      - path: 'kinde-test-utils/target/{{distributionArtifactFile}}'
+        platform: '{{os}}'
+    java:
+      groupId: com.kinde
+      artifactId: kinde-test-utils
+      version: '{{projectVersion}}'
+    maven:
+      enabled: true
+      central:
+        enabled: true
+        sync:
+          enabled: true
+          user: '{{env.OSSRH_USERNAME}}'
+          token: '{{env.OSSRH_TOKEN}}'
+          close: true
+          publish: true
+          stagingProfileId: '{{env.OSSRH_STAGING_PROFILE_ID}}'
+        signing:
+          enabled: true
+          armored: true
+          keyring: '{{env.GPG_KEYRING}}'
+          passphrase: '{{env.GPG_PASSPHRASE}}'
+          publicKey: '{{env.GPG_PUBLIC_KEY}}'
+          secretKey: '{{env.GPG_SECRET_KEY}}'
+        nexus:
+          url: 'https://s01.oss.sonatype.org'
+          username: '{{env.OSSRH_USERNAME}}'
+          password: '{{env.OSSRH_TOKEN}}'
+        uploadUrl: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+
+changelog:
+  enabled: true
+  format: '{{formattedChangelog}}'
+  preset: conventional-commits
+  categories:
+    - title: '🚀 Features'
+      labels:
+        - 'feature'
+        - 'enhancement'
+    - title: '🐛 Bug Fixes'
+      labels:
+        - 'fix'
+        - 'bugfix'
+        - 'bug'
+    - title: '🧰 Maintenance'
+      labels:
+        - 'chore'
+        - 'deps'
+        - 'maintenance'
+  contributors:
+    enabled: true
+    format: '{{contributorName}} ({{contributorLogin}})'
+  hide:
+    uncategorized: false
+    empty: true
+  sort:
+    order: ASC
+  skipMergeCommits: true
+  links:
+    enabled: true
+    format: '{{#formatCommitLink}}{{commitLongHash}}{{/formatCommitLink}}'
+    issue: 'https://github.com/kinde-oss/kinde-java-sdk/issues/{{issue}}'
+    commit: 'https://github.com/kinde-oss/kinde-java-sdk/commit/{{hash}}'
+    scm: 'https://github.com/kinde-oss/kinde-java-sdk/{{branch}}'
+
+announce:
+  twitter:
+    enabled: false
+  mastodon:
+    enabled: false
+  discord:
+    enabled: false
+  teams:
+    enabled: false
+  slack:
+    enabled: false
+  zulip:
+    enabled: false
+  gitter:
+    enabled: false
+  mattermost:
+    enabled: false
+  rocketchat:
+    enabled: false
+  telegram:
+    enabled: false
+  smtp:
+    enabled: false
+  sdkman:
+    enabled: false
+  scoop:
+    enabled: false
+  chocolatey:
+    enabled: false
+  homebrew:
+    enabled: false
+  snap:
+    enabled: false
+  gofish:
+    enabled: false
+  winget:
+    enabled: false
+  linkedin:
+    enabled: false
+  reddit:
+    enabled: false
+  facebook:
+    enabled: false
+  youtube:
+    enabled: false
+  gitea:
+    enabled: false
+  codeberg:
+    enabled: false
+  sourceforge:
+    enabled: false
+  gitlab:
+    enabled: false
+  gitee:
+    enabled: false
+  generic:
+    enabled: false

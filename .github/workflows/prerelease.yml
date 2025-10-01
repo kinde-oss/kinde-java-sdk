@@ -1,0 +1,123 @@
+name: Pre-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Pre-release version (e.g., 2.3.0-alpha.1)'
+        required: true
+        type: string
+      prerelease_type:
+        description: 'Type of pre-release'
+        required: true
+        default: 'alpha'
+        type: choice
+        options:
+          - alpha
+          - beta
+          - rc
+      skip_tests:
+        description: 'Skip tests during pre-release'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  MAVEN_OPTS: -Xmx1024m
+
+jobs:
+  prerelease:
+    name: Pre-release
+    runs-on: ubuntu-latest
+    environment: prerelease
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run tests
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          mvn clean test -DskipTests=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build project
+        run: |
+          mvn clean compile package -DskipTests=true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup GPG
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import --batch --yes
+          echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --pinentry-mode loopback --passphrase-fd 0 --batch --yes --armor --export-secret-keys > private.key
+          gpg --import private.key
+          rm private.key
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "Kinde Pre-release Bot"
+          git config --global user.email "engineering@kinde.com"
+
+      - name: Run JReleaser (Pre-release)
+        uses: jreleaser/release-action@v1
+        with:
+          version: latest
+          arguments: |
+            --config-file jreleaser.yml
+            --debug
+            --project-version ${{ inputs.version }}
+            --release-type prerelease
+            --prerelease-type ${{ inputs.prerelease_type }}
+            ${{ inputs.skip_tests && '--skip-tests' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+          OSSRH_STAGING_PROFILE_ID: ${{ secrets.OSSRH_STAGING_PROFILE_ID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
+          GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
+          GPG_KEYRING: ${{ secrets.GPG_KEYRING }}
+
+      - name: Upload pre-release artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prerelease-artifacts-${{ inputs.version }}
+          path: |
+            jreleaser/output/
+          retention-days: 30
+
+      - name: Create pre-release summary
+        if: always()
+        run: |
+          echo "## Pre-release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Pre-release Type**: ${{ inputs.prerelease_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests Skipped**: ${{ inputs.skip_tests }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow**: [View Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
