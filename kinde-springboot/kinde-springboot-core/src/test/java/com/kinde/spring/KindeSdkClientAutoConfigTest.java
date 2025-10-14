@@ -3,8 +3,12 @@ package com.kinde.spring;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,8 +30,8 @@ public class KindeSdkClientAutoConfigTest {
         
         List<String> lines;
         try (var inputStream = resource.getInputStream();
-             var reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(java.util.stream.Collectors.toList());
+             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            lines = reader.lines().collect(Collectors.toList());
         }
         
         // Verify that KindeSdkClientAutoConfig is registered
@@ -41,8 +45,8 @@ public class KindeSdkClientAutoConfigTest {
         ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
         List<String> lines;
         try (var inputStream = resource.getInputStream();
-             var reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(java.util.stream.Collectors.toList());
+             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            lines = reader.lines().collect(Collectors.toList());
         }
         
         int kindeSdkClientAutoConfigIndex = lines.indexOf("com.kinde.spring.KindeSdkClientAutoConfig");
@@ -62,8 +66,8 @@ public class KindeSdkClientAutoConfigTest {
         
         List<String> lines;
         try (var inputStream = resource.getInputStream();
-             var reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(java.util.stream.Collectors.toList());
+             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            lines = reader.lines().collect(Collectors.toList());
         }
         assertThat(lines).isNotEmpty();
         
@@ -147,8 +151,8 @@ public class KindeSdkClientAutoConfigTest {
         ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
         List<String> lines;
         try (var inputStream = resource.getInputStream();
-             var reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(java.util.stream.Collectors.toList());
+             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            lines = reader.lines().collect(Collectors.toList());
         }
         
         // Before our fix: KindeSdkClient would not be available because:
@@ -175,8 +179,8 @@ public class KindeSdkClientAutoConfigTest {
         ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
         List<String> lines;
         try (var inputStream = resource.getInputStream();
-             var reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(java.util.stream.Collectors.toList());
+             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            lines = reader.lines().collect(Collectors.toList());
         }
         
         // The fact that KindeSdkClientAutoConfig is registered means that
