@@ -22,18 +22,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class KindeSdkClientAutoConfigurationRegistrationTest {
 
+    /**
+     * Helper method to read the auto-configuration imports file.
+     * 
+     * @return List of lines from the auto-configuration imports file
+     * @throws IOException if the file cannot be read
+     */
+    private List<String> readAutoConfigurationImports() throws IOException {
+        ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
+        assertThat(resource.exists()).isTrue();
+        
+        try (var reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
+            return reader.lines().collect(Collectors.toList());
+        }
+    }
+
     @Test
     public void testKindeSdkClientAutoConfigIsProperlyRegistered() throws IOException {
         // Verifies that KindeSdkClientAutoConfig is registered in auto-configuration imports
         // and available for Spring Boot's auto-configuration system
         
-        ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
-        assertThat(resource.exists()).isTrue();
-        
-        List<String> lines;
-        try (var reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
-            lines = reader.lines().collect(Collectors.toList());
-        }
+        List<String> lines = readAutoConfigurationImports();
         
         assertThat(lines)
             .isNotEmpty()
@@ -45,11 +54,7 @@ public class KindeSdkClientAutoConfigurationRegistrationTest {
         // This test verifies that KindeSdkClientAutoConfig is registered before
         // KindeOAuth2AutoConfig, ensuring proper ordering
         
-        ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
-        List<String> lines;
-        try (var reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
-            lines = reader.lines().collect(Collectors.toList());
-        }
+        List<String> lines = readAutoConfigurationImports();
         
         int kindeSdkClientAutoConfigIndex = lines.indexOf("com.kinde.spring.KindeSdkClientAutoConfig");
         int kindeOAuth2AutoConfigIndex = lines.indexOf("com.kinde.spring.KindeOAuth2AutoConfig");

@@ -22,17 +22,26 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class KindeSdkClientAutoConfigTest {
 
-    @Test
-    public void testKindeSdkClientAutoConfigIsRegisteredInImportsFile() throws IOException {
-        // Test that KindeSdkClientAutoConfig is properly registered in the auto-configuration imports file
+    /**
+     * Helper method to read the auto-configuration imports file.
+     * 
+     * @return List of lines from the auto-configuration imports file
+     * @throws IOException if the file cannot be read
+     */
+    private List<String> readAutoConfigurationImports() throws IOException {
         ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
         assertThat(resource.exists()).isTrue();
         
-        List<String> lines;
         try (var inputStream = resource.getInputStream();
              var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(Collectors.toList());
+            return reader.lines().collect(Collectors.toList());
         }
+    }
+
+    @Test
+    public void testKindeSdkClientAutoConfigIsRegisteredInImportsFile() throws IOException {
+        // Test that KindeSdkClientAutoConfig is properly registered in the auto-configuration imports file
+        List<String> lines = readAutoConfigurationImports();
         
         // Verify that KindeSdkClientAutoConfig is registered
         assertThat(lines).contains("com.kinde.spring.KindeSdkClientAutoConfig");
@@ -42,12 +51,7 @@ public class KindeSdkClientAutoConfigTest {
     public void testKindeSdkClientAutoConfigIsRegisteredBeforeKindeOAuth2AutoConfig() throws IOException {
         // Test that KindeSdkClientAutoConfig is registered before KindeOAuth2AutoConfig
         // This ensures proper ordering so that KindeSdkClient is available for KindeOAuth2AutoConfig
-        ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
-        List<String> lines;
-        try (var inputStream = resource.getInputStream();
-             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(Collectors.toList());
-        }
+        List<String> lines = readAutoConfigurationImports();
         
         int kindeSdkClientAutoConfigIndex = lines.indexOf("com.kinde.spring.KindeSdkClientAutoConfig");
         int kindeOAuth2AutoConfigIndex = lines.indexOf("com.kinde.spring.KindeOAuth2AutoConfig");
@@ -61,14 +65,7 @@ public class KindeSdkClientAutoConfigTest {
     @Test
     public void testAutoConfigurationImportsFileExists() throws IOException {
         // Test that the auto-configuration imports file exists and contains the necessary configuration
-        ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
-        assertThat(resource.exists()).isTrue();
-        
-        List<String> lines;
-        try (var inputStream = resource.getInputStream();
-             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(Collectors.toList());
-        }
+        List<String> lines = readAutoConfigurationImports();
         assertThat(lines).isNotEmpty();
         
         // Verify that KindeSdkClientAutoConfig is in the list
@@ -148,12 +145,7 @@ public class KindeSdkClientAutoConfigTest {
         // Test that demonstrates the customer's problem has been resolved
         // by showing that the auto-configuration is properly registered
         
-        ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
-        List<String> lines;
-        try (var inputStream = resource.getInputStream();
-             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(Collectors.toList());
-        }
+        List<String> lines = readAutoConfigurationImports();
         
         // Before our fix: KindeSdkClient would not be available because:
         // 1. It was only annotated with @Component
@@ -176,12 +168,7 @@ public class KindeSdkClientAutoConfigTest {
         // @SpringBootApplication(scanBasePackageClasses = [KindeSdkClient::class])
         // This test proves that's not necessary anymore
         
-        ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
-        List<String> lines;
-        try (var inputStream = resource.getInputStream();
-             var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            lines = reader.lines().collect(Collectors.toList());
-        }
+        List<String> lines = readAutoConfigurationImports();
         
         // The fact that KindeSdkClientAutoConfig is registered means that
         // no manual configuration like component scanning is required
