@@ -3,8 +3,11 @@ package com.kinde.spring;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,8 +31,8 @@ public class KindeSdkClientAutoConfigurationRegistrationTest {
         assertThat(resource.exists()).isTrue();
         
         List<String> lines;
-        try (var reader = new java.io.BufferedReader(new java.io.InputStreamReader(resource.getInputStream()))) {
-            lines = reader.lines().collect(java.util.stream.Collectors.toList());
+        try (var reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
+            lines = reader.lines().collect(Collectors.toList());
         }
         
         assertThat(lines)
@@ -44,8 +47,8 @@ public class KindeSdkClientAutoConfigurationRegistrationTest {
         
         ClassPathResource resource = new ClassPathResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
         List<String> lines;
-        try (var reader = new java.io.BufferedReader(new java.io.InputStreamReader(resource.getInputStream()))) {
-            lines = reader.lines().collect(java.util.stream.Collectors.toList());
+        try (var reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
+            lines = reader.lines().collect(Collectors.toList());
         }
         
         int kindeSdkClientAutoConfigIndex = lines.indexOf("com.kinde.spring.KindeSdkClientAutoConfig");
