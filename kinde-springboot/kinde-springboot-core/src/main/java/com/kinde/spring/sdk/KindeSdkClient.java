@@ -2,19 +2,13 @@ package com.kinde.spring.sdk;
 
 import com.kinde.KindeClient;
 import com.kinde.KindeClientBuilder;
-import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.spring.config.KindeOAuth2Properties;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.ApplicationScope;
 
-import java.util.Map;
-
 @ApplicationScope
-@Component
 public class KindeSdkClient {
 
     @Autowired

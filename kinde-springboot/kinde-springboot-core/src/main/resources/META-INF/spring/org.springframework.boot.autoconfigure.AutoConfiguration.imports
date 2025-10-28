@@ -1,3 +1,4 @@
+com.kinde.spring.KindeSdkClientAutoConfig
 com.kinde.spring.KindeOAuth2AutoConfig
 com.kinde.spring.KindeOAuth2ResourceServerAutoConfig
 com.kinde.spring.ReactiveKindeOAuth2AutoConfig
