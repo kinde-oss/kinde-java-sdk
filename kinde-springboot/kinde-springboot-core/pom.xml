@@ -30,7 +30,7 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
       <optional>true</optional>
-      <version>3.5.5</version>
+      <version>3.5.7</version>
     </dependency>
 
           <dependency>
