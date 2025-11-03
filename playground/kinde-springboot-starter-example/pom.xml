@@ -73,7 +73,7 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <scope>runtime</scope>
-      <version>1.5.18</version>
+      <version>1.5.20</version>
     </dependency>
 
     <dependency>
