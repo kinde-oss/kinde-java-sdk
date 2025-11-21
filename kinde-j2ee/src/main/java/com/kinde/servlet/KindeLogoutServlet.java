@@ -27,11 +27,21 @@ public class KindeLogoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            AuthorizationUrl authorizationUrl = KindeSingleton
+            String logoutRedirectUri = req.getParameter("redirect_uri");
+            AuthorizationUrl authorizationUrl;
+            
+            KindeClientSession clientSession = KindeSingleton
                     .getInstance()
                     .getKindeClientBuilder()
                     .build()
-                    .clientSession().logout();
+                    .clientSession();
+                    
+            if (logoutRedirectUri != null && !logoutRedirectUri.isEmpty()) {
+                authorizationUrl = clientSession.logout(logoutRedirectUri);
+            } else {
+                authorizationUrl = clientSession.logout();
+            }
+            
             HttpSession session = req.getSession(false);
             if (session != null) {
                 session.removeAttribute(ACCESS_TOKEN);
