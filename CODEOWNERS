@@ -1,1 +1,11 @@
+# Default owners for all files
 * @kinde-oss/giants-kinde
+
+# Java / Maven dependency files that Renovate updates
+pom.xml              @kinde-oss/sdk-engineers
+**/pom.xml           @kinde-oss/sdk-engineers
+
+# Optional: if Renovate ever bumps Maven wrapper versions
+.mvn/wrapper/**      @kinde-oss/sdk-engineers
+mvnw                 @kinde-oss/sdk-engineers
+mvnw.cmd             @kinde-oss/sdk-engineers
