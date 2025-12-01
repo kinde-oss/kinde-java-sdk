@@ -22,6 +22,8 @@ import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import lombok.SneakyThrows;
+import com.kinde.KindeClientSession;
+import com.kinde.authorization.AuthorizationUrl;
 
 import java.net.URI;
 import java.util.List;
