@@ -12,19 +12,25 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.net.URL;
 import java.security.Principal;
+import java.util.Map;
 
-import static com.kinde.constants.KindeConstants.CONNECTION_ID;
+import static com.kinde.constants.KindeConstants.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 public class ConnectionIdFilterTest {
@@ -57,17 +63,29 @@ public class ConnectionIdFilterTest {
     private AuthorizationUrl authorizationUrl;
 
     private KindeLoginFilter filter;
+    private MockedStatic<KindeSingleton> kindeSingletonStatic;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         filter = new KindeLoginFilter();
         
+        // Static mocking for KindeSingleton
+        kindeSingletonStatic = Mockito.mockStatic(KindeSingleton.class);
+        kindeSingletonStatic.when(KindeSingleton::getInstance).thenReturn(kindeSingleton);
+        
         when(request.getSession()).thenReturn(session);
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/test"));
         when(session.getAttribute(anyString())).thenReturn(null);
         when(request.getParameter("code")).thenReturn(null);
         when(request.getParameter("error")).thenReturn(null);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (kindeSingletonStatic != null) {
+            kindeSingletonStatic.close();
+        }
     }
 
     @Test
@@ -79,8 +97,7 @@ public class ConnectionIdFilterTest {
         when(request.getParameter("org_code")).thenReturn(null);
         when(request.getParameter("lang")).thenReturn(null);
         
-        // Mock KindeSingleton
-        KindeSingleton.setInstance(kindeSingleton);
+        // Mock KindeSingleton chain
         when(kindeSingleton.getKindeClientBuilder()).thenReturn(kindeClientBuilder);
         when(kindeClientBuilder.redirectUri(anyString())).thenReturn(kindeClientBuilder);
         when(kindeClientBuilder.grantType(any(AuthorizationType.class))).thenReturn(kindeClientBuilder);
@@ -90,13 +107,13 @@ public class ConnectionIdFilterTest {
         when(kindeClientBuilder.build()).thenReturn(kindeClient);
         when(kindeClient.clientSession()).thenReturn(kindeClientSession);
         when(kindeClientSession.authorizationUrlWithParameters(any())).thenReturn(authorizationUrl);
-        when(authorizationUrl.getUrl()).thenReturn(new java.net.URL("http://example.com/auth?connection_id=" + connectionId));
+        when(authorizationUrl.getUrl()).thenReturn(new URL("http://example.com/auth?connection_id=" + connectionId));
         
         // Execute
         filter.doFilter(request, response, filterChain);
         
         // Verify
-        verify(kindeClientSession).authorizationUrlWithParameters(argThat(params -> 
+        verify(kindeClientSession).authorizationUrlWithParameters(argThat((Map<String, String> params) -> 
             params.containsKey(CONNECTION_ID) && 
             params.get(CONNECTION_ID).equals(connectionId) &&
             params.containsKey("supports_reauth")
@@ -112,8 +129,7 @@ public class ConnectionIdFilterTest {
         when(request.getParameter("org_code")).thenReturn(null);
         when(request.getParameter("lang")).thenReturn(null);
         
-        // Mock KindeSingleton
-        KindeSingleton.setInstance(kindeSingleton);
+        // Mock KindeSingleton chain
         when(kindeSingleton.getKindeClientBuilder()).thenReturn(kindeClientBuilder);
         when(kindeClientBuilder.redirectUri(anyString())).thenReturn(kindeClientBuilder);
         when(kindeClientBuilder.grantType(any(AuthorizationType.class))).thenReturn(kindeClientBuilder);
@@ -123,7 +139,7 @@ public class ConnectionIdFilterTest {
         when(kindeClientBuilder.build()).thenReturn(kindeClient);
         when(kindeClient.clientSession()).thenReturn(kindeClientSession);
         when(kindeClientSession.login()).thenReturn(authorizationUrl);
-        when(authorizationUrl.getUrl()).thenReturn(new java.net.URL("http://example.com/auth"));
+        when(authorizationUrl.getUrl()).thenReturn(new URL("http://example.com/auth"));
         
         // Execute
         filter.doFilter(request, response, filterChain);
