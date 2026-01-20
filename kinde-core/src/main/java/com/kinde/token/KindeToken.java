@@ -17,6 +17,17 @@ public interface KindeToken {
 
     Object getClaim(String key);
 
+    /**
+     * Gets the connection ID from the token.
+     * This method checks for connection_id in the token claims, including nested structures
+     * like ext_provider.connection_id for external identity providers.
+     * 
+     * @return The connection ID string, or null if not found
+     */
+    default String getConnectionId() {
+        return null;
+    }
+
     List<String> getPermissions();
 
     /**
