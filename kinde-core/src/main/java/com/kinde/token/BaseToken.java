@@ -1,6 +1,5 @@
 package com.kinde.token;
 
-import com.google.inject.Inject;
 import com.kinde.accounts.KindeAccountsClient;
 import com.kinde.accounts.dto.PermissionDto;
 import com.kinde.accounts.dto.RoleDto;
@@ -89,6 +88,33 @@ public class BaseToken implements KindeToken {
             return null; // Return null for invalid tokens instead of throwing NPE
         }
         return this.signedJWT.getJWTClaimsSet().getClaim(key);
+    }
+
+    @Override
+    @SneakyThrows
+    public String getConnectionId() {
+        if (this.signedJWT == null) {
+            return null;
+        }
+        
+        // First, try direct connection_id claim
+        Object connectionId = getClaim("connection_id");
+        if (connectionId instanceof String) {
+            return (String) connectionId;
+        }
+        
+        // Then, try nested ext_provider.connection_id structure
+        Object extProvider = getClaim("ext_provider");
+        if (extProvider instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> extProviderMap = (Map<String, Object>) extProvider;
+            Object nestedConnectionId = extProviderMap.get("connection_id");
+            if (nestedConnectionId instanceof String) {
+                return (String) nestedConnectionId;
+            }
+        }
+        
+        return null;
     }
 
     @SuppressWarnings("unchecked")

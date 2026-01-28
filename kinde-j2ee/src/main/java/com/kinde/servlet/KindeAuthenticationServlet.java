@@ -17,9 +17,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.kinde.constants.KindeConstants.*;
 import static com.kinde.constants.KindeJ2eeConstants.*;
+import com.kinde.session.KindeRequestParameters;
 
 @Slf4j
 public class KindeAuthenticationServlet extends HttpServlet {
@@ -53,16 +56,51 @@ public class KindeAuthenticationServlet extends HttpServlet {
             }
             // Redirect to the OAuth provider's authorization page
             KindeClientSession kindeClientSession = createKindeClientSession(req);
+            
+            // Build parameters map for connection_id support
+            Map<String, String> parameters = new HashMap<>();
+            String connectionId = req.getParameter(com.kinde.constants.KindeConstants.CONNECTION_ID);
+            if (connectionId != null && !connectionId.isEmpty()) {
+                parameters.put(KindeRequestParameters.CONNECTION_ID, connectionId);
+            }
+            
             AuthorizationUrl authorizationUrl = null;
             if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
-                authorizationUrl = kindeClientSession.login();
+                if (parameters.isEmpty()) {
+                    authorizationUrl = kindeClientSession.login();
+                } else {
+                    Map<String, String> loginParams = new HashMap<>(parameters);
+                    loginParams.put("supports_reauth", "true");
+                    authorizationUrl = kindeClientSession.authorizationUrlWithParameters(loginParams);
+                }
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register();
+                if (parameters.isEmpty()) {
+                    authorizationUrl = kindeClientSession.register();
+                } else {
+                    Map<String, String> registerParams = new HashMap<>(parameters);
+                    registerParams.put("prompt", "create");
+                    registerParams.put("supports_reauth", "true");
+                    authorizationUrl = kindeClientSession.authorizationUrlWithParameters(registerParams);
+                }
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
                 if (req.getParameter(ORG_NAME) == null) {
                     throw new ServletException("Must provide org_name query parameter to create an organisation.");
                 }
-                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
+                if (parameters.isEmpty()) {
+                    authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
+                } else {
+                    Map<String, String> createOrgParams = new HashMap<>(parameters);
+                    createOrgParams.put("prompt", "create");
+                    createOrgParams.put("is_create_org", Boolean.TRUE.toString());
+                    createOrgParams.put("org_name", req.getParameter(ORG_NAME));
+                    authorizationUrl = kindeClientSession.authorizationUrlWithParameters(createOrgParams);
+                }
+            } else {
+                throw new ServletException("Unknown authentication action: " + kindeAuthenticationAction);
+            }
+            
+            if (authorizationUrl == null) {
+                throw new ServletException("Failed to generate authorization URL");
             }
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             req.getSession().setAttribute(POST_LOGIN_URL,postLoginUrl);
