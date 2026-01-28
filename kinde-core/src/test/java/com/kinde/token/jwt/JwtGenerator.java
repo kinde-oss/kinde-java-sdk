@@ -345,4 +345,45 @@ public class JwtGenerator {
         signedJWT.sign(signer);
         return signedJWT.serialize();
     }
+
+    @SneakyThrows
+    public static String generateIDTokenWithExtProviderButNoConnectionId() {
+        RSAKey rsaJWK = new RSAKeyGenerator(2048)
+                .keyID("123")
+                .generate();
+
+        JWSSigner signer = new RSASSASigner(rsaJWK);
+        Date now = new Date();
+
+        Map<String,Object> featureFlags = new HashMap<>();
+        featureFlags.put("test_str","test_str");
+        featureFlags.put("test_integer",Integer.valueOf(1));
+        featureFlags.put("test_boolean",Boolean.valueOf(false));
+
+        // Create ext_provider with other fields but no connection_id
+        Map<String, Object> extProvider = new HashMap<>();
+        extProvider.put("provider", "google");
+        extProvider.put("provider_id", "12345");
+
+        JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
+                .issuer("https://openid.net")
+                .subject("test")
+                .audience(Arrays.asList("https://kinde.com"))
+                .expirationTime(new Date(now.getTime() + 1000*60*10))
+                .notBeforeTime(now)
+                .issueTime(now)
+                .claim("permissions",Arrays.asList("test1","test1"))
+                .claim("org_codes",Arrays.asList("test1","test1"))
+                .claim("feature_flags",featureFlags)
+                .claim("ext_provider", extProvider)
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaJWK.getKeyID()).build(),
+                jwtClaims);
+
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
+    }
 }

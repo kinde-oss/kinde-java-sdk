@@ -112,11 +112,10 @@ public class ConnectionIdTokenTest {
     @DisplayName("getConnectionId should handle ext_provider without connection_id gracefully")
     public void testGetConnectionIdWithExtProviderButNoConnectionId() throws Exception {
         // This test verifies that if ext_provider exists but doesn't have connection_id, it returns null
-        // We'll use a regular token and verify the behavior
-        String tokenString = JwtGenerator.generateIDToken();
-        
+        String tokenString = JwtGenerator.generateIDTokenWithExtProviderButNoConnectionId();
+
         KindeToken kindeToken = IDToken.init(tokenString, true);
-        
+
         assertNotNull(kindeToken);
         assertTrue(kindeToken.valid());
         assertNull(kindeToken.getConnectionId(), 
