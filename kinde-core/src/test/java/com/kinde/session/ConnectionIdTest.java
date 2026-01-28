@@ -24,7 +24,7 @@ public class ConnectionIdTest {
     public void setUp() {
         KindeGuiceSingleton.fin();
         KindeEnvironmentSingleton.fin();
-        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.ACTIVE);
+        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
         
         KindeGuiceSingleton.init(
                 new KindeCoreGuiceTestModule(),

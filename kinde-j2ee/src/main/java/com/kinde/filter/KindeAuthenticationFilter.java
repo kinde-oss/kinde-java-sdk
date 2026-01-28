@@ -81,17 +81,19 @@ public abstract class KindeAuthenticationFilter implements Filter {
                 } else {
                     Map<String, String> registerParams = new HashMap<>(parameters);
                     registerParams.put("prompt", "create");
+                    registerParams.put("supports_reauth", "true");
                     authorizationUrl = kindeClientSession.authorizationUrlWithParameters(registerParams);
                 }
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
                 if (req.getParameter(ORG_NAME) == null) {
-                    throw new ServletException("Must proved org_name query parameter to create an organisation.");
+                    throw new ServletException("Must provide org_name query parameter to create an organisation.");
                 }
                 if (parameters.isEmpty()) {
                     authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
                 } else {
                     Map<String, String> createOrgParams = new HashMap<>(parameters);
                     createOrgParams.put("prompt", "create");
+                    createOrgParams.put("is_create_org", Boolean.TRUE.toString());
                     createOrgParams.put("org_name", req.getParameter(ORG_NAME));
                     authorizationUrl = kindeClientSession.authorizationUrlWithParameters(createOrgParams);
                 }

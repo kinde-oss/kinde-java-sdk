@@ -79,6 +79,7 @@ public class KindeAuthenticationServlet extends HttpServlet {
                 } else {
                     Map<String, String> registerParams = new HashMap<>(parameters);
                     registerParams.put("prompt", "create");
+                    registerParams.put("supports_reauth", "true");
                     authorizationUrl = kindeClientSession.authorizationUrlWithParameters(registerParams);
                 }
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
@@ -90,6 +91,7 @@ public class KindeAuthenticationServlet extends HttpServlet {
                 } else {
                     Map<String, String> createOrgParams = new HashMap<>(parameters);
                     createOrgParams.put("prompt", "create");
+                    createOrgParams.put("is_create_org", Boolean.TRUE.toString());
                     createOrgParams.put("org_name", req.getParameter(ORG_NAME));
                     authorizationUrl = kindeClientSession.authorizationUrlWithParameters(createOrgParams);
                 }

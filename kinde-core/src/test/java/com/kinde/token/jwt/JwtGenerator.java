@@ -305,4 +305,44 @@ public class JwtGenerator {
         signedJWT.sign(signer);
         return signedJWT.serialize();
     }
+
+    @SneakyThrows
+    public static String generateIDTokenWithBothConnectionIds(String directConnectionId, String nestedConnectionId) {
+        RSAKey rsaJWK = new RSAKeyGenerator(2048)
+                .keyID("123")
+                .generate();
+
+        JWSSigner signer = new RSASSASigner(rsaJWK);
+        Date now = new Date();
+
+        Map<String,Object> featureFlags = new HashMap<>();
+        featureFlags.put("test_str","test_str");
+        featureFlags.put("test_integer",Integer.valueOf(1));
+        featureFlags.put("test_boolean",Boolean.valueOf(false));
+
+        Map<String, Object> extProvider = new HashMap<>();
+        extProvider.put("connection_id", nestedConnectionId);
+
+        JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
+                .issuer("https://openid.net")
+                .subject("test")
+                .audience(Arrays.asList("https://kinde.com"))
+                .expirationTime(new Date(now.getTime() + 1000*60*10))
+                .notBeforeTime(now)
+                .issueTime(now)
+                .claim("permissions",Arrays.asList("test1","test1"))
+                .claim("org_codes",Arrays.asList("test1","test1"))
+                .claim("feature_flags",featureFlags)
+                .claim("connection_id", directConnectionId)
+                .claim("ext_provider", extProvider)
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaJWK.getKeyID()).build(),
+                jwtClaims);
+
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
+    }
 }

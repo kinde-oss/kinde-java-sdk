@@ -52,18 +52,18 @@ public class ConnectionIdTokenTest {
     @Test
     @DisplayName("getConnectionId should prefer direct connection_id over nested ext_provider.connection_id")
     public void testGetConnectionIdPreferDirectOverNested() throws Exception {
-        // Create a token with direct connection_id
+        // Create a token with both direct and nested connection_id to test preference
         String directConnectionId = "conn_direct_123";
+        String nestedConnectionId = "conn_nested_456";
         
-        // For this test, we'll use the direct one and verify it's preferred
-        String tokenString = JwtGenerator.generateIDTokenWithConnectionId(directConnectionId);
+        String tokenString = JwtGenerator.generateIDTokenWithBothConnectionIds(directConnectionId, nestedConnectionId);
         
         KindeToken kindeToken = IDToken.init(tokenString, true);
         
         assertNotNull(kindeToken);
         assertTrue(kindeToken.valid());
         assertEquals(directConnectionId, kindeToken.getConnectionId(), 
-                "getConnectionId() should prefer direct connection_id claim");
+                "getConnectionId() should prefer direct connection_id over ext_provider.connection_id");
     }
 
     @Test
