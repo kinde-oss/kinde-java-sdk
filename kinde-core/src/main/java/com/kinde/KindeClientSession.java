@@ -17,9 +17,17 @@ public interface KindeClientSession {
 
     AuthorizationUrl login();
 
+    AuthorizationUrl login(String invitationCode);
+
     AuthorizationUrl createOrg(String orgName);
 
+    AuthorizationUrl createOrg(String orgName, String invitationCode);
+
     AuthorizationUrl register();
+
+    AuthorizationUrl register(String invitationCode);
+
+    AuthorizationUrl handleInvitation(String invitationCode);
 
     AuthorizationUrl logout() throws Exception;
 

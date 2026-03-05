@@ -1,11 +1,13 @@
 package com.kinde.session;
 
+import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.exceptions.KindeClientSessionException;
 import com.kinde.token.AccessToken;
 import com.kinde.token.KindeTokens;
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -13,8 +15,10 @@ import org.mockito.Mockito;
 import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -116,6 +120,74 @@ class KindeClientSessionImplTest {
         MalformedURLException ex = assertThrows(MalformedURLException.class, () ->
                 kindeClient.generatePortalUrl("https://example.kinde.com", "https://myapp.com/return", "profile")
         );
+    }
+
+    private KindeClientSessionImpl createSessionWithOidc() throws Exception {
+        KindeConfig mockConfig = mock(KindeConfig.class);
+        when(mockConfig.clientId()).thenReturn("test-client-id");
+        when(mockConfig.redirectUri()).thenReturn("http://localhost/callback");
+        when(mockConfig.grantType()).thenReturn(AuthorizationType.CODE);
+        when(mockConfig.scopes()).thenReturn(List.of("openid", "email"));
+
+        OidcMetaData mockMeta = mock(OidcMetaData.class);
+        OIDCProviderMetadata metadata = mock(OIDCProviderMetadata.class);
+        when(metadata.getAuthorizationEndpointURI()).thenReturn(URI.create("http://localhost:8089/oauth2/auth"));
+        when(mockMeta.getOpMetadata()).thenReturn(metadata);
+
+        return new KindeClientSessionImpl(mockConfig, mockMeta);
+    }
+
+    @Test
+    @DisplayName("login with invitationCode includes both login and invitation params")
+    void loginWithInvitationCodeIncludesBothParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.login("inv_login123");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("invitation_code=inv_login123"), "URL should contain invitation_code");
+        assertTrue(url.contains("is_invitation=true"), "URL should contain is_invitation=true");
+        assertTrue(url.contains("supports_reauth=true"), "URL should contain login-specific supports_reauth");
+    }
+
+    @Test
+    @DisplayName("login without invitationCode does not include invitation params")
+    void loginWithoutInvitationCodeOmitsInvitationParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.login();
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
+        assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+        assertTrue(url.contains("supports_reauth=true"), "URL should still contain supports_reauth");
+    }
+
+    @Test
+    @DisplayName("register with invitationCode includes both register and invitation params")
+    void registerWithInvitationCodeIncludesBothParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.register("inv_reg456");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("invitation_code=inv_reg456"), "URL should contain invitation_code");
+        assertTrue(url.contains("is_invitation=true"), "URL should contain is_invitation=true");
+        assertTrue(url.contains("prompt=create"), "URL should contain register-specific prompt=create");
+    }
+
+    @Test
+    @DisplayName("createOrg with invitationCode includes both createOrg and invitation params")
+    void createOrgWithInvitationCodeIncludesBothParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.createOrg("TestOrg", "inv_org789");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("invitation_code=inv_org789"), "URL should contain invitation_code");
+        assertTrue(url.contains("is_invitation=true"), "URL should contain is_invitation=true");
+        assertTrue(url.contains("org_name=TestOrg"), "URL should contain org_name");
+        assertTrue(url.contains("is_create_org=true"), "URL should contain is_create_org");
     }
 }
 

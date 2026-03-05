@@ -40,7 +40,13 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
         if (request.getParameter("prompt") != null && "create".equals(request.getParameter("prompt"))) {
             additionalParameters.put("prompt", "create");
         } else {
-            additionalParameters.put("prompt", "login"); // Default behavior
+            additionalParameters.put("prompt", "login");
+        }
+
+        String invitationCode = request.getParameter("invitation_code");
+        if (invitationCode != null && !invitationCode.isEmpty()) {
+            additionalParameters.put("invitation_code", invitationCode);
+            additionalParameters.put("is_invitation", "true");
         }
 
         return OAuth2AuthorizationRequest.from(authorizationRequest)

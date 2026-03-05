@@ -46,6 +46,8 @@ public class KindeAuthenticationServlet extends HttpServlet {
         }
 
         String code = req.getParameter("code");
+        String rawInvitationCode = req.getParameter(INVITATION_CODE);
+        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isEmpty()) ? rawInvitationCode : null;
         if (code == null) {
             String postLoginUrl = req.getParameter(POST_LOGIN_URL);
             if (postLoginUrl == null) {
@@ -55,14 +57,14 @@ public class KindeAuthenticationServlet extends HttpServlet {
             KindeClientSession kindeClientSession = createKindeClientSession(req);
             AuthorizationUrl authorizationUrl = null;
             if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
-                authorizationUrl = kindeClientSession.login();
+                authorizationUrl = kindeClientSession.login(invitationCode);
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register();
+                authorizationUrl = kindeClientSession.register(invitationCode);
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
                 if (req.getParameter(ORG_NAME) == null) {
                     throw new ServletException("Must provide org_name query parameter to create an organisation.");
                 }
-                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
+                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME), invitationCode);
             }
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             req.getSession().setAttribute(POST_LOGIN_URL,postLoginUrl);

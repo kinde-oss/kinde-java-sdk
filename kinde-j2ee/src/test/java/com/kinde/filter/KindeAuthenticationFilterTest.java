@@ -151,4 +151,64 @@ public class KindeAuthenticationFilterTest {
         // Should not proceed with the filter chain
         verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
+
+    @Test
+    public void testInvitationCodeOnLoginPassesCodeToLogin() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_filter123");
+        AuthorizationUrl invitationAuthUrl = mock(AuthorizationUrl.class);
+        when(invitationAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?invitation_code=inv_filter123&is_invitation=true"));
+        when(mockSession.login("inv_filter123")).thenReturn(invitationAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login("inv_filter123");
+        verify(session).setAttribute(AUTHORIZATION_URL, invitationAuthUrl);
+        verify(response).sendRedirect(invitationAuthUrl.getUrl().toString());
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void testInvitationCodeOnRegisterPassesCodeToRegister() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_filter_reg");
+        AuthorizationUrl invitationAuthUrl = mock(AuthorizationUrl.class);
+        when(invitationAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?invitation_code=inv_filter_reg&is_invitation=true"));
+        when(mockSession.register("inv_filter_reg")).thenReturn(invitationAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.REGISTER);
+
+        verify(mockSession).register("inv_filter_reg");
+        verify(session).setAttribute(AUTHORIZATION_URL, invitationAuthUrl);
+        verify(response).sendRedirect(invitationAuthUrl.getUrl().toString());
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void testInvitationCodeOverridesExistingSession() throws Exception {
+        Principal principal = mock(KindePrincipal.class);
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(principal);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(mockAuthUrl);
+        when(request.getParameter("invitation_code")).thenReturn("inv_override");
+        AuthorizationUrl invitationAuthUrl = mock(AuthorizationUrl.class);
+        when(invitationAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?invitation_code=inv_override&is_invitation=true"));
+        when(mockSession.login("inv_override")).thenReturn(invitationAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login("inv_override");
+        verify(response).sendRedirect(invitationAuthUrl.getUrl().toString());
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void testEmptyInvitationCodeFallsThrough() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("");
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://auth.url"));
+        when(mockSession.login()).thenReturn(mockAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login();
+    }
 }

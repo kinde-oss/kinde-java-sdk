@@ -36,6 +36,7 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
     private final String code;
     private final AuthorizationUrl authorizationUrl;
     private AccessToken accessToken;
+    private KindeTokens cachedTokens;
 
     @Inject
     public KindeClientCodeSessionImpl(
@@ -62,6 +63,10 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
     @Override
     @SneakyThrows
     public KindeTokens retrieveTokens() {
+        if (this.cachedTokens != null) {
+            return this.cachedTokens;
+        }
+
         AuthorizationCode code = new AuthorizationCode(this.code);
         URI callback = new URI(this.kindeConfig.redirectUri());
         AuthorizationGrant codeGrant = this.authorizationUrl == null ? new AuthorizationCodeGrant(code, callback) :
@@ -79,7 +84,11 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
         TokenResponse response = TokenResponse.parse(httpRequest.send());
 
         if (!response.indicatesSuccess()) {
-            throw new Exception(response.toErrorResponse().toString());
+            TokenErrorResponse errorResponse = response.toErrorResponse();
+            String errorDetail = errorResponse.getErrorObject() != null
+                    ? errorResponse.getErrorObject().getCode() + ": " + errorResponse.getErrorObject().getDescription()
+                    : errorResponse.toString();
+            throw new Exception("Token exchange failed - " + errorDetail);
         }
         AccessTokenResponse successResponse = response.toSuccessResponse();
 
@@ -97,7 +106,8 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
             refreshToken = com.kinde.token.RefreshToken.init(successResponse.getTokens().getRefreshToken().getValue(), true);
         }
 
-        return new KindeTokens(this.kindeConfig.scopes(), idToken, this.accessToken, refreshToken);
+        this.cachedTokens = new KindeTokens(this.kindeConfig.scopes(), idToken, this.accessToken, refreshToken);
+        return this.cachedTokens;
     }
 
     @Override

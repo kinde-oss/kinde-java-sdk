@@ -51,9 +51,26 @@ public abstract class KindeAuthenticationFilter implements Filter {
         }
 
         String code = req.getParameter("code");
+        String rawInvitationCode = req.getParameter(INVITATION_CODE);
+        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isEmpty()) ? rawInvitationCode : null;
         Principal userPrincipal = (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
         AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
-        if (userPrincipal == null || authorizationUrl == null) {
+        if (invitationCode != null) {
+            // Invitation code always starts a new auth flow, even if already authenticated
+            KindeClientSession kindeClientSession = createKindeClientSession(req);
+            if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
+                authorizationUrl = kindeClientSession.login(invitationCode);
+            } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
+                authorizationUrl = kindeClientSession.register(invitationCode);
+            } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
+                if (req.getParameter(ORG_NAME) == null) {
+                    throw new ServletException("Must provide org_name query parameter to create an organisation.");
+                }
+                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME), invitationCode);
+            }
+            req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
+            resp.sendRedirect(authorizationUrl.getUrl().toString());
+        } else if (userPrincipal == null || authorizationUrl == null) {
             // Redirect to the OAuth provider's authorization page
             KindeClientSession kindeClientSession = createKindeClientSession(req);
             if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
@@ -62,7 +79,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
                 authorizationUrl = kindeClientSession.register();
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
                 if (req.getParameter(ORG_NAME) == null) {
-                    throw new ServletException("Must proved org_name query parameter to create an organisation.");
+                    throw new ServletException("Must provide org_name query parameter to create an organisation.");
                 }
                 authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
             }
