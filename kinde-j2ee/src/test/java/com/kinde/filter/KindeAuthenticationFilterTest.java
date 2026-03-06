@@ -211,4 +211,79 @@ public class KindeAuthenticationFilterTest {
 
         verify(mockSession).login();
     }
+
+    @Test
+    public void testInvitationCodeOnCreateOrgPassesCodeToCreateOrg() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_org_create");
+        when(request.getParameter("org_name")).thenReturn("MyOrg");
+        AuthorizationUrl invitationAuthUrl = mock(AuthorizationUrl.class);
+        when(invitationAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?invitation_code=inv_org_create&is_invitation=true"));
+        when(mockSession.createOrg("MyOrg", "inv_org_create")).thenReturn(invitationAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+
+        verify(mockSession).createOrg("MyOrg", "inv_org_create");
+        verify(session).setAttribute(AUTHORIZATION_URL, invitationAuthUrl);
+        verify(response).sendRedirect(invitationAuthUrl.getUrl().toString());
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test(expected = jakarta.servlet.ServletException.class)
+    public void testInvitationCodeOnCreateOrgMissingOrgNameThrows() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_org_no_name");
+        when(request.getParameter("org_name")).thenReturn(null);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+    }
+
+    @Test
+    public void testLoginLinkExpiredWithQueryParamsInAuthUrl() throws Exception {
+        String urlParams = "param1=value1";
+        String encodedState = java.util.Base64.getEncoder().encodeToString(urlParams.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        when(request.getParameter("error")).thenReturn("login_link_expired");
+        when(request.getParameter("reauth_state")).thenReturn(encodedState);
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?existing=param"));
+        when(mockSession.login()).thenReturn(mockAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(response).sendRedirect("http://auth.url?existing=param&" + urlParams);
+    }
+
+    @Test
+    public void testRegisterRedirectWhenNoPrincipal() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://auth.url"));
+        when(mockSession.register()).thenReturn(mockAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.REGISTER);
+
+        verify(mockSession).register();
+        verify(response).sendRedirect("http://auth.url");
+    }
+
+    @Test
+    public void testCreateOrgRedirectWhenNoPrincipal() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(request.getParameter("org_name")).thenReturn("NewOrg");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://auth.url"));
+        when(mockSession.createOrg("NewOrg")).thenReturn(mockAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+
+        verify(mockSession).createOrg("NewOrg");
+        verify(response).sendRedirect("http://auth.url");
+    }
+
+    @Test(expected = jakarta.servlet.ServletException.class)
+    public void testCreateOrgMissingOrgNameThrowsWhenNoPrincipal() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(request.getParameter("org_name")).thenReturn(null);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+    }
 }

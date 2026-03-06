@@ -83,4 +83,31 @@ class KindeOAuth2AuthorizationRequestResolverTest {
 
         assertNull(authRequest);
     }
+
+    @Test
+    @DisplayName("Resolve with clientRegistrationId and invitation_code adds params")
+    void resolveWithClientRegistrationIdAndInvitationCodeAddsParams() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("invitation_code", "inv_client_reg");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request, "kinde");
+
+        assertNotNull(authRequest);
+        assertEquals("inv_client_reg", authRequest.getAdditionalParameters().get("invitation_code"));
+        assertEquals("true", authRequest.getAdditionalParameters().get("is_invitation"));
+    }
+
+    @Test
+    @DisplayName("Resolve with clientRegistrationId without invitation_code does not add params")
+    void resolveWithClientRegistrationIdWithoutInvitationCodeDoesNotAddParams() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request, "kinde");
+
+        assertNotNull(authRequest);
+        assertNull(authRequest.getAdditionalParameters().get("invitation_code"));
+        assertNull(authRequest.getAdditionalParameters().get("is_invitation"));
+    }
 }

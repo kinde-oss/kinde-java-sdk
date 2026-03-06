@@ -189,5 +189,68 @@ class KindeClientSessionImplTest {
         assertTrue(url.contains("org_name=TestOrg"), "URL should contain org_name");
         assertTrue(url.contains("is_create_org=true"), "URL should contain is_create_org");
     }
+
+    @Test
+    @DisplayName("handleInvitation with code includes invitation params")
+    void handleInvitationWithCodeIncludesInvitationParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.handleInvitation("inv_handle123");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("invitation_code=inv_handle123"), "URL should contain invitation_code");
+        assertTrue(url.contains("is_invitation=true"), "URL should contain is_invitation=true");
+    }
+
+    @Test
+    @DisplayName("handleInvitation with null code omits invitation params")
+    void handleInvitationWithNullCodeOmitsInvitationParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.handleInvitation(null);
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
+        assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+    }
+
+    @Test
+    @DisplayName("handleInvitation with empty code omits invitation params")
+    void handleInvitationWithEmptyCodeOmitsInvitationParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.handleInvitation("");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
+        assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+    }
+
+    @Test
+    @DisplayName("register without args omits invitation params")
+    void registerWithoutArgsOmitsInvitationParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.register();
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
+        assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+        assertTrue(url.contains("prompt=create"), "URL should contain register-specific prompt=create");
+    }
+
+    @Test
+    @DisplayName("createOrg without invitation code omits invitation params")
+    void createOrgWithoutInvitationCodeOmitsInvitationParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.createOrg("TestOrg");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
+        assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+        assertTrue(url.contains("org_name=TestOrg"), "URL should contain org_name");
+        assertTrue(url.contains("is_create_org=true"), "URL should contain is_create_org");
+    }
 }
 
