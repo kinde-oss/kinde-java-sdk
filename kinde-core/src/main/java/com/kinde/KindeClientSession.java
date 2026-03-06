@@ -17,17 +17,25 @@ public interface KindeClientSession {
 
     AuthorizationUrl login();
 
-    AuthorizationUrl login(String invitationCode);
+    default AuthorizationUrl login(String invitationCode) {
+        return login();
+    }
 
     AuthorizationUrl createOrg(String orgName);
 
-    AuthorizationUrl createOrg(String orgName, String invitationCode);
+    default AuthorizationUrl createOrg(String orgName, String invitationCode) {
+        return createOrg(orgName);
+    }
 
     AuthorizationUrl register();
 
-    AuthorizationUrl register(String invitationCode);
+    default AuthorizationUrl register(String invitationCode) {
+        return register();
+    }
 
-    AuthorizationUrl handleInvitation(String invitationCode);
+    default AuthorizationUrl handleInvitation(String invitationCode) {
+        throw new UnsupportedOperationException("handleInvitation is not supported by this implementation");
+    }
 
     AuthorizationUrl logout() throws Exception;
 

@@ -52,7 +52,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
 
         String code = req.getParameter("code");
         String rawInvitationCode = req.getParameter(INVITATION_CODE);
-        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isEmpty()) ? rawInvitationCode : null;
+        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isBlank()) ? rawInvitationCode : null;
         Principal userPrincipal = (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
         AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
         if (invitationCode != null) {

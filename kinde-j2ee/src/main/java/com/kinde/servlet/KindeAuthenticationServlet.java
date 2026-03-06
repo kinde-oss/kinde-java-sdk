@@ -47,7 +47,7 @@ public class KindeAuthenticationServlet extends HttpServlet {
 
         String code = req.getParameter("code");
         String rawInvitationCode = req.getParameter(INVITATION_CODE);
-        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isEmpty()) ? rawInvitationCode : null;
+        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isBlank()) ? rawInvitationCode : null;
         if (code == null) {
             String postLoginUrl = req.getParameter(POST_LOGIN_URL);
             if (postLoginUrl == null) {

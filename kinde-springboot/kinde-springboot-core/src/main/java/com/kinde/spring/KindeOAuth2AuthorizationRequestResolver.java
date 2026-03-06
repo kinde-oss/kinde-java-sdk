@@ -6,6 +6,8 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2Authorization
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 
+import com.kinde.session.KindeRequestParameters;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +21,6 @@ import static org.springframework.security.oauth2.client.web.OAuth2Authorization
  * request's additional parameters.
  */
 public class KindeOAuth2AuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
-
-    private static final String INVITATION_CODE_PARAM = "invitation_code";
-    private static final String IS_INVITATION_PARAM = "is_invitation";
 
     private final DefaultOAuth2AuthorizationRequestResolver defaultResolver;
 
@@ -50,13 +49,13 @@ public class KindeOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
         if (authorizationRequest == null) {
             return null;
         }
-        String invitationCode = request.getParameter(INVITATION_CODE_PARAM);
-        if (invitationCode == null || invitationCode.isEmpty()) {
+        String invitationCode = request.getParameter(KindeRequestParameters.INVITATION_CODE);
+        if (invitationCode == null || invitationCode.isBlank()) {
             return authorizationRequest;
         }
         Map<String, Object> additionalParams = new HashMap<>(authorizationRequest.getAdditionalParameters());
-        additionalParams.put(INVITATION_CODE_PARAM, invitationCode);
-        additionalParams.put(IS_INVITATION_PARAM, "true");
+        additionalParams.put(KindeRequestParameters.INVITATION_CODE, invitationCode);
+        additionalParams.put(KindeRequestParameters.IS_INVITATION, "true");
         return OAuth2AuthorizationRequest.from(authorizationRequest)
                 .additionalParameters(additionalParams)
                 .build();

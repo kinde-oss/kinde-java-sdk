@@ -36,6 +36,20 @@ public class Kinde {
     }
 
 
+    /**
+     * Configures the {@code http} with an OAuth2 Login that supports PKCE.
+     * <p>
+     * <b>NOTE:</b> This reactive overload does not currently forward {@code invitation_code}
+     * parameters to the authorization endpoint. Invitation code handling is only supported
+     * via the servlet-based {@link #configureOAuth2WithPkce(HttpSecurity, ClientRegistrationRepository)}
+     * overload. If you need invitation support in a reactive application, implement a custom
+     * {@code ServerOAuth2AuthorizationRequestResolver} that mirrors the logic in
+     * {@link KindeOAuth2AuthorizationRequestResolver}.
+     *
+     * @param http the ServerHttpSecurity to configure
+     * @param clientRegistrationRepository the reactive repository bean
+     * @return the {@code http} to allow method chaining
+     */
     public static ServerHttpSecurity configureOAuth2WithPkce(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
         // Create a request resolver that enables PKCE
         DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);

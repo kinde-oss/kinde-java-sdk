@@ -81,14 +81,16 @@ public class KindeClientCodeSessionImpl extends KindeClientSessionImpl {
         HTTPRequest httpRequest = request.toHTTPRequest();
         httpRequest.setHeader("Kinde-SDK", "Java/2.0.1");
 
-        TokenResponse response = TokenResponse.parse(httpRequest.send());
+        HTTPResponse httpResponse = httpRequest.send();
+        TokenResponse response = TokenResponse.parse(httpResponse);
 
         if (!response.indicatesSuccess()) {
             TokenErrorResponse errorResponse = response.toErrorResponse();
             String errorDetail = errorResponse.getErrorObject() != null
                     ? errorResponse.getErrorObject().getCode() + ": " + errorResponse.getErrorObject().getDescription()
                     : errorResponse.toString();
-            throw new Exception("Token exchange failed - " + errorDetail);
+            throw new Exception("Token exchange failed - " + errorDetail
+                    + " | Raw response: " + httpResponse.getContent());
         }
         AccessTokenResponse successResponse = response.toSuccessResponse();
 

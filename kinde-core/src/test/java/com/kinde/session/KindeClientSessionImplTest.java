@@ -227,6 +227,18 @@ class KindeClientSessionImplTest {
     }
 
     @Test
+    @DisplayName("login with whitespace-only invitationCode omits invitation params")
+    void loginWithWhitespaceOnlyCodeOmitsInvitationParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.login("   ");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
+        assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+    }
+
+    @Test
     @DisplayName("register without args omits invitation params")
     void registerWithoutArgsOmitsInvitationParams() throws Exception {
         KindeClientSessionImpl session = createSessionWithOidc();

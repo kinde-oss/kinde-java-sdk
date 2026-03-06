@@ -298,7 +298,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
     }
 
     private void addInvitationParams(Map<String, String> parameters, String invitationCode) {
-        if (invitationCode != null && !invitationCode.isEmpty()) {
+        if (invitationCode != null && !invitationCode.isBlank()) {
             parameters.put(KindeRequestParameters.INVITATION_CODE, invitationCode);
             parameters.put(KindeRequestParameters.IS_INVITATION, Boolean.TRUE.toString());
         }

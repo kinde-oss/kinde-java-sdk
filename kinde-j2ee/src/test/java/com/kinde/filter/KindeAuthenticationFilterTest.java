@@ -213,6 +213,19 @@ public class KindeAuthenticationFilterTest {
     }
 
     @Test
+    public void testWhitespaceOnlyInvitationCodeFallsThrough() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("   ");
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://auth.url"));
+        when(mockSession.login()).thenReturn(mockAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login();
+    }
+
+    @Test
     public void testInvitationCodeOnCreateOrgPassesCodeToCreateOrg() throws Exception {
         when(request.getParameter("invitation_code")).thenReturn("inv_org_create");
         when(request.getParameter("org_name")).thenReturn("MyOrg");

@@ -186,6 +186,19 @@ public class KindeAuthenticationServletTest {
     }
 
     @Test
+    public void testDoGet_WhitespaceOnlyInvitationCode_FallsThrough() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("   ");
+        when(request.getParameter("code")).thenReturn(null);
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://test.kinde.com"));
+        when(mockSession.login((String) null)).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login((String) null);
+    }
+
+    @Test
     public void testDoGet_CreateOrgWithInvitationCode_PassesCodeToCreateOrg() throws Exception {
         when(request.getParameter("invitation_code")).thenReturn("inv_org789");
         when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");

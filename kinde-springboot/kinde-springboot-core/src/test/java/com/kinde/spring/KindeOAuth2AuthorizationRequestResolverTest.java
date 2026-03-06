@@ -73,6 +73,20 @@ class KindeOAuth2AuthorizationRequestResolverTest {
     }
 
     @Test
+    @DisplayName("Resolve with whitespace-only invitation_code does not add invitation params")
+    void resolveWithWhitespaceOnlyInvitationCodeDoesNotAddParams() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("invitation_code", "   ");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertNotNull(authRequest);
+        assertNull(authRequest.getAdditionalParameters().get("invitation_code"));
+        assertNull(authRequest.getAdditionalParameters().get("is_invitation"));
+    }
+
+    @Test
     @DisplayName("Resolve returns null for non-authorization request path")
     void resolveReturnsNullForNonAuthorizationPath() {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/some/other/path");
