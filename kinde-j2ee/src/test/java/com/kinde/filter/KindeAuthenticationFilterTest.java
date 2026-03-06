@@ -246,20 +246,32 @@ public class KindeAuthenticationFilterTest {
         verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
-    @Test(expected = jakarta.servlet.ServletException.class)
+    @Test
     public void testInvitationCodeOnCreateOrgMissingOrgNameThrows() throws Exception {
         when(request.getParameter("invitation_code")).thenReturn("inv_org_no_name");
         when(request.getParameter("org_name")).thenReturn(null);
 
-        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+        try {
+            filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+            org.junit.Assert.fail("Expected ServletException");
+        } catch (jakarta.servlet.ServletException e) {
+            org.junit.Assert.assertTrue("Message should mention org_name",
+                    e.getMessage().contains("org_name"));
+        }
     }
 
-    @Test(expected = jakarta.servlet.ServletException.class)
+    @Test
     public void testInvitationCodeOnCreateOrgBlankOrgNameThrows() throws Exception {
         when(request.getParameter("invitation_code")).thenReturn("inv_org_blank");
         when(request.getParameter("org_name")).thenReturn("   ");
 
-        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+        try {
+            filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+            org.junit.Assert.fail("Expected ServletException");
+        } catch (jakarta.servlet.ServletException e) {
+            org.junit.Assert.assertTrue("Message should mention org_name",
+                    e.getMessage().contains("org_name"));
+        }
     }
 
     @Test

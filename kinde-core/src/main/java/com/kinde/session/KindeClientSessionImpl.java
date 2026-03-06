@@ -268,10 +268,13 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public AuthorizationUrl createOrg(String orgName, String invitationCode) {
+        if (orgName == null || orgName.isBlank()) {
+            throw new IllegalArgumentException("createOrg requires a non-blank orgName");
+        }
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt", Prompt.Type.CREATE.toString());
         parameters.put("is_create_org", Boolean.TRUE.toString());
-        parameters.put("org_name", orgName);
+        parameters.put("org_name", orgName.trim());
         addInvitationParams(parameters, invitationCode);
         return authorizationUrlWithParameters(parameters);
     }

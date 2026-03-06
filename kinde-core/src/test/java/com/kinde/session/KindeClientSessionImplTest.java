@@ -264,5 +264,31 @@ class KindeClientSessionImplTest {
         assertTrue(url.contains("org_name=TestOrg"), "URL should contain org_name");
         assertTrue(url.contains("is_create_org=true"), "URL should contain is_create_org");
     }
+
+    @Test
+    @DisplayName("createOrg with null orgName throws IllegalArgumentException")
+    void createOrgWithNullOrgNameThrows() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        assertThrows(IllegalArgumentException.class, () -> session.createOrg(null));
+    }
+
+    @Test
+    @DisplayName("createOrg with blank orgName throws IllegalArgumentException")
+    void createOrgWithBlankOrgNameThrows() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        assertThrows(IllegalArgumentException.class, () -> session.createOrg("   "));
+    }
+
+    @Test
+    @DisplayName("createOrg trims orgName in the generated URL")
+    void createOrgTrimsOrgName() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.createOrg("  TestOrg  ");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("org_name=TestOrg"), "URL should contain trimmed org_name");
+        assertFalse(url.contains("org_name=+"), "URL should not contain leading whitespace in org_name");
+    }
 }
 

@@ -215,6 +215,37 @@ public class KindeAuthenticationServletTest {
         verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
     }
 
+    @Test
+    public void testDoGet_LoginWithPaddedInvitationCode_TrimsBeforePassing() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("  inv_test123  ");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://kinde.com/oauth2/auth?invitation_code=inv_test123&is_invitation=true"));
+        when(mockSession.login("inv_test123")).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login("inv_test123");
+        verify(session).setAttribute(AUTHORIZATION_URL, mockAuthUrl);
+        verify(session).setAttribute(POST_LOGIN_URL, "http://example.com/dashboard");
+        verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
+    }
+
+    @Test
+    public void testDoGet_CreateOrgWithPaddedValues_TrimsBeforePassing() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("  inv_org789  ");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(request.getParameter("org_name")).thenReturn("  TestOrg  ");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://kinde.com/oauth2/auth?invitation_code=inv_org789&is_invitation=true"));
+        when(mockSession.createOrg("TestOrg", "inv_org789")).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.CREATE_ORG);
+
+        verify(mockSession).createOrg("TestOrg", "inv_org789");
+        verify(session).setAttribute(AUTHORIZATION_URL, mockAuthUrl);
+        verify(session).setAttribute(POST_LOGIN_URL, "http://example.com/dashboard");
+        verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
+    }
+
     @Test(expected = ServletException.class)
     public void testDoGet_CreateOrgWithNullOrgName_Throws() throws Exception {
         when(request.getParameter("invitation_code")).thenReturn("inv_org_null");
