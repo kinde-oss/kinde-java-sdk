@@ -195,6 +195,7 @@ public class KindeAuthenticationFilterTest {
         filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
 
         verify(mockSession).login("inv_override");
+        verify(session).setAttribute(AUTHORIZATION_URL, invitationAuthUrl);
         verify(response).sendRedirect(invitationAuthUrl.getUrl().toString());
         verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
@@ -210,6 +211,8 @@ public class KindeAuthenticationFilterTest {
         filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
 
         verify(mockSession).login();
+        verify(response).sendRedirect("http://auth.url");
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
     @Test
@@ -223,6 +226,8 @@ public class KindeAuthenticationFilterTest {
         filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
 
         verify(mockSession).login();
+        verify(response).sendRedirect("http://auth.url");
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
     @Test
