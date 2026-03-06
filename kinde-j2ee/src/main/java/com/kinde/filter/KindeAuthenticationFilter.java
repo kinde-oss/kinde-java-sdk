@@ -52,7 +52,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
 
         String code = req.getParameter("code");
         String rawInvitationCode = req.getParameter(INVITATION_CODE);
-        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isBlank()) ? rawInvitationCode : null;
+        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isBlank()) ? rawInvitationCode.trim() : null;
         Principal userPrincipal = (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
         AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
         if (invitationCode != null) {
@@ -63,10 +63,11 @@ public abstract class KindeAuthenticationFilter implements Filter {
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
                 authorizationUrl = kindeClientSession.register(invitationCode);
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
-                if (req.getParameter(ORG_NAME) == null) {
+                String orgName = req.getParameter(ORG_NAME);
+                if (orgName == null || orgName.isBlank()) {
                     throw new ServletException("Must provide org_name query parameter to create an organisation.");
                 }
-                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME), invitationCode);
+                authorizationUrl = kindeClientSession.createOrg(orgName.trim(), invitationCode);
             }
             req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
@@ -78,10 +79,11 @@ public abstract class KindeAuthenticationFilter implements Filter {
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
                 authorizationUrl = kindeClientSession.register();
             } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
-                if (req.getParameter(ORG_NAME) == null) {
+                String orgName = req.getParameter(ORG_NAME);
+                if (orgName == null || orgName.isBlank()) {
                     throw new ServletException("Must provide org_name query parameter to create an organisation.");
                 }
-                authorizationUrl = kindeClientSession.createOrg(req.getParameter(ORG_NAME));
+                authorizationUrl = kindeClientSession.createOrg(orgName.trim());
             }
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());

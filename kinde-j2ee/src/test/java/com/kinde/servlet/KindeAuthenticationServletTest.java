@@ -160,6 +160,7 @@ public class KindeAuthenticationServletTest {
 
         verify(mockSession).register("inv_reg456");
         verify(session).setAttribute(AUTHORIZATION_URL, mockAuthUrl);
+        verify(session).setAttribute(POST_LOGIN_URL, "http://example.com/dashboard");
         verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
     }
 
@@ -212,5 +213,25 @@ public class KindeAuthenticationServletTest {
         verify(session).setAttribute(AUTHORIZATION_URL, mockAuthUrl);
         verify(session).setAttribute(POST_LOGIN_URL, "http://example.com/dashboard");
         verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
+    }
+
+    @Test(expected = ServletException.class)
+    public void testDoGet_CreateOrgWithNullOrgName_Throws() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_org_null");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(request.getParameter("org_name")).thenReturn(null);
+        when(request.getParameter("code")).thenReturn(null);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.CREATE_ORG);
+    }
+
+    @Test(expected = ServletException.class)
+    public void testDoGet_CreateOrgWithBlankOrgName_Throws() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_org_blank");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(request.getParameter("org_name")).thenReturn("   ");
+        when(request.getParameter("code")).thenReturn(null);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.CREATE_ORG);
     }
 }

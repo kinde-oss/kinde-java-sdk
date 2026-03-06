@@ -135,7 +135,7 @@ public class KindeAuthenticationFilterTest {
     public void testLoginLinkExpiredRedirectsWithDecodedParams() throws Exception {
         // Setup base64-encoded URL params
         String urlParams = "param1=value1&param2=value2";
-        String encodedState = java.util.Base64.getEncoder().encodeToString(urlParams.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String encodedState = java.util.Base64.getUrlEncoder().encodeToString(urlParams.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
         when(request.getParameter("error")).thenReturn("login_link_expired");
         when(request.getParameter("reauth_state")).thenReturn(encodedState);
@@ -254,10 +254,18 @@ public class KindeAuthenticationFilterTest {
         filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
     }
 
+    @Test(expected = jakarta.servlet.ServletException.class)
+    public void testInvitationCodeOnCreateOrgBlankOrgNameThrows() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_org_blank");
+        when(request.getParameter("org_name")).thenReturn("   ");
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+    }
+
     @Test
     public void testLoginLinkExpiredWithQueryParamsInAuthUrl() throws Exception {
         String urlParams = "param1=value1";
-        String encodedState = java.util.Base64.getEncoder().encodeToString(urlParams.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String encodedState = java.util.Base64.getUrlEncoder().encodeToString(urlParams.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
         when(request.getParameter("error")).thenReturn("login_link_expired");
         when(request.getParameter("reauth_state")).thenReturn(encodedState);
@@ -301,6 +309,15 @@ public class KindeAuthenticationFilterTest {
         when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
         when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
         when(request.getParameter("org_name")).thenReturn(null);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+    }
+
+    @Test(expected = jakarta.servlet.ServletException.class)
+    public void testCreateOrgBlankOrgNameThrowsWhenNoPrincipal() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(request.getParameter("org_name")).thenReturn("   ");
 
         filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
     }

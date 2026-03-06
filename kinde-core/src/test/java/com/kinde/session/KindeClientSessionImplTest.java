@@ -12,6 +12,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -203,27 +205,24 @@ class KindeClientSessionImplTest {
     }
 
     @Test
-    @DisplayName("handleInvitation with null code omits invitation params")
-    void handleInvitationWithNullCodeOmitsInvitationParams() throws Exception {
+    @DisplayName("handleInvitation with null code throws IllegalArgumentException")
+    void handleInvitationWithNullCodeThrows() throws Exception {
         KindeClientSessionImpl session = createSessionWithOidc();
-        AuthorizationUrl result = session.handleInvitation(null);
-
-        assertNotNull(result);
-        String url = result.getUrl().toString();
-        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
-        assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+        assertThrows(IllegalArgumentException.class, () -> session.handleInvitation(null));
     }
 
     @Test
-    @DisplayName("handleInvitation with empty code omits invitation params")
-    void handleInvitationWithEmptyCodeOmitsInvitationParams() throws Exception {
+    @DisplayName("handleInvitation with empty code throws IllegalArgumentException")
+    void handleInvitationWithEmptyCodeThrows() throws Exception {
         KindeClientSessionImpl session = createSessionWithOidc();
-        AuthorizationUrl result = session.handleInvitation("");
+        assertThrows(IllegalArgumentException.class, () -> session.handleInvitation(""));
+    }
 
-        assertNotNull(result);
-        String url = result.getUrl().toString();
-        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
-        assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+    @Test
+    @DisplayName("handleInvitation with blank code throws IllegalArgumentException")
+    void handleInvitationWithBlankCodeThrows() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        assertThrows(IllegalArgumentException.class, () -> session.handleInvitation("   "));
     }
 
     @Test
@@ -236,6 +235,7 @@ class KindeClientSessionImplTest {
         String url = result.getUrl().toString();
         assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
         assertFalse(url.contains("is_invitation"), "URL should not contain is_invitation");
+        assertTrue(url.contains("supports_reauth=true"), "URL should still contain supports_reauth");
     }
 
     @Test

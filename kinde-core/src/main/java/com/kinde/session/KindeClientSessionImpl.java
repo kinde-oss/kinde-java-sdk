@@ -292,6 +292,9 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public AuthorizationUrl handleInvitation(String invitationCode) {
+        if (invitationCode == null || invitationCode.isBlank()) {
+            throw new IllegalArgumentException("handleInvitation requires a non-blank invitationCode");
+        }
         Map<String, String> parameters = new HashMap<>();
         addInvitationParams(parameters, invitationCode);
         return authorizationUrlWithParameters(parameters);

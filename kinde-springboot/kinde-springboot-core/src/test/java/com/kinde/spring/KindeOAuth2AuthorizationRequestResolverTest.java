@@ -142,4 +142,18 @@ class KindeOAuth2AuthorizationRequestResolverTest {
         assertNull(authRequest.getAdditionalParameters().get("invitation_code"));
         assertNull(authRequest.getAdditionalParameters().get("is_invitation"));
     }
+
+    @Test
+    @DisplayName("Resolve with clientRegistrationId and whitespace-only invitation_code does not add params")
+    void resolveWithClientRegistrationIdWithWhitespaceOnlyInvitationCodeDoesNotAddParams() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("invitation_code", "   ");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request, "kinde");
+
+        assertNotNull(authRequest);
+        assertNull(authRequest.getAdditionalParameters().get("invitation_code"));
+        assertNull(authRequest.getAdditionalParameters().get("is_invitation"));
+    }
 }
