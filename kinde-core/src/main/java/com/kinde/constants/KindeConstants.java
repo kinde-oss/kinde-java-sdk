@@ -7,5 +7,6 @@ public class KindeConstants {
     public final static String ORG_CODE = "org_code";
     public final static String LANG = "lang";
     public final static String ORG_NAME = "org_name";
+    public final static String INVITATION_CODE = "invitation_code";
     public final static String SCOPE = "openid,email,profile";
 }

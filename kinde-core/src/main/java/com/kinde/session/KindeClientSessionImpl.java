@@ -250,26 +250,64 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public AuthorizationUrl login() {
+        return login(null);
+    }
+
+    @Override
+    public AuthorizationUrl login(String invitationCode) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("supports_reauth", "true");
+        addInvitationParams(parameters, invitationCode);
         return authorizationUrlWithParameters(parameters);
     }
 
     @Override
     public AuthorizationUrl createOrg(String orgName) {
+        return createOrg(orgName, null);
+    }
+
+    @Override
+    public AuthorizationUrl createOrg(String orgName, String invitationCode) {
+        if (orgName == null || orgName.isBlank()) {
+            throw new IllegalArgumentException("createOrg requires a non-blank orgName");
+        }
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt", Prompt.Type.CREATE.toString());
         parameters.put("is_create_org", Boolean.TRUE.toString());
-        parameters.put("org_name", orgName);
+        parameters.put("org_name", orgName.trim());
+        addInvitationParams(parameters, invitationCode);
         return authorizationUrlWithParameters(parameters);
     }
 
     @Override
     public AuthorizationUrl register() {
+        return register(null);
+    }
+
+    @Override
+    public AuthorizationUrl register(String invitationCode) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt", Prompt.Type.CREATE.toString());
         parameters.put("supports_reauth", "true");
+        addInvitationParams(parameters, invitationCode);
         return authorizationUrlWithParameters(parameters);
+    }
+
+    @Override
+    public AuthorizationUrl handleInvitation(String invitationCode) {
+        if (invitationCode == null || invitationCode.isBlank()) {
+            throw new IllegalArgumentException("handleInvitation requires a non-blank invitationCode");
+        }
+        Map<String, String> parameters = new HashMap<>();
+        addInvitationParams(parameters, invitationCode);
+        return authorizationUrlWithParameters(parameters);
+    }
+
+    private void addInvitationParams(Map<String, String> parameters, String invitationCode) {
+        if (invitationCode != null && !invitationCode.isBlank()) {
+            parameters.put(KindeRequestParameters.INVITATION_CODE, invitationCode);
+            parameters.put(KindeRequestParameters.IS_INVITATION, Boolean.TRUE.toString());
+        }
     }
 
     public AuthorizationUrl logout() throws Exception {

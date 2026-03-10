@@ -4,7 +4,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver;
 
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers.withPkce;
@@ -13,8 +12,11 @@ public class Kinde {
 
 
     /**
-     * Configures the {@code http} with an OAuth2 Login, that supports PKCE. The default Spring Security implementation
-     * only enables PKCE for public clients.
+     * Configures the {@code http} with an OAuth2 Login, that supports PKCE and invitation code handling.
+     * The default Spring Security implementation only enables PKCE for public clients.
+     * <p>
+     * When the originating request contains an {@code invitation_code} query parameter,
+     * it is forwarded to the authorization endpoint along with {@code is_invitation=true}.
      * <p>
      * <b>NOTE:</b> Enabling PKCE will be required for all clients (public and confidential) in the future OAuth 2.1 spec.
      *
@@ -24,10 +26,8 @@ public class Kinde {
      * @throws Exception
      */
     public static HttpSecurity configureOAuth2WithPkce(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
-        // Create a request resolver that enables PKCE
-        DefaultOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
-        authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
-        // enable oauth2 login that uses PKCE
+        KindeOAuth2AuthorizationRequestResolver authorizationRequestResolver =
+                new KindeOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
         http.oauth2Login()
                 .authorizationEndpoint()
                 .authorizationRequestResolver(authorizationRequestResolver);
@@ -36,6 +36,20 @@ public class Kinde {
     }
 
 
+    /**
+     * Configures the {@code http} with an OAuth2 Login that supports PKCE.
+     * <p>
+     * <b>NOTE:</b> This reactive overload does not currently forward {@code invitation_code}
+     * parameters to the authorization endpoint. Invitation code handling is only supported
+     * via the servlet-based {@link #configureOAuth2WithPkce(HttpSecurity, ClientRegistrationRepository)}
+     * overload. If you need invitation support in a reactive application, implement a custom
+     * {@code ServerOAuth2AuthorizationRequestResolver} that mirrors the logic in
+     * {@link KindeOAuth2AuthorizationRequestResolver}.
+     *
+     * @param http the ServerHttpSecurity to configure
+     * @param clientRegistrationRepository the reactive repository bean
+     * @return the {@code http} to allow method chaining
+     */
     public static ServerHttpSecurity configureOAuth2WithPkce(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
         // Create a request resolver that enables PKCE
         DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
