@@ -1,24 +1,24 @@
 package com.kinde.accounts.manager.impl;
 
-import com.google.inject.Inject;
-import com.kinde.accounts.dto.PermissionDto;
-import com.kinde.accounts.manager.PermissionsManager;
-import com.kinde.accounts.util.ApiResponseHandler;
-import com.kinde.accounts.util.PaginationHelper;
-import com.kinde.accounts.dto.DtoConverter;
-import com.kinde.KindeClientSession;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.DefaultApi;
-import org.openapitools.client.model.Permission;
 import org.openapitools.client.model.PermissionResponse;
 import org.openapitools.client.model.PermissionsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import com.google.inject.Inject;
+import com.kinde.KindeClientSession;
+import com.kinde.accounts.dto.DtoConverter;
+import com.kinde.accounts.dto.PermissionDto;
+import com.kinde.accounts.manager.PermissionsManager;
+import com.kinde.accounts.util.ApiResponseHandler;
+import com.kinde.accounts.util.PaginationHelper;
 
 /**
  * Implementation of PermissionsManager that handles permissions operations.
@@ -43,11 +43,12 @@ public class PermissionsManagerImpl implements PermissionsManager {
         this.paginationHelper = paginationHelper;
         this.responseHandler = responseHandler;
         this.session = session;
-        configureApiClient();
     }
     
     /**
      * Configures the API client with authentication headers from the session.
+     * Called lazily before API use to avoid infinite recursion when the session's
+     * getAccessToken() triggers retrieveTokens() which creates a KindeAccountsClient.
      */
     private void configureApiClient() {
         String accessToken = session.getAccessToken();
@@ -82,6 +83,7 @@ public class PermissionsManagerImpl implements PermissionsManager {
         log.debug("Getting all permissions asynchronously");
         
         return CompletableFuture.supplyAsync(() -> {
+            configureApiClient();
             try {
                 PermissionsResponse allPermissions = new PermissionsResponse();
                 allPermissions.setData(new ArrayList<>());
@@ -126,6 +128,7 @@ public class PermissionsManagerImpl implements PermissionsManager {
         log.debug("Getting permission with key: {} asynchronously", key);
         
         return CompletableFuture.supplyAsync(() -> {
+            configureApiClient();
             try {
                 PermissionResponse response = apiClient.getPermission(key);
                 
