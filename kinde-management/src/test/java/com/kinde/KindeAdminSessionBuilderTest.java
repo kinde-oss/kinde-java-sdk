@@ -36,19 +36,18 @@ public class KindeAdminSessionBuilderTest
      * Rigourous Test :-)
      */
     public void testApp() {
-        // Initialize Guice with test modules
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
         KindeGuiceSingleton.init(
                 new KindeManagementGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
-        
-        KindeClient kindeClient = KindeClientBuilder.builder().build();
-        KindeAdminSession kindeAdminSession1 = KindeAdminSessionBuilder.builder().build();
-        KindeAdminSession kindeAdminSession2 = KindeAdminSessionBuilder.builder().client(kindeClient).build();
-        assertTrue( kindeAdminSession1 != kindeAdminSession2 );
-        
-        // Clean up
-        KindeGuiceSingleton.fin();
-        KindeEnvironmentSingleton.fin();
+        try {
+            KindeClient kindeClient = KindeClientBuilder.builder().build();
+            KindeAdminSession kindeAdminSession1 = KindeAdminSessionBuilder.builder().build();
+            KindeAdminSession kindeAdminSession2 = KindeAdminSessionBuilder.builder().client(kindeClient).build();
+            assertTrue( kindeAdminSession1 != kindeAdminSession2 );
+        } finally {
+            KindeGuiceSingleton.fin();
+            KindeEnvironmentSingleton.fin();
+        }
     }
 }
