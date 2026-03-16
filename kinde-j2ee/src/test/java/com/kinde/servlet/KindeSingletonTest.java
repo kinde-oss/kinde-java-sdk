@@ -33,16 +33,16 @@ public class KindeSingletonTest extends TestCase  {
      */
     public void testApp()
     {
-        // Initialize Guice with test modules
         KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
         KindeGuiceSingleton.init(
                 new KindeJ2eeGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
-        
-        KindeSingleton singleton = KindeSingleton.getInstance();
-        assertTrue( true );
-        
-        KindeGuiceSingleton.fin();
-        KindeEnvironmentSingleton.fin();
+        try {
+            KindeSingleton singleton = KindeSingleton.getInstance();
+            assertTrue( true );
+        } finally {
+            KindeGuiceSingleton.fin();
+            KindeEnvironmentSingleton.fin();
+        }
     }
 }
