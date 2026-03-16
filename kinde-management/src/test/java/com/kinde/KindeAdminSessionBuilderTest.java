@@ -2,6 +2,7 @@ package com.kinde;
 
 import com.kinde.client.KindeManagementGuiceTestModule;
 import com.kinde.token.KindeTokenGuiceTestModule;
+import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -36,6 +37,7 @@ public class KindeAdminSessionBuilderTest
      */
     public void testApp() {
         // Initialize Guice with test modules
+        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
         KindeGuiceSingleton.init(
                 new KindeManagementGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
@@ -47,5 +49,6 @@ public class KindeAdminSessionBuilderTest
         
         // Clean up
         KindeGuiceSingleton.fin();
+        KindeEnvironmentSingleton.fin();
     }
 }
