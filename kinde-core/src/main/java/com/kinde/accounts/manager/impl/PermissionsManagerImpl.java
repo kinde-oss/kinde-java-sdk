@@ -60,8 +60,10 @@ public class PermissionsManagerImpl implements PermissionsManager {
     public List<PermissionDto> getAllPermissions() {
         try {
             return getAllPermissionsAsync().get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to get permissions", e);
+        } catch (ExecutionException e) {
             throw new RuntimeException("Failed to get permissions", e);
         }
     }
@@ -71,8 +73,10 @@ public class PermissionsManagerImpl implements PermissionsManager {
         responseHandler.validateKey(key, "permission");
         try {
             return getPermissionAsync(key).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to get permission: " + key, e);
+        } catch (ExecutionException e) {
             throw new RuntimeException("Failed to get permission: " + key, e);
         }
     }

@@ -1,10 +1,12 @@
 package com.kinde.accounts;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,17 +40,13 @@ class KindeAccountsClientGuiceBindingTest {
 
         KindeAccountsClient client = new KindeAccountsClient(mockSession, true);
 
-        assertDoesNotThrow(() -> {
-            try {
-                client.getEntitlements();
-            } catch (RuntimeException e) {
-                if (e.getCause() instanceof java.util.concurrent.ExecutionException) {
-                    // API call failure is expected (no real server) — 
-                    // the point is that no Guice/recursion error occurred
-                    return;
-                }
-                throw e;
+        try {
+            client.getEntitlements();
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof ExecutionException) {
+                return;
             }
-        });
+            fail("Unexpected RuntimeException (not an API failure): " + e.getMessage());
+        }
     }
 }

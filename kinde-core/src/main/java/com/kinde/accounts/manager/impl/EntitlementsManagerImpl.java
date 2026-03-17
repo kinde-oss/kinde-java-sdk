@@ -61,8 +61,10 @@ public class EntitlementsManagerImpl implements EntitlementsManager {
     public List<EntitlementDto> getAllEntitlements() {
         try {
             return getAllEntitlementsAsync().get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to get entitlements", e);
+        } catch (ExecutionException e) {
             throw new RuntimeException("Failed to get entitlements", e);
         }
     }
@@ -72,8 +74,10 @@ public class EntitlementsManagerImpl implements EntitlementsManager {
         responseHandler.validateKey(key, "entitlement");
         try {
             return getEntitlementAsync(key).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to get entitlement: " + key, e);
+        } catch (ExecutionException e) {
             throw new RuntimeException("Failed to get entitlement: " + key, e);
         }
     }
