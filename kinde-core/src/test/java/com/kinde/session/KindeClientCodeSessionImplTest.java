@@ -1,5 +1,15 @@
 package com.kinde.session;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.kinde.KindeClient;
@@ -8,25 +18,15 @@ import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.client.KindeCoreGuiceTestModule;
-import com.kinde.client.oidc.OidcMetaDataImplTest;
 import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
-import com.kinde.token.KindeTokenGuiceTestModule;
 import com.kinde.token.AccessToken;
-import com.kinde.token.KindeToken;
+import com.kinde.token.KindeTokenGuiceTestModule;
 import com.kinde.token.KindeTokens;
-import com.kinde.token.RefreshToken;
-import com.kinde.token.jwt.JwtGenerator;
 import com.kinde.token.TestKeyGenerator;
 import com.kinde.token.TestTokenGenerator;
+import com.kinde.token.jwt.JwtGenerator;
 import com.kinde.user.UserInfo;
-import org.junit.jupiter.api.*;
-
-import java.util.List;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 public class KindeClientCodeSessionImplTest {
@@ -39,7 +39,7 @@ public class KindeClientCodeSessionImplTest {
     public void setUp() {
         KindeGuiceSingleton.fin();
         KindeEnvironmentSingleton.fin();
-        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.ACTIVE);
+        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
         
         // Initialize Guice with test modules
         KindeGuiceSingleton.init(
