@@ -52,9 +52,8 @@ public class PermissionsManagerImpl implements PermissionsManager {
      */
     private void configureApiClient() {
         String accessToken = session.getAccessToken();
-        if (accessToken != null && !accessToken.isEmpty()) {
-            apiClient.getApiClient().setBearerToken(accessToken);
-        }
+        apiClient.getApiClient().setBearerToken(
+                (accessToken != null && !accessToken.isEmpty()) ? accessToken : null);
     }
     
     @Override
