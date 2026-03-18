@@ -18,7 +18,7 @@ import com.kinde.accounts.dto.DtoConverter;
 import com.kinde.accounts.dto.PermissionDto;
 import com.kinde.accounts.manager.PermissionsManager;
 import com.kinde.accounts.util.ApiResponseHandler;
-import com.kinde.accounts.util.PaginationHelper;
+
 
 /**
  * Implementation of PermissionsManager that handles permissions operations.
@@ -29,18 +29,15 @@ public class PermissionsManagerImpl implements PermissionsManager {
     private static final Logger log = LoggerFactory.getLogger(PermissionsManagerImpl.class);
     
     private final DefaultApi apiClient;
-    private final PaginationHelper paginationHelper;
     private final ApiResponseHandler responseHandler;
     private final KindeClientSession session;
     
     @Inject
     public PermissionsManagerImpl(
             DefaultApi apiClient,
-            PaginationHelper paginationHelper,
             ApiResponseHandler responseHandler,
             KindeClientSession session) {
         this.apiClient = apiClient;
-        this.paginationHelper = paginationHelper;
         this.responseHandler = responseHandler;
         this.session = session;
     }

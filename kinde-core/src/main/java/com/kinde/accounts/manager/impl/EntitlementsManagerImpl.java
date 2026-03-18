@@ -19,7 +19,7 @@ import com.kinde.accounts.dto.DtoConverter;
 import com.kinde.accounts.dto.EntitlementDto;
 import com.kinde.accounts.manager.EntitlementsManager;
 import com.kinde.accounts.util.ApiResponseHandler;
-import com.kinde.accounts.util.PaginationHelper;
+
 
 /**
  * Implementation of EntitlementsManager that handles entitlements operations.
@@ -30,18 +30,15 @@ public class EntitlementsManagerImpl implements EntitlementsManager {
     private static final Logger log = LoggerFactory.getLogger(EntitlementsManagerImpl.class);
     
     private final DefaultApi apiClient;
-    private final PaginationHelper paginationHelper;
     private final ApiResponseHandler responseHandler;
     private final KindeClientSession session;
     
     @Inject
     public EntitlementsManagerImpl(
             DefaultApi apiClient,
-            PaginationHelper paginationHelper,
             ApiResponseHandler responseHandler,
             KindeClientSession session) {
         this.apiClient = apiClient;
-        this.paginationHelper = paginationHelper;
         this.responseHandler = responseHandler;
         this.session = session;
     }
