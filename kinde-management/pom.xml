@@ -17,10 +17,8 @@
         <scribejava-apis-version>8.3.3</scribejava-apis-version>
     </properties>
 
-    <groupId>com.kinde</groupId>
     <artifactId>kinde-management</artifactId>
     <packaging>jar</packaging>
-    <version>2.2.0</version>
     <name>kinde-management</name>
     <url>http://maven.apache.org</url>
     <dependencies>
@@ -295,11 +293,6 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
                             <dataFile>${project.build.directory}/jacoco/jacoco.exec</dataFile>
-                            <reportFormats>
-                                <format>HTML</format>
-                                <format>XML</format>
-                            </reportFormats>
-                            <append>true</append>
                             <skip>false</skip>
                             <includes>
                                 <include>com/kinde/**</include>

@@ -5,8 +5,6 @@ import com.kinde.KindeClientBuilder;
 import com.kinde.KindeClientSession;
 import com.kinde.KindeTokenFactory;
 import com.kinde.accounts.KindeAccountsClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,14 +18,12 @@ import java.util.List;
  */
 public class HardCheckExample {
     
-    private static final Logger log = LoggerFactory.getLogger(HardCheckExample.class);
-    
     public static void main(String[] args) {
         // Create a Kinde client
         KindeClient client = KindeClientBuilder.builder()
-                .domain("https://your-domain.kinde.com")
-                .clientId("your-client-id")
-                .clientSecret("your-client-secret")
+                .domain("https://koman.kinde.com")
+                .clientId("a06a72f6df3642fe85e99e4084ddf866")
+                .clientSecret("Ts3GjhZrDomohSMGDzhzjOgiK1SYXo7ZINzd73B6qywMBOoT8viHq")
                 .redirectUri("http://localhost:8080/callback")
                 .build();
         
@@ -40,8 +36,8 @@ public class HardCheckExample {
         // Create a KindeAccountsClient for API fallback
         KindeAccountsClient accountsClient = new KindeAccountsClient(session, true);
         
-        // Create a token factory
-        KindeTokenFactory tokenFactory = new KindeTokenFactoryImpl(null); // JWK store would be injected in real usage
+        // Obtain the token factory from the client (properly wired with JWK store)
+        KindeTokenFactory tokenFactory = client.tokenFactory();
         
         // Parse the token with hard check capabilities
         KindeToken tokenWithHardCheck = tokenFactory.parse(token.token(), accountsClient);
@@ -54,18 +50,18 @@ public class HardCheckExample {
      * Example: Check a single permission with API fallback.
      */
     private static void checkSinglePermission(KindeToken token) {
-        log.info("=== Checking Single Permission ===");
+        System.out.println("=== Checking Single Permission ===");
         
         try {
             boolean hasPermission = token.hasPermission("read:users");
             
             if (hasPermission) {
-                log.info("✅ User has 'read:users' permission");
+                System.out.println("User has 'read:users' permission");
             } else {
-                log.info("❌ User does not have 'read:users' permission");
+                System.out.println("User does not have 'read:users' permission");
             }
         } catch (Exception e) {
-            log.error("Error checking permission: {}", e.getMessage());
+            System.err.println("Error checking permission: " + e.getMessage());
         }
     }
     
@@ -73,30 +69,28 @@ public class HardCheckExample {
      * Example: Check multiple permissions with API fallback.
      */
     private static void checkMultiplePermissions(KindeToken token) {
-        log.info("=== Checking Multiple Permissions ===");
+        System.out.println("=== Checking Multiple Permissions ===");
         
-        List<String> permissions = Arrays.asList("read:users", "write:users", "delete:users");
+        List<String> permissions = Arrays.asList("read:users", "write:users", "delete:users", "admin");
         
         try {
-            // Check if user has any of the permissions
             boolean hasAnyPermission = token.hasAnyPermission(permissions);
             
             if (hasAnyPermission) {
-                log.info("✅ User has at least one of the permissions: {}", permissions);
+                System.out.println("User has at least one of the permissions: " + permissions);
             } else {
-                log.info("❌ User does not have any of the permissions: {}", permissions);
+                System.out.println("User does not have any of the permissions: " + permissions);
             }
             
-            // Check if user has all of the permissions
             boolean hasAllPermissions = token.hasAllPermissions(permissions);
             
             if (hasAllPermissions) {
-                log.info("✅ User has all permissions: {}", permissions);
+                System.out.println("User has all permissions: " + permissions);
             } else {
-                log.info("❌ User does not have all permissions: {}", permissions);
+                System.out.println("User does not have all permissions: " + permissions);
             }
         } catch (Exception e) {
-            log.error("Error checking permissions: {}", e.getMessage());
+            System.err.println("Error checking permissions: " + e.getMessage());
         }
     }
     
@@ -104,30 +98,28 @@ public class HardCheckExample {
      * Example: Check roles with API fallback.
      */
     private static void checkRoles(KindeToken token) {
-        log.info("=== Checking Roles ===");
+        System.out.println("=== Checking Roles ===");
         
         List<String> roles = Arrays.asList("admin", "moderator", "user");
         
         try {
-            // Check if user has any of the roles
             boolean hasAnyRole = token.hasAnyRole(roles);
             
             if (hasAnyRole) {
-                log.info("✅ User has at least one of the roles: {}", roles);
+                System.out.println("User has at least one of the roles: " + roles);
             } else {
-                log.info("❌ User does not have any of the roles: {}", roles);
+                System.out.println("User does not have any of the roles: " + roles);
             }
             
-            // Check if user has all of the roles
             boolean hasAllRoles = token.hasAllRoles(roles);
             
             if (hasAllRoles) {
-                log.info("✅ User has all roles: {}", roles);
+                System.out.println("User has all roles: " + roles);
             } else {
-                log.info("❌ User does not have all roles: {}", roles);
+                System.out.println("User does not have all roles: " + roles);
             }
         } catch (Exception e) {
-            log.error("Error checking roles: {}", e.getMessage());
+            System.err.println("Error checking roles: " + e.getMessage());
         }
     }
     
@@ -135,28 +127,26 @@ public class HardCheckExample {
      * Example: Check feature flags with API fallback.
      */
     private static void checkFeatureFlags(KindeToken token) {
-        log.info("=== Checking Feature Flags ===");
+        System.out.println("=== Checking Feature Flags ===");
         
         try {
-            // Check if a feature flag is enabled
             boolean isDarkModeEnabled = token.isFeatureFlagEnabled("dark_mode");
             
             if (isDarkModeEnabled) {
-                log.info("✅ Dark mode feature flag is enabled");
+                System.out.println("Dark mode feature flag is enabled");
             } else {
-                log.info("❌ Dark mode feature flag is disabled");
+                System.out.println("Dark mode feature flag is disabled");
             }
             
-            // Get the value of a feature flag
             Object betaFeaturesValue = token.getFeatureFlagValue("beta_features");
             
             if (betaFeaturesValue != null) {
-                log.info("✅ Beta features flag value: {}", betaFeaturesValue);
+                System.out.println("Beta features flag value: " + betaFeaturesValue);
             } else {
-                log.info("❌ Beta features flag not found or null");
+                System.out.println("Beta features flag not found or null");
             }
         } catch (Exception e) {
-            log.error("Error checking feature flags: {}", e.getMessage());
+            System.err.println("Error checking feature flags: " + e.getMessage());
         }
     }
     
@@ -164,14 +154,13 @@ public class HardCheckExample {
      * Example: Comprehensive checks combining permissions, roles, and feature flags.
      */
     private static void comprehensiveChecks(KindeToken token) {
-        log.info("=== Comprehensive Checks ===");
+        System.out.println("=== Comprehensive Checks ===");
         
         List<String> requiredPermissions = Arrays.asList("read:users", "write:users");
         List<String> requiredRoles = Arrays.asList("admin", "moderator");
         List<String> requiredFeatureFlags = Arrays.asList("advanced_analytics", "real_time_notifications");
         
         try {
-            // Check if user has ALL requirements (permissions AND roles AND feature flags)
             boolean hasAllRequirements = token.hasAll(
                     requiredPermissions, 
                     requiredRoles, 
@@ -179,15 +168,14 @@ public class HardCheckExample {
             );
             
             if (hasAllRequirements) {
-                log.info("✅ User has ALL requirements:");
-                log.info("   - Permissions: {}", requiredPermissions);
-                log.info("   - Roles: {}", requiredRoles);
-                log.info("   - Feature Flags: {}", requiredFeatureFlags);
+                System.out.println("User has ALL requirements:");
+                System.out.println("   - Permissions: " + requiredPermissions);
+                System.out.println("   - Roles: " + requiredRoles);
+                System.out.println("   - Feature Flags: " + requiredFeatureFlags);
             } else {
-                log.info("❌ User does not have ALL requirements");
+                System.out.println("User does not have ALL requirements");
             }
             
-            // Check if user has ANY requirements (permissions OR roles OR feature flags)
             boolean hasAnyRequirements = token.hasAny(
                     requiredPermissions, 
                     requiredRoles, 
@@ -195,12 +183,12 @@ public class HardCheckExample {
             );
             
             if (hasAnyRequirements) {
-                log.info("✅ User has at least one requirement from each category");
+                System.out.println("User has at least one requirement from each category");
             } else {
-                log.info("❌ User does not have any requirements from each category");
+                System.out.println("User does not have any requirements from each category");
             }
         } catch (Exception e) {
-            log.error("Error in comprehensive checks: {}", e.getMessage());
+            System.err.println("Error in comprehensive checks: " + e.getMessage());
         }
     }
     
