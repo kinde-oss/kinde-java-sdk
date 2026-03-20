@@ -30,7 +30,7 @@ public class HardCheckExample {
                 .clientId("your-client-id")
                 .clientSecret("your-client-secret")
                 .redirectUri("http://localhost:8080/callback")
-                .addAudience("https://koman.kinde.com/api")
+                .addAudience("https://your-domain.kinde.com/api")
                 .build();
 
         KindeClientSession session = client.clientSession();
