@@ -122,13 +122,6 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.17</version>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
         </dependency>
@@ -270,8 +263,6 @@
                         <configuration>
                             <inputSpec>${project.basedir}/../kinde-accounts-api.yaml</inputSpec>
                             <generatorName>java</generatorName>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
                                 <library>okhttp-gson</library>
