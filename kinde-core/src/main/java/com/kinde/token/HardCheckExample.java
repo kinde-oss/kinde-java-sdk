@@ -4,266 +4,138 @@ import com.kinde.KindeClient;
 import com.kinde.KindeClientBuilder;
 import com.kinde.KindeClientSession;
 import com.kinde.KindeTokenFactory;
-import com.kinde.accounts.KindeAccountsClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Example demonstrating the "hard check" functionality for permissions, roles, and feature flags.
- * This shows how the system falls back to API calls when information is not available in the token.
- * 
- * The hard check functionality is now integrated directly into the token classes (AccessToken, IDToken, BaseToken)
- * and no longer requires a separate KindeTokenChecker.
+ *
+ * Token-based checks (permissions, roles, feature flags) read directly from the JWT claims
+ * and work with any token type, including M2M (client credentials) tokens.
+ *
+ * API-fallback checks (via KindeAccountsClient) require a user-context token obtained through
+ * the authorization code flow (e.g., in a Spring Boot or J2EE app with a logged-in user).
+ * They will not work with M2M tokens because the Account API needs org_code and sub claims.
+ *
+ * This standalone example demonstrates token-based checks only.
+ * For API-fallback examples, see the Spring Boot playground application.
  */
 public class HardCheckExample {
-    
-    private static final Logger log = LoggerFactory.getLogger(HardCheckExample.class);
-    
+
     public static void main(String[] args) {
-        // Create a Kinde client
         KindeClient client = KindeClientBuilder.builder()
                 .domain("https://your-domain.kinde.com")
                 .clientId("your-client-id")
                 .clientSecret("your-client-secret")
                 .redirectUri("http://localhost:8080/callback")
+                .addAudience("https://koman.kinde.com/api")
                 .build();
-        
-        // Get a client session (M2M or user session)
+
         KindeClientSession session = client.clientSession();
-        
-        // Get the token from the session
         KindeToken token = session.retrieveTokens().getAccessToken();
-        
-        // Create a KindeAccountsClient for API fallback
-        KindeAccountsClient accountsClient = new KindeAccountsClient(session, true);
-        
-        // Create a token factory
-        KindeTokenFactory tokenFactory = new KindeTokenFactoryImpl(null); // JWK store would be injected in real usage
-        
-        // Parse the token with hard check capabilities
-        KindeToken tokenWithHardCheck = tokenFactory.parse(token.token(), accountsClient);
-        
-        // Now you can use the hard check methods directly on the token
-        runHardCheckExamples(tokenWithHardCheck);
+
+        KindeTokenFactory tokenFactory = client.tokenFactory();
+        KindeToken parsedToken = tokenFactory.parse(token.token());
+
+        System.out.println("Token valid: " + parsedToken.valid());
+        System.out.println();
+
+        checkPermissionsFromToken(parsedToken);
+        checkRolesFromToken(parsedToken);
+        checkFeatureFlags(parsedToken);
+        checkFlagValues(parsedToken);
     }
-    
+
     /**
-     * Example: Check a single permission with API fallback.
+     * Check permissions directly from the token claims.
+     * Permissions are present when users have roles/permissions assigned
+     * and the token is issued via the authorization code flow (user login).
      */
-    private static void checkSinglePermission(KindeToken token) {
-        log.info("=== Checking Single Permission ===");
-        
-        try {
-            boolean hasPermission = token.hasPermission("read:users");
-            
-            if (hasPermission) {
-                log.info("✅ User has 'read:users' permission");
-            } else {
-                log.info("❌ User does not have 'read:users' permission");
-            }
-        } catch (Exception e) {
-            log.error("Error checking permission: {}", e.getMessage());
+    private static void checkPermissionsFromToken(KindeToken token) {
+        System.out.println("=== Permissions (from token claims) ===");
+
+        List<String> permissions = token.getPermissions();
+        if (permissions == null || permissions.isEmpty()) {
+            System.out.println("No permissions found in token.");
+            System.out.println("Tip: Permissions are included in user tokens when roles are assigned.");
+        } else {
+            System.out.println("Permissions in token: " + permissions);
+
+            boolean hasRead = token.hasPermission("read:users");
+            System.out.println("Has 'read:users': " + hasRead);
+
+            List<String> toCheck = Arrays.asList("read:users", "write:users", "delete:users");
+            boolean hasAny = token.hasAnyPermission(toCheck);
+            boolean hasAll = token.hasAllPermissions(toCheck);
+            System.out.println("Has any of " + toCheck + ": " + hasAny);
+            System.out.println("Has all of " + toCheck + ": " + hasAll);
         }
+        System.out.println();
     }
-    
+
     /**
-     * Example: Check multiple permissions with API fallback.
+     * Check roles directly from the token claims.
+     * Roles are present when users have roles assigned
+     * and the token is issued via the authorization code flow (user login).
      */
-    private static void checkMultiplePermissions(KindeToken token) {
-        log.info("=== Checking Multiple Permissions ===");
-        
-        List<String> permissions = Arrays.asList("read:users", "write:users", "delete:users");
-        
-        try {
-            // Check if user has any of the permissions
-            boolean hasAnyPermission = token.hasAnyPermission(permissions);
-            
-            if (hasAnyPermission) {
-                log.info("✅ User has at least one of the permissions: {}", permissions);
-            } else {
-                log.info("❌ User does not have any of the permissions: {}", permissions);
-            }
-            
-            // Check if user has all of the permissions
-            boolean hasAllPermissions = token.hasAllPermissions(permissions);
-            
-            if (hasAllPermissions) {
-                log.info("✅ User has all permissions: {}", permissions);
-            } else {
-                log.info("❌ User does not have all permissions: {}", permissions);
-            }
-        } catch (Exception e) {
-            log.error("Error checking permissions: {}", e.getMessage());
+    private static void checkRolesFromToken(KindeToken token) {
+        System.out.println("=== Roles (from token claims) ===");
+
+        List<String> roles = token.getRoles();
+        if (roles == null || roles.isEmpty()) {
+            System.out.println("No roles found in token.");
+            System.out.println("Tip: Roles are included in user tokens when assigned at the organization level.");
+        } else {
+            System.out.println("Roles in token: " + roles);
+
+            List<String> toCheck = Arrays.asList("admin", "moderator", "user");
+            boolean hasAny = token.hasAnyRole(toCheck);
+            boolean hasAll = token.hasAllRoles(toCheck);
+            System.out.println("Has any of " + toCheck + ": " + hasAny);
+            System.out.println("Has all of " + toCheck + ": " + hasAll);
         }
+        System.out.println();
     }
-    
+
     /**
-     * Example: Check roles with API fallback.
-     */
-    private static void checkRoles(KindeToken token) {
-        log.info("=== Checking Roles ===");
-        
-        List<String> roles = Arrays.asList("admin", "moderator", "user");
-        
-        try {
-            // Check if user has any of the roles
-            boolean hasAnyRole = token.hasAnyRole(roles);
-            
-            if (hasAnyRole) {
-                log.info("✅ User has at least one of the roles: {}", roles);
-            } else {
-                log.info("❌ User does not have any of the roles: {}", roles);
-            }
-            
-            // Check if user has all of the roles
-            boolean hasAllRoles = token.hasAllRoles(roles);
-            
-            if (hasAllRoles) {
-                log.info("✅ User has all roles: {}", roles);
-            } else {
-                log.info("❌ User does not have all roles: {}", roles);
-            }
-        } catch (Exception e) {
-            log.error("Error checking roles: {}", e.getMessage());
-        }
-    }
-    
-    /**
-     * Example: Check feature flags with API fallback.
+     * Check feature flags from the token claims.
+     * Feature flags are included when enabled in the Kinde dashboard.
      */
     private static void checkFeatureFlags(KindeToken token) {
-        log.info("=== Checking Feature Flags ===");
-        
+        System.out.println("=== Feature Flags (from token claims) ===");
+
         try {
-            // Check if a feature flag is enabled
-            boolean isDarkModeEnabled = token.isFeatureFlagEnabled("dark_mode");
-            
-            if (isDarkModeEnabled) {
-                log.info("✅ Dark mode feature flag is enabled");
-            } else {
-                log.info("❌ Dark mode feature flag is disabled");
-            }
-            
-            // Get the value of a feature flag
-            Object betaFeaturesValue = token.getFeatureFlagValue("beta_features");
-            
-            if (betaFeaturesValue != null) {
-                log.info("✅ Beta features flag value: {}", betaFeaturesValue);
-            } else {
-                log.info("❌ Beta features flag not found or null");
-            }
+            boolean darkMode = token.isFeatureFlagEnabled("dark_mode");
+            System.out.println("dark_mode enabled: " + darkMode);
         } catch (Exception e) {
-            log.error("Error checking feature flags: {}", e.getMessage());
+            System.out.println("dark_mode: not found in token");
         }
-    }
-    
-    /**
-     * Example: Comprehensive checks combining permissions, roles, and feature flags.
-     */
-    private static void comprehensiveChecks(KindeToken token) {
-        log.info("=== Comprehensive Checks ===");
-        
-        List<String> requiredPermissions = Arrays.asList("read:users", "write:users");
-        List<String> requiredRoles = Arrays.asList("admin", "moderator");
-        List<String> requiredFeatureFlags = Arrays.asList("advanced_analytics", "real_time_notifications");
-        
+
         try {
-            // Check if user has ALL requirements (permissions AND roles AND feature flags)
-            boolean hasAllRequirements = token.hasAll(
-                    requiredPermissions, 
-                    requiredRoles, 
-                    requiredFeatureFlags
-            );
-            
-            if (hasAllRequirements) {
-                log.info("✅ User has ALL requirements:");
-                log.info("   - Permissions: {}", requiredPermissions);
-                log.info("   - Roles: {}", requiredRoles);
-                log.info("   - Feature Flags: {}", requiredFeatureFlags);
-            } else {
-                log.info("❌ User does not have ALL requirements");
-            }
-            
-            // Check if user has ANY requirements (permissions OR roles OR feature flags)
-            boolean hasAnyRequirements = token.hasAny(
-                    requiredPermissions, 
-                    requiredRoles, 
-                    requiredFeatureFlags
-            );
-            
-            if (hasAnyRequirements) {
-                log.info("✅ User has at least one requirement from each category");
-            } else {
-                log.info("❌ User does not have any requirements from each category");
-            }
+            Object betaValue = token.getFeatureFlagValue("beta_features");
+            System.out.println("beta_features value: " + betaValue);
         } catch (Exception e) {
-            log.error("Error in comprehensive checks: {}", e.getMessage());
+            System.out.println("beta_features: not found in token");
         }
+        System.out.println();
     }
-    
+
     /**
-     * Run all hard check examples.
+     * Dump all feature flags from the token for inspection.
      */
-    private static void runHardCheckExamples(KindeToken token) {
-        checkSinglePermission(token);
-        checkMultiplePermissions(token);
-        checkRoles(token);
-        checkFeatureFlags(token);
-        comprehensiveChecks(token);
-    }
-    
-    /**
-     * Example: Real-world usage in a web application context.
-     */
-    public static class WebApplicationExample {
-        
-        private final KindeToken token;
-        
-        public WebApplicationExample(KindeToken token) {
-            this.token = token;
+    private static void checkFlagValues(KindeToken token) {
+        System.out.println("=== All Feature Flags ===");
+
+        Map<String, Object> flags = token.getFlags();
+        if (flags == null || flags.isEmpty()) {
+            System.out.println("No feature flags found in token.");
+        } else {
+            for (Map.Entry<String, Object> entry : flags.entrySet()) {
+                System.out.println("  " + entry.getKey() + " = " + entry.getValue());
+            }
         }
-        
-        /**
-         * Check if user can access the admin dashboard.
-         */
-        public boolean canAccessAdminDashboard() {
-            return token.hasAll(
-                    Arrays.asList("read:admin", "write:admin"),
-                    Arrays.asList("admin"),
-                    Arrays.asList("admin_dashboard")
-            );
-        }
-        
-        /**
-         * Check if user can perform user management operations.
-         */
-        public boolean canManageUsers() {
-            return token.hasAll(
-                    Arrays.asList("read:users", "write:users", "delete:users"),
-                    Arrays.asList("admin", "moderator"),
-                    Arrays.asList("user_management")
-            );
-        }
-        
-        /**
-         * Check if user can view analytics.
-         */
-        public boolean canViewAnalytics() {
-            return token.hasAny(
-                    Arrays.asList("read:analytics", "read:reports"),
-                    Arrays.asList("admin", "analyst"),
-                    Arrays.asList("analytics", "advanced_analytics")
-            );
-        }
-        
-        /**
-         * Check if user can access beta features.
-         */
-        public boolean canAccessBetaFeatures() {
-            return token.isFeatureFlagEnabled("beta_features");
-        }
+        System.out.println();
     }
 }

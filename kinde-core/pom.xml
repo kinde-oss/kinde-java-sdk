@@ -263,6 +263,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/../kinde-accounts-api.yaml</inputSpec>
                             <generatorName>java</generatorName>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
                                 <library>okhttp-gson</library>
