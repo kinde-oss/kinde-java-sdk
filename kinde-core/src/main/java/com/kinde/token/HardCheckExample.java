@@ -4,6 +4,8 @@ import com.kinde.KindeClient;
 import com.kinde.KindeClientBuilder;
 import com.kinde.KindeClientSession;
 import com.kinde.KindeTokenFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +26,8 @@ import java.util.Map;
  */
 public class HardCheckExample {
 
+    private static final Logger log = LoggerFactory.getLogger(HardCheckExample.class);
+
     public static void main(String[] args) {
         KindeClient client = KindeClientBuilder.builder()
                 .domain("https://your-domain.kinde.com")
@@ -39,8 +43,7 @@ public class HardCheckExample {
         KindeTokenFactory tokenFactory = client.tokenFactory();
         KindeToken parsedToken = tokenFactory.parse(token.token());
 
-        System.out.println("Token valid: " + parsedToken.valid());
-        System.out.println();
+        log.info("Token valid: {}", parsedToken.valid());
 
         checkPermissionsFromToken(parsedToken);
         checkRolesFromToken(parsedToken);
@@ -54,25 +57,24 @@ public class HardCheckExample {
      * and the token is issued via the authorization code flow (user login).
      */
     private static void checkPermissionsFromToken(KindeToken token) {
-        System.out.println("=== Permissions (from token claims) ===");
+        log.info("=== Permissions (from token claims) ===");
 
         List<String> permissions = token.getPermissions();
         if (permissions == null || permissions.isEmpty()) {
-            System.out.println("No permissions found in token.");
-            System.out.println("Tip: Permissions are included in user tokens when roles are assigned.");
+            log.info("No permissions found in token.");
+            log.info("Tip: Permissions are included in user tokens when roles are assigned.");
         } else {
-            System.out.println("Permissions in token: " + permissions);
+            log.info("Permissions in token: {}", permissions);
 
             boolean hasRead = token.hasPermission("read:users");
-            System.out.println("Has 'read:users': " + hasRead);
+            log.info("Has 'read:users': {}", hasRead);
 
             List<String> toCheck = Arrays.asList("read:users", "write:users", "delete:users");
             boolean hasAny = token.hasAnyPermission(toCheck);
             boolean hasAll = token.hasAllPermissions(toCheck);
-            System.out.println("Has any of " + toCheck + ": " + hasAny);
-            System.out.println("Has all of " + toCheck + ": " + hasAll);
+            log.info("Has any of {}: {}", toCheck, hasAny);
+            log.info("Has all of {}: {}", toCheck, hasAll);
         }
-        System.out.println();
     }
 
     /**
@@ -81,22 +83,21 @@ public class HardCheckExample {
      * and the token is issued via the authorization code flow (user login).
      */
     private static void checkRolesFromToken(KindeToken token) {
-        System.out.println("=== Roles (from token claims) ===");
+        log.info("=== Roles (from token claims) ===");
 
         List<String> roles = token.getRoles();
         if (roles == null || roles.isEmpty()) {
-            System.out.println("No roles found in token.");
-            System.out.println("Tip: Roles are included in user tokens when assigned at the organization level.");
+            log.info("No roles found in token.");
+            log.info("Tip: Roles are included in user tokens when assigned at the organization level.");
         } else {
-            System.out.println("Roles in token: " + roles);
+            log.info("Roles in token: {}", roles);
 
             List<String> toCheck = Arrays.asList("admin", "moderator", "user");
             boolean hasAny = token.hasAnyRole(toCheck);
             boolean hasAll = token.hasAllRoles(toCheck);
-            System.out.println("Has any of " + toCheck + ": " + hasAny);
-            System.out.println("Has all of " + toCheck + ": " + hasAll);
+            log.info("Has any of {}: {}", toCheck, hasAny);
+            log.info("Has all of {}: {}", toCheck, hasAll);
         }
-        System.out.println();
     }
 
     /**
@@ -104,38 +105,36 @@ public class HardCheckExample {
      * Feature flags are included when enabled in the Kinde dashboard.
      */
     private static void checkFeatureFlags(KindeToken token) {
-        System.out.println("=== Feature Flags (from token claims) ===");
+        log.info("=== Feature Flags (from token claims) ===");
 
         try {
             boolean darkMode = token.isFeatureFlagEnabled("dark_mode");
-            System.out.println("dark_mode enabled: " + darkMode);
+            log.info("dark_mode enabled: {}", darkMode);
         } catch (Exception e) {
-            System.out.println("dark_mode: not found in token");
+            log.info("dark_mode: not found in token");
         }
 
         try {
             Object betaValue = token.getFeatureFlagValue("beta_features");
-            System.out.println("beta_features value: " + betaValue);
+            log.info("beta_features value: {}", betaValue);
         } catch (Exception e) {
-            System.out.println("beta_features: not found in token");
+            log.info("beta_features: not found in token");
         }
-        System.out.println();
     }
 
     /**
      * Dump all feature flags from the token for inspection.
      */
     private static void checkFlagValues(KindeToken token) {
-        System.out.println("=== All Feature Flags ===");
+        log.info("=== All Feature Flags ===");
 
         Map<String, Object> flags = token.getFlags();
         if (flags == null || flags.isEmpty()) {
-            System.out.println("No feature flags found in token.");
+            log.info("No feature flags found in token.");
         } else {
             for (Map.Entry<String, Object> entry : flags.entrySet()) {
-                System.out.println("  " + entry.getKey() + " = " + entry.getValue());
+                log.info("  {} = {}", entry.getKey(), entry.getValue());
             }
         }
-        System.out.println();
     }
 }
