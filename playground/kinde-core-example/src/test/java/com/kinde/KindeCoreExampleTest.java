@@ -1,5 +1,6 @@
 package com.kinde;
 
+import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.token.KindeTokens;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -34,5 +35,30 @@ public class KindeCoreExampleTest extends TestCase {
         assertNotNull(kindeTokens.getAccessToken());
         assertNotNull(kindeTokenFactory);
         assertNotNull(kindeTokenFactory.parse(kindeTokens.getAccessToken().token()));
+    }
+
+    @Ignore
+    public void testInvitationCodeWithLogin() {
+        System.out.println("Test invitation code with login");
+        KindeClient kindeClient = KindeClientBuilder
+                .builder()
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.clientSession();
+
+        AuthorizationUrl loginWithInvite = kindeClientSession.login("inv_example123");
+        System.out.println("\nLogin with invitation code:");
+        System.out.println("  URL: " + loginWithInvite.getUrl());
+
+        AuthorizationUrl registerWithInvite = kindeClientSession.register("inv_example456");
+        System.out.println("\nRegister with invitation code:");
+        System.out.println("  URL: " + registerWithInvite.getUrl());
+
+        AuthorizationUrl handleDirect = kindeClientSession.handleInvitation("inv_example789");
+        System.out.println("\nHandle invitation directly:");
+        System.out.println("  URL: " + handleDirect.getUrl());
+
+        AuthorizationUrl normalLogin = kindeClientSession.login();
+        System.out.println("\nNormal login (no invitation):");
+        System.out.println("  URL: " + normalLogin.getUrl());
     }
 }

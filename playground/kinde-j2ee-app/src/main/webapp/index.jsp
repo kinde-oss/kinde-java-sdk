@@ -31,6 +31,18 @@
                 Go to docs
             </a>
         </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <p class="text-heading-1">Team Invitation</p>
+            <p class="text-body-1" style="margin-bottom: 1rem;">
+                Enter an invitation code to accept a team invitation.
+            </p>
+            <form onsubmit="redirectWithInvitation(event)" style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="invitationCode" placeholder="inv_xxxxxxxx"
+                       style="padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;" />
+                <button type="submit" class="btn btn-dark">Accept Invitation</button>
+            </form>
+        </div>
     </div>
 </main>
 
@@ -56,6 +68,15 @@
 <script inline="javascript">
     function redirectToRegistration() {
         window.location.href = "./register?post_login_url=./private";
+    }
+</script>
+<script inline="javascript">
+    function redirectWithInvitation(event) {
+        event.preventDefault();
+        var code = document.getElementById('invitationCode').value;
+        if (code) {
+            window.location.href = "./login?post_login_url=./private&invitation_code=" + encodeURIComponent(code);
+        }
     }
 </script>
 </body>

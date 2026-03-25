@@ -30,7 +30,7 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
       <optional>true</optional>
-      <version>3.5.7</version>
+      <version>3.5.10</version>
     </dependency>
 
           <dependency>
@@ -108,7 +108,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.27.6</version>
+      <version>3.27.7</version>
       <scope>test</scope>
     </dependency>
 
@@ -208,7 +208,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.13</version> <!-- Use the latest version available -->
+        <version>0.8.14</version> <!-- Use the latest version available -->
         <executions>
           <execution>
             <goals>
@@ -227,7 +227,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.14.0</version> <!-- You can use the latest version -->
+        <version>3.14.1</version> <!-- You can use the latest version -->
         <configuration>
           <source>17</source> <!-- Specify your desired Java version -->
           <target>17</target> <!-- Specify your desired Java version -->

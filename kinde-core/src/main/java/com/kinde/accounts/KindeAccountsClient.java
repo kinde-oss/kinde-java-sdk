@@ -3,6 +3,7 @@ package com.kinde.accounts;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provides;
 import com.google.inject.Inject;
 import com.kinde.KindeClientSession;
 import com.kinde.accounts.dto.*;
@@ -64,14 +65,19 @@ public class KindeAccountsClient {
             throw new IllegalArgumentException("session cannot be null");
         }
         
-        // Create a child injector with both the module and session binding
+        // Create a child injector with both the module and session binding.
+        // Use @Provides instead of toInstance() to avoid Guice performing member
+        // injection on the session, which would fail due to unbound @Inject setters
+        // on KindeClientSessionImpl (KindeTokenFactory, KindeEntitlements).
         Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                // Install the KindeAccountsModule to provide all manager bindings
                 install(new KindeAccountsModule());
-                // Bind the session instance
-                bind(KindeClientSession.class).toInstance(session);
+            }
+
+            @Provides
+            KindeClientSession provideSession() {
+                return session;
             }
         });
         

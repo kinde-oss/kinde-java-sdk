@@ -1,25 +1,25 @@
 package com.kinde.accounts.manager.impl;
 
-import com.google.inject.Inject;
-import com.kinde.accounts.dto.EntitlementDto;
-import com.kinde.accounts.manager.EntitlementsManager;
-import com.kinde.accounts.util.ApiResponseHandler;
-import com.kinde.accounts.util.PaginationHelper;
-import com.kinde.accounts.dto.DtoConverter;
-import com.kinde.KindeClientSession;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.DefaultApi;
-import org.openapitools.client.model.Entitlement;
 import org.openapitools.client.model.EntitlementResponse;
 import org.openapitools.client.model.EntitlementsResponse;
 import org.openapitools.client.model.EntitlementsResponseData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import com.google.inject.Inject;
+import com.kinde.KindeClientSession;
+import com.kinde.accounts.dto.DtoConverter;
+import com.kinde.accounts.dto.EntitlementDto;
+import com.kinde.accounts.manager.EntitlementsManager;
+import com.kinde.accounts.util.ApiResponseHandler;
+
 
 /**
  * Implementation of EntitlementsManager that handles entitlements operations.
@@ -30,39 +30,38 @@ public class EntitlementsManagerImpl implements EntitlementsManager {
     private static final Logger log = LoggerFactory.getLogger(EntitlementsManagerImpl.class);
     
     private final DefaultApi apiClient;
-    private final PaginationHelper paginationHelper;
     private final ApiResponseHandler responseHandler;
     private final KindeClientSession session;
     
     @Inject
     public EntitlementsManagerImpl(
             DefaultApi apiClient,
-            PaginationHelper paginationHelper,
             ApiResponseHandler responseHandler,
             KindeClientSession session) {
         this.apiClient = apiClient;
-        this.paginationHelper = paginationHelper;
         this.responseHandler = responseHandler;
         this.session = session;
-        configureApiClient();
     }
     
     /**
      * Configures the API client with authentication headers from the session.
+     * Called lazily before API use to avoid infinite recursion when the session's
+     * getAccessToken() triggers retrieveTokens() which creates a KindeAccountsClient.
      */
     private void configureApiClient() {
         String accessToken = session.getAccessToken();
-        if (accessToken != null && !accessToken.isEmpty()) {
-            apiClient.getApiClient().setBearerToken(accessToken);
-        }
+        apiClient.getApiClient().setBearerToken(
+                (accessToken != null && !accessToken.isEmpty()) ? accessToken : null);
     }
     
     @Override
     public List<EntitlementDto> getAllEntitlements() {
         try {
             return getAllEntitlementsAsync().get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to get entitlements", e);
+        } catch (ExecutionException e) {
             throw new RuntimeException("Failed to get entitlements", e);
         }
     }
@@ -72,8 +71,10 @@ public class EntitlementsManagerImpl implements EntitlementsManager {
         responseHandler.validateKey(key, "entitlement");
         try {
             return getEntitlementAsync(key).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to get entitlement: " + key, e);
+        } catch (ExecutionException e) {
             throw new RuntimeException("Failed to get entitlement: " + key, e);
         }
     }
@@ -83,6 +84,7 @@ public class EntitlementsManagerImpl implements EntitlementsManager {
         log.debug("Getting all entitlements asynchronously");
         
         return CompletableFuture.supplyAsync(() -> {
+            configureApiClient();
             try {
                 EntitlementsResponse allEntitlements = new EntitlementsResponse();
                 EntitlementsResponseData allData = new EntitlementsResponseData();
@@ -142,6 +144,7 @@ public class EntitlementsManagerImpl implements EntitlementsManager {
         log.debug("Getting entitlement with key: {} asynchronously", key);
         
         return CompletableFuture.supplyAsync(() -> {
+            configureApiClient();
             try {
                 EntitlementResponse response = apiClient.getEntitlement(key);
                 

@@ -3,6 +3,7 @@ package com.kinde.servlet;
 import com.kinde.AppTest;
 import com.kinde.client.KindeJ2eeGuiceTestModule;
 import com.kinde.token.KindeTokenGuiceTestModule;
+import com.kinde.guice.KindeEnvironmentSingleton;
 import com.kinde.guice.KindeGuiceSingleton;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -32,12 +33,16 @@ public class KindeSingletonTest extends TestCase  {
      */
     public void testApp()
     {
-        // Initialize Guice with test modules
+        KindeEnvironmentSingleton.init(KindeEnvironmentSingleton.State.TEST);
         KindeGuiceSingleton.init(
                 new KindeJ2eeGuiceTestModule(),
                 new KindeTokenGuiceTestModule());
-        
-        KindeSingleton singleton = KindeSingleton.getInstance();
-        assertTrue( true );
+        try {
+            KindeSingleton singleton = KindeSingleton.getInstance();
+            assertTrue( true );
+        } finally {
+            KindeGuiceSingleton.fin();
+            KindeEnvironmentSingleton.fin();
+        }
     }
 }
