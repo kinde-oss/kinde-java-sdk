@@ -37,7 +37,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-webflux</artifactId>
         <optional>true</optional>
-        <version>3.5.12</version>
+        <version>4.0.0</version>
       </dependency>
 
     <dependency>
