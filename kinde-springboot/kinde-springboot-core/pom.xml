@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
-      <version>6.5.5</version>
+      <version>6.5.10</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -60,17 +60,17 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-client</artifactId>
-      <version>6.5.5</version>
+      <version>6.5.10</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-jose</artifactId>
-      <version>6.5.5</version>
+      <version>6.5.10</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-resource-server</artifactId>
-      <version>6.5.5</version>
+      <version>6.5.10</version>
     </dependency>
 
     <!-- Spring deps-->
@@ -97,7 +97,7 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <scope>test</scope>
-      <version>6.2.11</version>
+      <version>6.2.18</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -177,7 +177,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.42</version>
+      <version>1.18.46</version>
       <scope>provided</scope>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
@@ -227,7 +227,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.14.1</version> <!-- You can use the latest version -->
+        <version>3.15.0</version> <!-- You can use the latest version -->
         <configuration>
           <source>17</source> <!-- Specify your desired Java version -->
           <target>17</target> <!-- Specify your desired Java version -->
