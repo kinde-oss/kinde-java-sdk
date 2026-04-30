@@ -34,22 +34,22 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <version>3.5.5</version>
+            <version>3.5.14</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
-            <version>3.5.5</version>
+            <version>3.5.14</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-            <version>3.5.5</version>
+            <version>3.5.14</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.5.5</version>
+            <version>3.5.14</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>3.5.5</version>
+            <version>3.5.14</version>
         </dependency>
         <dependency>
             <groupId>org.thymeleaf</groupId>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <version>3.5.5</version>
+            <version>3.5.14</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -93,7 +93,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <version>3.5.5</version>
+            <version>3.5.14</version>
         </dependency>
     </dependencies>
 
@@ -102,7 +102,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.5.5</version>
+                <version>3.5.14</version>
             </plugin>
         </plugins>
     </build>
