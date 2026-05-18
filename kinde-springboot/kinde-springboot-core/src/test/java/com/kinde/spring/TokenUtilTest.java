@@ -93,6 +93,22 @@ public class TokenUtilTest {
         assertFalse(resultEmpty.getErrors().isEmpty(), "Token with empty aud should be rejected when audience configured");
     }
 
+    /**
+     * Some IdPs (and hand-crafted tokens) omit the {@code aud} claim entirely rather than emit an
+     * empty array. {@link Jwt#getAudience()} returns {@code null} for that case, which previously
+     * caused {@code Collections.disjoint} to throw an NPE inside the audience validator. The
+     * validator must reject those tokens when an audience is configured, not crash.
+     */
+    @Test
+    public void testJwtValidatorWithAbsentAudClaimRejectsWhenAudienceConfigured() {
+        OAuth2TokenValidator<Jwt> validator = TokenUtil.jwtValidator(ISSUER, "https://api.example.com");
+
+        Jwt tokenWithNoAudClaim = jwt(ISSUER, null);
+        OAuth2TokenValidatorResult result = validator.validate(tokenWithNoAudClaim);
+        assertFalse(result.getErrors().isEmpty(),
+                "Token with absent aud claim should be rejected (not NPE) when audience configured");
+    }
+
     @Test
     public void testJwtValidatorRejectsWrongIssuerRegardlessOfAudience() {
         OAuth2TokenValidator<Jwt> validator = TokenUtil.jwtValidator(ISSUER, null);

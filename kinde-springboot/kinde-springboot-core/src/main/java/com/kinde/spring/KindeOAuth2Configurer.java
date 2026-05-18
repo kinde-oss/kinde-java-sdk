@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResp
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
 import java.lang.reflect.Field;
@@ -41,8 +42,8 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
         if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
             && (propertiesProvider = context.getBean(OAuth2ClientProperties.class).getProvider().get("kinde")) != null
             && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("kinde")) != null
-            && !propertiesProvider.getIssuerUri().isEmpty()
-            && !propertiesRegistration.getClientId().isEmpty()) {
+            && StringUtils.hasText(propertiesProvider.getIssuerUri())
+            && StringUtils.hasText(propertiesRegistration.getClientId())) {
 
             configureLogin(http, kindeOAuth2Properties, context.getEnvironment());
 

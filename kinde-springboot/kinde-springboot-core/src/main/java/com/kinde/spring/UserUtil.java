@@ -51,7 +51,7 @@ final class UserUtil {
     static OidcUser decorateUser(OidcUser user, OidcUserRequest userRequest, Collection<AuthoritiesProvider> authoritiesProviders, KindeClient kindeClient) {
 
         // Only post process requests from the Kinde registration
-        if (!"kinde".equals(userRequest.getClientRegistration().getRegistrationId())) {
+        if (!"kinde".equalsIgnoreCase(userRequest.getClientRegistration().getRegistrationId())) {
             return user;
         }
 

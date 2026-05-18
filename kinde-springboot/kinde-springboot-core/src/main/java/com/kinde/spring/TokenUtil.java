@@ -78,9 +78,13 @@ final class TokenUtil {
         if (StringUtils.hasText(audience)) {
             final String expected = audience;
             validators.add(token -> {
+                List<String> tokenAudience = token.getAudience();
+                if (tokenAudience == null || tokenAudience.isEmpty()) {
+                    return OAuth2TokenValidatorResult.failure(INVALID_AUDIENCE);
+                }
                 Set<String> expectedAudience = new HashSet<>();
                 expectedAudience.add(expected);
-                return !Collections.disjoint(token.getAudience(), expectedAudience)
+                return !Collections.disjoint(tokenAudience, expectedAudience)
                         ? OAuth2TokenValidatorResult.success()
                         : OAuth2TokenValidatorResult.failure(INVALID_AUDIENCE);
             });
