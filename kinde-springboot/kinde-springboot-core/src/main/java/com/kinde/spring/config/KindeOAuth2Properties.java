@@ -16,7 +16,8 @@ public final class KindeOAuth2Properties implements Validator {
 
     /**
      * Login route path. This property should NOT be used with applications that have multiple OAuth2 providers.
-     * NOTE: this does NOT work with WebFlux, where the redirect URI will always be: /login/oauth2/code/okta
+     * NOTE: this does NOT work with WebFlux, where the redirect URI is derived from the OAuth2 client
+     * registration id and defaults to {@code /login/oauth2/code/kinde} for the Kinde registration.
      */
     private String redirectUri;
 
@@ -36,7 +37,8 @@ public final class KindeOAuth2Properties implements Validator {
     private String authorizationGrantType;
 
     /**
-     * Custom authorization server issuer URL: i.e. 'https://dev-123456.oktapreview.com/oauth2/ausar5cbq5TRooicu812'.
+     * Kinde authorization server URL: e.g. {@code https://your-subdomain.kinde.com}. This is the
+     * issuer URI for the OIDC provider.
      */
     private String domain;
 

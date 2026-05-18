@@ -67,7 +67,7 @@ public class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Env
         if (kindeClient != null) {
             // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
             environment.getPropertySources().addLast(defaultKindeScopesSource(environment, kindeClient));
-            // okta's endpoints can be resolved from an issuer
+            // Kinde's endpoints can be resolved from an issuer
             environment.getPropertySources().addLast(kindeStaticDiscoveryPropertySource(environment, kindeClient));
             // Auth0 does not have an introspection endpoint
             environment.getPropertySources().addLast(kindeOpaqueTokenPropertySource(environment, kindeClient));
@@ -115,7 +115,7 @@ public class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Env
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.client.registration.kinde.scope", "${" + KINDE_OAUTH_SCOPES + "}");
-        return new KindeScopesPropertySource("okta-scope-remaper", properties, environment);
+        return new KindeScopesPropertySource("kinde-scope-remapper", properties, environment);
     }
 
     private PropertySource kindeRedirectUriPropertySource(Environment environment) {
