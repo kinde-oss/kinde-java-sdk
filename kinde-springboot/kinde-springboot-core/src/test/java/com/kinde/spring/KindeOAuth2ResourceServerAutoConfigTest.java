@@ -2,7 +2,6 @@ package com.kinde.spring;
 
 import com.kinde.spring.config.KindeOAuth2Properties;
 import com.kinde.spring.env.KindeOAuth2PropertiesMappingEnvironmentPostProcessor;
-import com.kinde.spring.sdk.KindeSdkClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,10 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
@@ -57,6 +59,77 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
         when(jwt.getIssuerUri()).thenReturn("http://test.kinde.com");
         when(kindeOAuth2Properties.getAudience()).thenReturn("http://test.kinde.com/test");
         kindeOAuth2ResourceServerAutoConfig.jwtDecoder(oAuth2ResourceServerProperties,kindeOAuth2Properties);
+    }
+
+    // --- restClient() / restTemplate() proxy-branch coverage ----------------------------------
+
+    @Test
+    public void restClientWithNoProxyConfigured() {
+        KindeOAuth2Properties props = Mockito.mock(KindeOAuth2Properties.class);
+        when(props.getProxy()).thenReturn(null);
+
+        RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
+        assertNotNull(client, "restClient() should build a non-null RestClient when no proxy is configured");
+    }
+
+    @Test
+    public void restClientWithProxyHostAndPort() {
+        KindeOAuth2Properties.Proxy proxy = new KindeOAuth2Properties.Proxy();
+        proxy.setHost("proxy.example.com");
+        proxy.setPort(8080);
+        proxy.setUsername("");
+        proxy.setPassword("");
+
+        KindeOAuth2Properties props = Mockito.mock(KindeOAuth2Properties.class);
+        when(props.getProxy()).thenReturn(proxy);
+
+        RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
+        assertNotNull(client, "restClient() should build a non-null RestClient when proxy host/port are configured");
+    }
+
+    @Test
+    public void restClientWithAuthenticatedProxy() {
+        KindeOAuth2Properties.Proxy proxy = new KindeOAuth2Properties.Proxy();
+        proxy.setHost("proxy.example.com");
+        proxy.setPort(8080);
+        proxy.setUsername("proxy-user");
+        proxy.setPassword("proxy-pass");
+
+        KindeOAuth2Properties props = Mockito.mock(KindeOAuth2Properties.class);
+        when(props.getProxy()).thenReturn(proxy);
+
+        RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
+        assertNotNull(client, "restClient() should build a non-null RestClient when proxy credentials are configured");
+    }
+
+    @Test
+    public void restTemplateWithProxyHostAndPort() {
+        KindeOAuth2Properties.Proxy proxy = new KindeOAuth2Properties.Proxy();
+        proxy.setHost("proxy.example.com");
+        proxy.setPort(8080);
+        proxy.setUsername("");
+        proxy.setPassword("");
+
+        KindeOAuth2Properties props = Mockito.mock(KindeOAuth2Properties.class);
+        when(props.getProxy()).thenReturn(proxy);
+
+        RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
+        assertNotNull(template, "restTemplate() should build a non-null RestTemplate when proxy is configured");
+    }
+
+    @Test
+    public void restTemplateWithAuthenticatedProxy() {
+        KindeOAuth2Properties.Proxy proxy = new KindeOAuth2Properties.Proxy();
+        proxy.setHost("proxy.example.com");
+        proxy.setPort(8080);
+        proxy.setUsername("proxy-user");
+        proxy.setPassword("proxy-pass");
+
+        KindeOAuth2Properties props = Mockito.mock(KindeOAuth2Properties.class);
+        when(props.getProxy()).thenReturn(proxy);
+
+        RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
+        assertNotNull(template, "restTemplate() should build a non-null RestTemplate when proxy credentials are configured");
     }
 
 }
