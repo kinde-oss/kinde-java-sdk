@@ -1,8 +1,8 @@
 package com.kinde.spring.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -47,8 +47,14 @@ public final class KindeOAuth2Properties implements Validator {
 
     /**
      * Expected access token audience claim value.
+     *
+     * <p>Defaults to {@code null}, meaning audience validation is disabled. This matches Kinde's
+     * out-of-the-box behaviour: tokens issued for clients without a configured API resource
+     * carry an empty {@code aud} array. When you have a Kinde API resource configured, set this
+     * property to the matching audience value so {@link com.kinde.spring.TokenUtil#jwtValidator}
+     * enforces it.
      */
-    private String audience = "api://default";
+    private String audience;
 
     /**
      * Access token permissions claim key.

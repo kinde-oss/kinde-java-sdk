@@ -28,9 +28,8 @@ public class Kinde {
     public static HttpSecurity configureOAuth2WithPkce(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
         KindeOAuth2AuthorizationRequestResolver authorizationRequestResolver =
                 new KindeOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
-        http.oauth2Login()
-                .authorizationEndpoint()
-                .authorizationRequestResolver(authorizationRequestResolver);
+        http.oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(authorizationRequestResolver)));
 
         return http;
     }
@@ -51,11 +50,10 @@ public class Kinde {
      * @return the {@code http} to allow method chaining
      */
     public static ServerHttpSecurity configureOAuth2WithPkce(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
-        // Create a request resolver that enables PKCE
-        DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
+        DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver =
+                new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
         authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
-        // enable oauth2 login that uses PKCE
-        http.oauth2Login().authorizationRequestResolver(authorizationRequestResolver);
+        http.oauth2Login(oauth2 -> oauth2.authorizationRequestResolver(authorizationRequestResolver));
 
         return http;
     }

@@ -18,6 +18,7 @@ coverage/
 
 # Personal files
 .idea
+.vscode
 
 # System files
 .DS_Store

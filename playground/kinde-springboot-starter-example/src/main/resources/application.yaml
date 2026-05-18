@@ -4,6 +4,12 @@ kinde:
     client-id: ${KINDE_CLIENT_ID:your-client-id-here}
     client-secret: ${KINDE_CLIENT_SECRET:your-client-secret-here}
     scopes: openid,email,profile,offline
+    # Triggers OidcClientInitiatedLogoutSuccessHandler bean which Kinde's auto-config wires
+    # into every HttpSecurity via KindeOAuth2Configurer (registered as a global
+    # AbstractHttpConfigurer in spring.factories). Setting this property opts the app into
+    # RP-Initiated logout: a POST /logout will redirect to {KINDE_DOMAIN}/logout with
+    # id_token_hint and post_logout_redirect_uri, then the IdP redirects back here.
+    post-logout-redirect-uri: ${KINDE_LOGOUT_REDIRECT_URI:http://localhost:8080}
     auto-config:
       enabled: true
 

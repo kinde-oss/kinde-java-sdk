@@ -51,7 +51,7 @@ class ReactiveKindeOAuth2ServerHttpServerAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "okta.oauth2.post-logout-redirect-uri")
+    @ConditionalOnProperty(name = "kinde.oauth2.post-logout-redirect-uri")
     OidcClientInitiatedServerLogoutSuccessHandler oidcClientInitiatedServerLogoutSuccessHandler(KindeOAuth2Properties kindeOAuth2Properties,
                                                                                                 ReactiveClientRegistrationRepository repository) throws URISyntaxException {
         OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(repository);
@@ -124,10 +124,11 @@ class ReactiveKindeOAuth2ServerHttpServerAutoConfig {
         public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof ServerHttpSecurity) {
                 ServerHttpSecurity httpSecurity = (ServerHttpSecurity) bean;
-                httpSecurity.oauth2Login().authenticationManager(reactiveAuthenticationManager(oAuth2UserService, oidcUserService));
+                httpSecurity.oauth2Login(oauth2 -> oauth2.authenticationManager(
+                        reactiveAuthenticationManager(oAuth2UserService, oidcUserService)));
 
                 if (logoutSuccessHandler != null) {
-                    httpSecurity.logout().logoutSuccessHandler(logoutSuccessHandler);
+                    httpSecurity.logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler));
                 }
             }
             return bean;
