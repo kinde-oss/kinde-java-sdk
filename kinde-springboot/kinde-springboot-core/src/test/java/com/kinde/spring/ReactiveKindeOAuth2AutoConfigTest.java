@@ -116,9 +116,18 @@ public class ReactiveKindeOAuth2AutoConfigTest {
         when(http.oauth2Client(any())).thenReturn(http);
 
         // oauth2ResourceServer(...) -> drive the inner customDecoder which calls server.jwt(...)
+        // and the nested jwt -> jwt.jwtDecoder(decoder) customizer so we can verify the configured
+        // ReactiveJwtDecoder is the one actually installed onto the JwtSpec.
         ServerHttpSecurity.OAuth2ResourceServerSpec resourceServerSpec =
                 mock(ServerHttpSecurity.OAuth2ResourceServerSpec.class);
-        when(resourceServerSpec.jwt(any())).thenReturn(resourceServerSpec);
+        ServerHttpSecurity.OAuth2ResourceServerSpec.JwtSpec jwtSpec =
+                mock(ServerHttpSecurity.OAuth2ResourceServerSpec.JwtSpec.class);
+        when(jwtSpec.jwtDecoder(any())).thenReturn(jwtSpec);
+        when(resourceServerSpec.jwt(any())).thenAnswer(invocation -> {
+            Customizer<ServerHttpSecurity.OAuth2ResourceServerSpec.JwtSpec> inner = invocation.getArgument(0);
+            inner.customize(jwtSpec);
+            return resourceServerSpec;
+        });
         when(http.oauth2ResourceServer(any())).thenAnswer(invocation -> {
             Customizer<ServerHttpSecurity.OAuth2ResourceServerSpec> customizer = invocation.getArgument(0);
             customizer.customize(resourceServerSpec);
@@ -139,6 +148,7 @@ public class ReactiveKindeOAuth2AutoConfigTest {
         verify(http).oauth2Client(any());
         verify(http).oauth2ResourceServer(any());
         verify(resourceServerSpec).jwt(any());
+        verify(jwtSpec).jwtDecoder(jwtDecoder);
         verify(http).build();
     }
 }

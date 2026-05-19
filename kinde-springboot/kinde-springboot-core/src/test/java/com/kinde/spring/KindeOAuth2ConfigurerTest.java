@@ -12,10 +12,15 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.cli
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -226,6 +231,42 @@ public class KindeOAuth2ConfigurerTest {
 
         verify(fx.httpSecurity).oauth2ResourceServer(any());
         verify(rsCustomizerTarget).opaqueToken(any());
+    }
+
+    /**
+     * The private {@code getFieldValue(Object, String)} helper has a defensive
+     * {@code NoSuchFieldException} catch that translates a Spring Security version mismatch
+     * (a renamed/removed internal field on {@link OAuth2ResourceServerConfigurer}) into a
+     * {@link RuntimeException} with a "Version incompatibility" message. The public callers
+     * ({@code getJwtConfigurer} / {@code getOpaqueTokenConfigurer}) hardcode known field names,
+     * so we exercise the catch by invoking {@code getFieldValue} reflectively with a deliberately
+     * unknown field name.
+     *
+     * <p>The sibling {@code IllegalAccessException} catch (and the catch in
+     * {@code unsetJwtConfigurer}) is not asserted here: after {@code Field#setAccessible(true)}
+     * succeeds, modern JVMs bypass the access check inside {@code Field#get}, so that branch is
+     * effectively dead code in a unit-test environment and only exists to satisfy the compiler.
+     */
+    @Test
+    public void getFieldValueWrapsNoSuchFieldExceptionAsVersionIncompatibilityError() throws Exception {
+        KindeOAuth2Configurer configurer = new KindeOAuth2Configurer();
+        Method getFieldValue = KindeOAuth2Configurer.class.getDeclaredMethod(
+                "getFieldValue", Object.class, String.class);
+        getFieldValue.setAccessible(true);
+
+        OAuth2ResourceServerConfigurer<?> source = mock(OAuth2ResourceServerConfigurer.class);
+
+        InvocationTargetException ite = assertThrows(InvocationTargetException.class,
+                () -> getFieldValue.invoke(configurer, source, "definitely-not-a-real-field"));
+
+        Throwable wrapped = ite.getCause();
+        assertInstanceOf(RuntimeException.class, wrapped);
+        assertTrue(wrapped.getMessage().contains("Expected field 'definitely-not-a-real-field'"),
+                "wrapper message must mention the missing field name; was: " + wrapped.getMessage());
+        assertTrue(wrapped.getMessage().contains("Version incompatibility"),
+                "wrapper message must call out version incompatibility; was: " + wrapped.getMessage());
+        assertInstanceOf(NoSuchFieldException.class, wrapped.getCause(),
+                "the underlying cause must be the original NoSuchFieldException");
     }
 
     // --- helpers ---------------------------------------------------------------------
