@@ -30,9 +30,7 @@ public class ReactiveKindeOAuth2ResourceServerAutoConfigTest {
     public static class MyTestConfig {
         @Bean
         public ReactiveKindeOAuth2ResourceServerAutoConfig reactiveKindeOAuth2AutoConfig() {
-            System.out.println("Hello 3");
-            ReactiveKindeOAuth2ResourceServerAutoConfig reactiveKindeOAuth2ResourceServerAutoConfig = new ReactiveKindeOAuth2ResourceServerAutoConfig();
-            return reactiveKindeOAuth2ResourceServerAutoConfig;
+            return new ReactiveKindeOAuth2ResourceServerAutoConfig();
         }
 
         @Bean

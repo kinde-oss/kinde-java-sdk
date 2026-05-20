@@ -25,3 +25,6 @@ coverage/
 
 # ---------------------------------------------------------------------
 # Add specific rules here…
+
+# Environment files — never commit secrets. Track a .env.example template instead.
+.env

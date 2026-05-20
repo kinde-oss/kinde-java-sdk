@@ -1,7 +1,6 @@
 package com.kinde.spring;
 
 
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class WebClientUtilTest {
@@ -45,6 +46,6 @@ public class WebClientUtilTest {
                 .bodyToMono(String.class)
                 .block();
 
-        System.out.println(headers.get().getFirst(HttpHeaders.USER_AGENT));
+        assertEquals("KINDE", headers.get().getFirst(HttpHeaders.USER_AGENT));
     }
 }

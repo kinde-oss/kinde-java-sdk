@@ -57,44 +57,6 @@
         <artifactId>junit-jupiter-params</artifactId>
         <version>${junit-jupiter.version}</version>
       </dependency>
-      <!--
-        The root parent POM pins jackson-* artifacts to 2.20.x, but Spring Boot 4 needs
-        jackson-annotations >= 2.21 (e.g. JsonSerializeAs is required by tools.jackson).
-        Force the Jackson 2.21 BOM that Spring Boot 4 ships.
-      -->
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>2.21.2</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>2.21.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <!-- jackson-annotations dropped the patch number in 2.21. -->
-        <version>2.21</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.21.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-joda</artifactId>
-        <version>2.21.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>2.21.2</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -218,13 +180,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Mockito (if you are using it for mocking) -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>5.19.0</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>

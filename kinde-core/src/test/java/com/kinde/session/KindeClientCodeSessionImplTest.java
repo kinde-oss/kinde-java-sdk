@@ -116,8 +116,6 @@ public class KindeClientCodeSessionImplTest {
                                                         }
                                         """)));
         
-        ///oauth2/token
-        System.out.println("Instanciate the wiremock service");
     }
 
 
@@ -204,7 +202,6 @@ public class KindeClientCodeSessionImplTest {
         AuthorizationUrl authorizationUrl1 = kindeClientSession.register();
         assertNotNull(authorizationUrl1);
         assertNotNull(authorizationUrl1.getUrl());
-        System.out.println(authorizationUrl1.getUrl());
         assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl1.getCodeVerifier() == null);
 
@@ -223,7 +220,6 @@ public class KindeClientCodeSessionImplTest {
         AuthorizationUrl authorizationUrl2 = kindeClientSession2.register();
         assertNotNull(authorizationUrl2);
         assertNotNull(authorizationUrl2.getUrl());
-        System.out.println(authorizationUrl2.getUrl());
         assertTrue(authorizationUrl2.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_code=TEST"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("has_success_page=true"));
@@ -258,7 +254,6 @@ public class KindeClientCodeSessionImplTest {
         AuthorizationUrl authorizationUrl1 = kindeClientSession.createOrg("TEST1");
         assertNotNull(authorizationUrl1);
         assertNotNull(authorizationUrl1.getUrl());
-        System.out.println(authorizationUrl1.getUrl());
         assertTrue(authorizationUrl1.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl1.getUrl().toString().contains("org_name=TEST1"));
         assertTrue(authorizationUrl1.getCodeVerifier() == null);
@@ -278,7 +273,6 @@ public class KindeClientCodeSessionImplTest {
         AuthorizationUrl authorizationUrl2 = kindeClientSession2.createOrg("TEST2");
         assertNotNull(authorizationUrl2);
         assertNotNull(authorizationUrl2.getUrl());
-        System.out.println(authorizationUrl2.getUrl());
         assertTrue(authorizationUrl2.getUrl().toString().contains("prompt=create"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_code=TEST"));
         assertTrue(authorizationUrl2.getUrl().toString().contains("org_name=TEST2"));

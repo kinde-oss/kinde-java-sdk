@@ -55,11 +55,10 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.20.0</version>
+                <version>2.21.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/com.nimbusds/oauth2-oidc-sdk -->
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>oauth2-oidc-sdk</artifactId>
@@ -116,7 +115,6 @@
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <!-- {version} can be 6.0.0, 7.0.0, etc. -->
                 <version>7.0.0</version>
                 <exclusions>
                     <exclusion>
@@ -125,22 +123,18 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>33.6.0-jre</version>
             </dependency>
 
-
-            <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.46</version>
                 <scope>provided</scope>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -184,33 +178,6 @@
                 <version>2.3.0</version>
             </dependency>
             
-            <!-- Jackson dependencies with consistent versions -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>2.21.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>2.20</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>2.20.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-joda</artifactId>
-                <version>2.20.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>2.20.0</version>
-            </dependency>
-            
             <!-- Force latest Kotlin stdlib version to minimize security vulnerability -->
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -252,13 +219,6 @@
     </modules>
 
     <build>
-
-        <pluginManagement>
-            <plugins>
-                <!-- Removed nexus-staging-maven-plugin as it's not needed for MCPS -->
-            </plugins>
-        </pluginManagement>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -271,7 +231,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.46</version> <!-- Use the version you need -->
+                            <version>1.18.46</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -280,6 +240,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>empty-javadoc-jar</id>
@@ -333,7 +294,6 @@
                         <exclude>**/generated/**</exclude>
                         <exclude>**/thirdparty/**</exclude>
                         <exclude>**/openapitools/**</exclude>
-                        <!-- Add more excludes if necessary -->
                     </excludes>
                 </configuration>
             </plugin>

@@ -2,7 +2,7 @@
 
 This project demonstrates the integration of OAuth2 login with Kinde using Spring Boot and Spring Security. The application provides a simple web interface with authentication and role-based authorization.
 
-Run the app, go to `http://localhost:8081` and click sign up to add your new Kinde application. You will need your new client id and secret from the Kinde portal for the `application.properties`. You will also need to configure roles and permissions. This starter uses three for demonstration purposes: `read`, `write` and `admin`.
+Run the app, go to `http://localhost:8080` and click sign up to add your new Kinde application. You will need your new client id and secret from the Kinde portal for the `application.properties` (or `.env`). You will also need to configure roles and permissions. This starter demonstrates four roles: `read`, `write`, `edit`, and `admin`.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ Run the app, go to `http://localhost:8081` and click sign up to add your new Kin
 
 - Java 17 or later
 - Maven 3.6+
-- Spring Boot 3.3.3
+- Spring Boot 4.0.x (currently 4.0.6 — see `pom.xml`)
 
 ## Project Setup
 
@@ -48,8 +48,8 @@ mvn spring-boot:run
 The `pom.xml` includes the following essential dependencies:
 
 - `spring-boot-starter-security`: Provides core Spring Security components.
-- `spring-boot-starter-oauth2-client`: Enables OAuth2 client capabilities.
-- `spring-boot-starter-oauth2-resource-server`: Supports resource server capabilities with JWT.
+- `spring-boot-starter-security-oauth2-client`: Enables OAuth2 client capabilities.
+- `spring-boot-starter-security-oauth2-resource-server`: Supports resource server capabilities with JWT.
 - `spring-boot-starter-thymeleaf`: Allows server-side rendering using Thymeleaf.
 - `spring-webflux`: Required for the reactive WebClient used in OAuth2 requests.
 - `kinde-core`: Kinde specific SDK for interacting with their API.
@@ -70,10 +70,11 @@ Setup the environment to execute correctly
 export KINDE_DOMAIN=https://<replace>.kinde.com
 export KINDE_CLIENT_ID=<replace>
 export KINDE_CLIENT_SECRET=<replace>
-export KINDE_REDIRECT_URI=http://localhost:8081/login/oauth2/code/kinde-provider
+export KINDE_REDIRECT_URI=http://localhost:8080/login/oauth2/code/kinde
 export KINDE_GRANT_TYPE=authorization_code
-export KINDE_SCOPES=openid,profile,email
+export KINDE_SCOPES=openid,profile,email,offline
 export KINDE_PREFIX=<replace>
+export KINDE_LOGOUT_REDIRECT_URI=http://localhost:8080
 ```
 
 2. **Start the Application:**
@@ -84,17 +85,19 @@ export KINDE_PREFIX=<replace>
    ```
 
 3. **Access the Application:**
-   Open your browser and navigate to `http://localhost:8081`.
+   Open your browser and navigate to `http://localhost:8080`.
 
 ## Endpoints
 
 The application provides several endpoints:
 
 - **`/home` or `/`** - Publicly accessible homepage.
-- **`/admin`** - Accessible to users with the `admins` role.
+- **`/dashboard`** - Authenticated; displays the user's Kinde profile data.
+- **`/admin`** - Accessible to users with the `admin` role.
 - **`/read`** - Accessible to users with the `read` role.
-- **`/write`** - Accessible to users with the `write` role.
-- **`/dashboard`** - Displays the user's Kinde profile data.
+- **`/edit`** - Accessible to users with the `edit` role.
+- **`/write`** - Authenticated (role check is commented out in `KindeController` by default; uncomment `@PreAuthorize("hasRole('write')")` to enforce).
+- **`/sdkLogout`** - Triggers Kinde logout via the SDK and redirects to `KINDE_LOGOUT_REDIRECT_URI`.
 
 ## Security Configuration
 
@@ -102,7 +105,7 @@ The application provides several endpoints:
   The home page (`/home`) and static resources (`/css/**`) are accessible without authentication.
 
 - **Authenticated Access:**
-  Other routes require authentication, and access is controlled by roles. For example, `/admin` requires the `admins` role.
+  Other routes require authentication, and access is controlled by roles. For example, `/admin` requires the `admin` role.
 
 - **JWT Processing:**
   The JWT `permissions` claim is used to assign roles provided from Kinde.

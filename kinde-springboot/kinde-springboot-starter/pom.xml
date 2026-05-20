@@ -50,38 +50,6 @@
         <artifactId>junit-jupiter-params</artifactId>
         <version>${junit-jupiter.version}</version>
       </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>2.21.2</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>2.21.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>2.21</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.21.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-joda</artifactId>
-        <version>2.21.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>2.21.2</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -104,26 +72,13 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-crypto</artifactId>
     </dependency>
-
-    <!--
-      Spring Boot 4 split OAuth2 auto-configuration out of spring-boot-autoconfigure into
-      dedicated modules. Bring the corresponding starters in here so every project that
-      depends on kinde-springboot-starter automatically gets a working OAuth2 client +
-      resource server setup, without having to repeat the deps in every consumer pom.
-    -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-oauth2-client</artifactId>
+      <artifactId>spring-boot-starter-security-oauth2-client</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+      <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <!-- Remove nexus-staging-maven-plugin if present -->
-    </plugins>
-  </build>
 </project>

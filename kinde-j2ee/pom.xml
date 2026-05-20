@@ -30,7 +30,6 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <!-- {version} can be 6.0.0, 7.0.0, etc. -->
       <exclusions>
         <exclusion>
           <groupId>com.google.guava</groupId>
@@ -81,10 +80,4 @@
             <scope>test</scope>
         </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <!-- Remove nexus-staging-maven-plugin if present -->
-    </plugins>
-  </build>
 </project>
