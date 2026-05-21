@@ -2,6 +2,7 @@ package com.kinde.spring;
 
 import com.kinde.spring.config.KindeOAuth2Properties;
 import com.kinde.spring.http.KindeClientRequestInterceptor;
+import com.kinde.spring.http.ProxyBasicAuthenticationInterceptor;
 import com.kinde.spring.http.UserAgentRequestInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -13,7 +14,6 @@ import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OA
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
@@ -64,14 +64,14 @@ class KindeOAuth2ResourceServerAutoConfig {
         Proxy proxy = null;
 
         KindeOAuth2Properties.Proxy proxyProperties = kindeOAuth2Properties.getProxy();
-        Optional<BasicAuthenticationInterceptor> basicAuthenticationInterceptor = Optional.empty();
+        Optional<ProxyBasicAuthenticationInterceptor> proxyAuthenticationInterceptor = Optional.empty();
         if (proxyProperties != null && !proxyProperties.getHost().trim().isEmpty() && proxyProperties.getPort() > 0) {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyProperties.getHost(), proxyProperties.getPort()));
 
             if (!proxyProperties.getUsername().trim().isEmpty() &&
                 !proxyProperties.getPassword().trim().isEmpty()) {
 
-                basicAuthenticationInterceptor = Optional.of(new BasicAuthenticationInterceptor(proxyProperties.getUsername(),
+                proxyAuthenticationInterceptor = Optional.of(new ProxyBasicAuthenticationInterceptor(proxyProperties.getUsername(),
                     proxyProperties.getPassword()));
             }
         }
@@ -79,7 +79,7 @@ class KindeOAuth2ResourceServerAutoConfig {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
         restTemplate.getInterceptors().add(new KindeClientRequestInterceptor());
-        basicAuthenticationInterceptor.ifPresent(restTemplate.getInterceptors()::add);
+        proxyAuthenticationInterceptor.ifPresent(restTemplate.getInterceptors()::add);
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         if (Objects.nonNull(proxy)) {
             requestFactory.setProxy(proxy);
@@ -99,14 +99,14 @@ class KindeOAuth2ResourceServerAutoConfig {
         Proxy proxy = null;
 
         KindeOAuth2Properties.Proxy proxyProperties = kindeOAuth2Properties.getProxy();
-        Optional<BasicAuthenticationInterceptor> basicAuthenticationInterceptor = Optional.empty();
+        Optional<ProxyBasicAuthenticationInterceptor> proxyAuthenticationInterceptor = Optional.empty();
         if (proxyProperties != null && !proxyProperties.getHost().trim().isEmpty() && proxyProperties.getPort() > 0) {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyProperties.getHost(), proxyProperties.getPort()));
 
             if (!proxyProperties.getUsername().trim().isEmpty() &&
                 !proxyProperties.getPassword().trim().isEmpty()) {
 
-                basicAuthenticationInterceptor = Optional.of(new BasicAuthenticationInterceptor(proxyProperties.getUsername(),
+                proxyAuthenticationInterceptor = Optional.of(new ProxyBasicAuthenticationInterceptor(proxyProperties.getUsername(),
                     proxyProperties.getPassword()));
             }
         }
@@ -136,7 +136,7 @@ class KindeOAuth2ResourceServerAutoConfig {
                 .defaultStatusHandler(new OAuth2ErrorResponseErrorHandler())
                 .requestInterceptor(new UserAgentRequestInterceptor())
                 .requestInterceptor(new KindeClientRequestInterceptor());
-        basicAuthenticationInterceptor.ifPresent(builder::requestInterceptor);
+        proxyAuthenticationInterceptor.ifPresent(builder::requestInterceptor);
         return builder.build();
     }
 }

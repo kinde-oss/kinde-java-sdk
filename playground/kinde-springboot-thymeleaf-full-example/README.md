@@ -97,7 +97,8 @@ The application provides several endpoints:
 - **`/read`** - Accessible to users with the `read` role.
 - **`/edit`** - Accessible to users with the `edit` role.
 - **`/write`** - Authenticated (role check is commented out in `KindeController` by default; uncomment `@PreAuthorize("hasRole('write')")` to enforce).
-- **`/sdkLogout`** - Triggers Kinde logout via the SDK and redirects to `KINDE_LOGOUT_REDIRECT_URI`.
+- **`/logout`** (POST) - RP-initiated logout. Clears the local Spring session and redirects to Kinde's end-session endpoint with `id_token_hint` + `post_logout_redirect_uri`, fully terminating the upstream SSO session. Wired via `OidcClientInitiatedLogoutSuccessHandler` in `SecurityConfig`.
+- **`/generatePortalUrl`** - Authenticated; uses the SDK to exchange the user's refresh token and generate a one-time URL to the Kinde account portal.
 
 ## Security Configuration
 

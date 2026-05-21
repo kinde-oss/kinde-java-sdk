@@ -376,3 +376,27 @@ a {
     display: flex;
     justify-content: center; /* Center the buttons */
 }
+
+/* Inline logout form + link-styled button: keeps the dashboard's "Sign out"
+   action POST-based (the Spring Security 6+ best practice) while looking the
+   same as the original anchor link. */
+.logout-form-inline {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.link-button:hover {
+    text-decoration: none;
+}

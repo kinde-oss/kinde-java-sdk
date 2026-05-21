@@ -2,6 +2,7 @@ package com.kinde.spring;
 
 import com.kinde.spring.config.KindeOAuth2Properties;
 import com.kinde.spring.env.KindeOAuth2PropertiesMappingEnvironmentPostProcessor;
+import com.kinde.spring.http.ProxyBasicAuthenticationInterceptor;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.context.TestPropertySource;
@@ -89,8 +89,10 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
     //
     // RestClient has no public accessor for its request factory or interceptors, so we walk the
     // DefaultRestClient fields by type rather than by name (resilient to Spring-internal renames).
-    // For the basic-auth interceptor we exercise it against a MockClientHttpRequest and assert on
-    // the resulting Authorization header instead of reflecting into the interceptor's internals.
+    // For the proxy-auth interceptor we exercise it against a MockClientHttpRequest and assert on
+    // the resulting Proxy-Authorization header (RFC 7235 §4.4) instead of reflecting into the
+    // interceptor's internals. Proxy credentials must NOT be carried in the origin-server
+    // Authorization header (they would leak to the origin and the proxy would never see them).
 
     private static final String EXPECTED_PROXY_HOST = "proxy.example.com";
     private static final int EXPECTED_PROXY_PORT = 8080;
@@ -107,8 +109,8 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
 
         assertNull(proxyOf(requestFactoryOf(client)),
                 "Expected no proxy on the request factory when properties#getProxy() is null");
-        assertFalse(hasBasicAuthInterceptor(interceptorsOf(client)),
-                "Expected no BasicAuthenticationInterceptor when no proxy is configured");
+        assertFalse(hasProxyAuthInterceptor(interceptorsOf(client)),
+                "Expected no ProxyBasicAuthenticationInterceptor when no proxy is configured");
     }
 
     @Test
@@ -117,8 +119,8 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
 
         RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
         assertProxyAddress(proxyOf(requestFactoryOf(client)));
-        assertFalse(hasBasicAuthInterceptor(interceptorsOf(client)),
-                "Expected no BasicAuthenticationInterceptor when username/password are blank");
+        assertFalse(hasProxyAuthInterceptor(interceptorsOf(client)),
+                "Expected no ProxyBasicAuthenticationInterceptor when username/password are blank");
     }
 
     @Test
@@ -127,7 +129,7 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
 
         RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
         assertProxyAddress(proxyOf(requestFactoryOf(client)));
-        assertBasicAuthInterceptorEmits(interceptorsOf(client), PROXY_USER, PROXY_PASS);
+        assertProxyAuthInterceptorEmits(interceptorsOf(client), PROXY_USER, PROXY_PASS);
     }
 
     @Test
@@ -138,8 +140,8 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
         RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
         assertNull(proxyOf(requestFactoryOf(template)),
                 "Expected no proxy on the request factory when properties#getProxy() is null");
-        assertFalse(hasBasicAuthInterceptor(template.getInterceptors()),
-                "Expected no BasicAuthenticationInterceptor when no proxy is configured");
+        assertFalse(hasProxyAuthInterceptor(template.getInterceptors()),
+                "Expected no ProxyBasicAuthenticationInterceptor when no proxy is configured");
     }
 
     @Test
@@ -148,8 +150,8 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
 
         RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
         assertProxyAddress(proxyOf(requestFactoryOf(template)));
-        assertFalse(hasBasicAuthInterceptor(template.getInterceptors()),
-                "Expected no BasicAuthenticationInterceptor when username/password are blank");
+        assertFalse(hasProxyAuthInterceptor(template.getInterceptors()),
+                "Expected no ProxyBasicAuthenticationInterceptor when username/password are blank");
     }
 
     @Test
@@ -158,7 +160,7 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
 
         RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
         assertProxyAddress(proxyOf(requestFactoryOf(template)));
-        assertBasicAuthInterceptorEmits(template.getInterceptors(), PROXY_USER, PROXY_PASS);
+        assertProxyAuthInterceptorEmits(template.getInterceptors(), PROXY_USER, PROXY_PASS);
     }
 
     // --- helpers ---------------------------------------------------------------------------------
@@ -186,17 +188,17 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
                 "Expected proxy address to match the configured host/port");
     }
 
-    private static boolean hasBasicAuthInterceptor(List<ClientHttpRequestInterceptor> interceptors) {
-        return interceptors.stream().anyMatch(BasicAuthenticationInterceptor.class::isInstance);
+    private static boolean hasProxyAuthInterceptor(List<ClientHttpRequestInterceptor> interceptors) {
+        return interceptors.stream().anyMatch(ProxyBasicAuthenticationInterceptor.class::isInstance);
     }
 
-    private static void assertBasicAuthInterceptorEmits(
+    private static void assertProxyAuthInterceptorEmits(
             List<ClientHttpRequestInterceptor> interceptors, String user, String pass) throws Exception {
         ClientHttpRequestInterceptor auth = interceptors.stream()
-                .filter(BasicAuthenticationInterceptor.class::isInstance)
+                .filter(ProxyBasicAuthenticationInterceptor.class::isInstance)
                 .findFirst()
                 .orElseThrow(() -> new AssertionError(
-                        "Expected a BasicAuthenticationInterceptor when proxy credentials are configured"));
+                        "Expected a ProxyBasicAuthenticationInterceptor when proxy credentials are configured"));
 
         MockClientHttpRequest outgoing = new MockClientHttpRequest(HttpMethod.GET, URI.create("https://example.test"));
         auth.intercept(outgoing, new byte[0],
@@ -204,8 +206,10 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
 
         String expected = "Basic " + Base64.getEncoder()
                 .encodeToString((user + ":" + pass).getBytes(StandardCharsets.UTF_8));
-        assertEquals(expected, outgoing.getHeaders().getFirst(HttpHeaders.AUTHORIZATION),
-                "BasicAuthenticationInterceptor must emit Authorization header for the configured credentials");
+        assertEquals(expected, outgoing.getHeaders().getFirst(HttpHeaders.PROXY_AUTHORIZATION),
+                "ProxyBasicAuthenticationInterceptor must emit Proxy-Authorization header for the configured credentials");
+        assertNull(outgoing.getHeaders().getFirst(HttpHeaders.AUTHORIZATION),
+                "Proxy credentials must not leak into the origin-server Authorization header");
     }
 
     /**

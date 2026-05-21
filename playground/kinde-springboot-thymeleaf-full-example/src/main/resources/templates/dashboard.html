@@ -12,7 +12,18 @@
             <div class="profile-blob">
                 <div>
                     <p class="text-heading-2" th:text="${kindeProfile.fullName}"></p>
-                    <a class="text-subtle" href="/logout">Sign out</a>
+                    <!--
+                      POST to /logout via a small form rather than a GET link. Spring Security 6+
+                      enables CSRF by default and only matches POST /logout in LogoutFilter; a GET
+                      link would land on Spring's built-in "Confirm Log Out?" page instead of
+                      triggering the logout flow. Use th:action (not plain action) so Thymeleaf's
+                      CsrfRequestDataValueProcessor auto-injects the CSRF hidden input; an explicit
+                      hidden input is also added as a belt-and-suspenders safeguard.
+                    -->
+                    <form th:action="@{/logout}" method="post" class="logout-form-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="link-button text-subtle">Sign out</button>
+                    </form>
                 </div>
             </div>
         </nav>
@@ -58,11 +69,6 @@
                                th:href="'https://jwt.io/#debugger-io?token=' + ${kindeProfile.accessToken}"
                                target="_blank">
                                 Parse token on JWT.io
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-light btn-small fixed-size-button" href="/sdkLogout">
-                                Logout using SDK
                             </a>
                         </li>
                         <li>

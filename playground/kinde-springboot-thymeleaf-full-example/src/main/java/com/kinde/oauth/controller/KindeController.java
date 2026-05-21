@@ -40,16 +40,6 @@ public class KindeController {
     }
 
     /**
-     * Handles requests to the logout page.
-     *
-     * @return the name of the "logout" view.
-     */
-    @RequestMapping(path = {"/sdkLogout"}, method = RequestMethod.GET)
-    public String logout() throws Exception {
-        return kindeService.logout();
-    }
-
-    /**
      * Handles requests to the dashboard page, loading the authenticated user's Kinde profile.
      *
      * @param model the {@link Model} used to pass attributes to the view.
