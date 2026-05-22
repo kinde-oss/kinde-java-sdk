@@ -27,6 +27,8 @@
     <artifactId>report</artifactId>
     <name>Aggregate Report</name>
     <version>2.3.0</version>
+    <!-- Pure JaCoCo aggregator; produces no jar of its own. -->
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>

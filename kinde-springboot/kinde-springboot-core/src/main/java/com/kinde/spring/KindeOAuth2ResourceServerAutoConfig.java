@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
@@ -65,11 +66,11 @@ class KindeOAuth2ResourceServerAutoConfig {
 
         KindeOAuth2Properties.Proxy proxyProperties = kindeOAuth2Properties.getProxy();
         Optional<ProxyBasicAuthenticationInterceptor> proxyAuthenticationInterceptor = Optional.empty();
-        if (proxyProperties != null && !proxyProperties.getHost().trim().isEmpty() && proxyProperties.getPort() > 0) {
+        if (proxyProperties != null && StringUtils.hasText(proxyProperties.getHost()) && proxyProperties.getPort() > 0) {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyProperties.getHost(), proxyProperties.getPort()));
 
-            if (!proxyProperties.getUsername().trim().isEmpty() &&
-                !proxyProperties.getPassword().trim().isEmpty()) {
+            if (StringUtils.hasText(proxyProperties.getUsername()) &&
+                StringUtils.hasText(proxyProperties.getPassword())) {
 
                 proxyAuthenticationInterceptor = Optional.of(new ProxyBasicAuthenticationInterceptor(proxyProperties.getUsername(),
                     proxyProperties.getPassword()));
@@ -100,11 +101,11 @@ class KindeOAuth2ResourceServerAutoConfig {
 
         KindeOAuth2Properties.Proxy proxyProperties = kindeOAuth2Properties.getProxy();
         Optional<ProxyBasicAuthenticationInterceptor> proxyAuthenticationInterceptor = Optional.empty();
-        if (proxyProperties != null && !proxyProperties.getHost().trim().isEmpty() && proxyProperties.getPort() > 0) {
+        if (proxyProperties != null && StringUtils.hasText(proxyProperties.getHost()) && proxyProperties.getPort() > 0) {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyProperties.getHost(), proxyProperties.getPort()));
 
-            if (!proxyProperties.getUsername().trim().isEmpty() &&
-                !proxyProperties.getPassword().trim().isEmpty()) {
+            if (StringUtils.hasText(proxyProperties.getUsername()) &&
+                StringUtils.hasText(proxyProperties.getPassword())) {
 
                 proxyAuthenticationInterceptor = Optional.of(new ProxyBasicAuthenticationInterceptor(proxyProperties.getUsername(),
                     proxyProperties.getPassword()));

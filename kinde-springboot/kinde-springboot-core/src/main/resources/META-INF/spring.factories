@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-org.springframework.boot.env.EnvironmentPostProcessor = com.kinde.spring.env.KindeOAuth2PropertiesMappingEnvironmentPostProcessor
+org.springframework.boot.EnvironmentPostProcessor = com.kinde.spring.env.KindeOAuth2PropertiesMappingEnvironmentPostProcessor
 org.springframework.context.ApplicationListener = com.kinde.spring.env.KindeEnvironmentPostProcessorApplicationListener
 
 org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer = \

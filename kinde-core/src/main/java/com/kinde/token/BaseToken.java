@@ -554,11 +554,10 @@ public class BaseToken implements KindeToken {
     // ========== Helper Methods ==========
 
     /**
-     * Gets roles from the token using the typed accessor.
-     * This method is now deprecated in favor of using token.getRoles() directly.
-     * 
+     * Internal helper that returns the token's roles claim with null-safety,
+     * falling back to an empty list when the token or roles are absent.
+     *
      * @return List of role strings, or empty list if no roles are found
-     * @deprecated Use token.getRoles() instead
      */
     private List<String> getTokenRoles() {
         List<String> roles = (token != null) ? getRoles() : null;

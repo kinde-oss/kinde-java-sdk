@@ -163,6 +163,33 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
         assertProxyAuthInterceptorEmits(template.getInterceptors(), PROXY_USER, PROXY_PASS);
     }
 
+    // Regression: previously the proxy block called proxyProperties.getUsername().trim() /
+    // getPassword().trim() unconditionally. Spring binds unset @ConfigurationProperties fields
+    // to null, so configuring `kinde.oauth2.proxy.host`/`.port` without credentials would NPE
+    // during bean initialisation. The two tests below pin that null credentials are treated the
+    // same as blank ones: the proxy address is honoured, no auth interceptor is installed,
+    // and nothing throws.
+
+    @Test
+    public void restClientWithProxyHostAndNullCredentials() {
+        KindeOAuth2Properties props = propertiesWithProxy(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT, null, null);
+
+        RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
+        assertProxyAddress(proxyOf(requestFactoryOf(client)));
+        assertFalse(hasProxyAuthInterceptor(interceptorsOf(client)),
+                "Expected no ProxyBasicAuthenticationInterceptor when username/password are null");
+    }
+
+    @Test
+    public void restTemplateWithProxyHostAndNullCredentials() {
+        KindeOAuth2Properties props = propertiesWithProxy(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT, null, null);
+
+        RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
+        assertProxyAddress(proxyOf(requestFactoryOf(template)));
+        assertFalse(hasProxyAuthInterceptor(template.getInterceptors()),
+                "Expected no ProxyBasicAuthenticationInterceptor when username/password are null");
+    }
+
     // --- helpers ---------------------------------------------------------------------------------
 
     private static KindeOAuth2Properties propertiesWithProxy(String host, int port, String user, String pass) {
