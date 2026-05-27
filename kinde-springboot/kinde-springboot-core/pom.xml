@@ -18,10 +18,30 @@
     <spring-security.version>7.0.5</spring-security.version>
     <!-- Spring Boot 4.0.x ships JUnit Platform 6.0.x; override the root parent POM's pin (5.13.x). -->
     <junit-jupiter.version>6.0.3</junit-jupiter.version>
+    <!--
+      Override Netty to patch transitive CVEs reported against the Spring Boot 4.0.6 pin (4.2.12.Final):
+        - io.netty:netty-codec-http3
+        - io.netty:netty-codec-compression
+        - io.netty:netty-transport-classes-epoll
+      Imported via the netty-bom below so every Netty module stays aligned.
+    -->
+    <netty.version>4.2.13.Final</netty.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!--
+        Netty BOM is imported before Spring Boot's BOM so the patched 4.2.13.Final versions
+        take precedence over the 4.2.12.Final versions managed by spring-boot-dependencies
+        (Maven uses "first declaration wins" for imported BOMs in dependencyManagement).
+      -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>${netty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <!-- Spring Boot 4 BOM aligns Spring Boot, Spring Framework 7, Tomcat 11, etc. -->
       <dependency>
         <groupId>org.springframework.boot</groupId>
