@@ -80,14 +80,18 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
                 throw new Exception("Access token validation failed: " + e.getMessage(), e);
             }
         } else if (this.kindeToken instanceof com.kinde.token.RefreshToken) {
-            // If we have a refresh token, perform the token exchange
-            // But first check if we have the necessary configuration
-            if (this.kindeConfig.tokenEndpoint() == null || this.kindeConfig.tokenEndpoint().isEmpty()) {
+            // Resolve the token endpoint: prefer an explicit KINDE_TOKEN_ENDPOINT override
+            // and fall back to the OIDC-discovered endpoint exposed via OidcMetaData. This
+            // matches the behavior of sibling code (KindeClientSessionImpl,
+            // KindeClientCodeSessionImpl) which already rely on discovery via
+            // `oidcMetaData.getOpMetadata().getTokenEndpointURI()`.
+            URI tokenEndpoint = resolveTokenEndpoint();
+            if (tokenEndpoint == null) {
                 throw new Exception("Token endpoint not configured - cannot exchange refresh token");
             }
-            
+
             com.kinde.token.RefreshToken refreshToken = (com.kinde.token.RefreshToken) this.kindeToken;
-            
+
             // Create the token request using the correct approach
             RefreshToken nimbusRefreshToken = new RefreshToken(refreshToken.token());
             AuthorizationGrant refreshTokenGrant = new RefreshTokenGrant(nimbusRefreshToken);
@@ -96,8 +100,6 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
             Secret clientSecret = new Secret(this.kindeConfig.clientSecret());
             ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 
-            // Convert the token endpoint string to URI and create the request
-            URI tokenEndpoint = URI.create(this.kindeConfig.tokenEndpoint());
             TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, refreshTokenGrant);
 
             HTTPRequest httpRequest = request.toHTTPRequest();
@@ -150,5 +152,23 @@ public class KindeClientKindeTokenSessionImpl extends KindeClientSessionImpl {
         }
 
         return new UserInfo(userInfoResponse.toSuccessResponse().getUserInfo());
+    }
+
+    /**
+     * Returns the token endpoint URI to use for refresh-token exchanges. Honours an explicit
+     * override on {@link KindeConfig#tokenEndpoint()} (sourced from
+     * {@code KINDE_TOKEN_ENDPOINT}) and otherwise falls back to the OIDC-discovered endpoint
+     * on {@link OidcMetaData}. Returns {@code null} when neither is available, which is treated
+     * as a configuration error by the caller.
+     */
+    private URI resolveTokenEndpoint() {
+        String configured = this.kindeConfig.tokenEndpoint();
+        if (configured != null && !configured.isEmpty()) {
+            return URI.create(configured);
+        }
+        if (this.oidcMetaData != null && this.oidcMetaData.getOpMetadata() != null) {
+            return this.oidcMetaData.getOpMetadata().getTokenEndpointURI();
+        }
+        return null;
     }
 }

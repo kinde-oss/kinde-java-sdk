@@ -2,17 +2,39 @@ package com.kinde.spring;
 
 import com.kinde.spring.config.KindeOAuth2Properties;
 import com.kinde.spring.env.KindeOAuth2PropertiesMappingEnvironmentPostProcessor;
-import com.kinde.spring.sdk.KindeSdkClient;
+import com.kinde.spring.http.ProxyBasicAuthenticationInterceptor;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
@@ -30,9 +52,7 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
     public static class MyTestConfig {
         @Bean
         public KindeOAuth2ResourceServerAutoConfig kindeOAuth2ResourceServerAutoConfig() {
-            System.out.println("Hello 3");
-            KindeOAuth2ResourceServerAutoConfig kindeOAuth2ResourceServerAutoConfig = new KindeOAuth2ResourceServerAutoConfig();
-            return kindeOAuth2ResourceServerAutoConfig;
+            return new KindeOAuth2ResourceServerAutoConfig();
         }
     }
 
@@ -57,6 +77,218 @@ public class KindeOAuth2ResourceServerAutoConfigTest {
         when(jwt.getIssuerUri()).thenReturn("http://test.kinde.com");
         when(kindeOAuth2Properties.getAudience()).thenReturn("http://test.kinde.com/test");
         kindeOAuth2ResourceServerAutoConfig.jwtDecoder(oAuth2ResourceServerProperties,kindeOAuth2Properties);
+    }
+
+    // --- restClient() / restTemplate() proxy-branch coverage ----------------------------------
+    //
+    // These tests assert that the proxy host/port and (when present) the basic-auth credentials
+    // are actually wired into the produced RestClient / RestTemplate. Asserting non-null on the
+    // factory result alone would only confirm "no exception during construction" and would let a
+    // future regression that silently drops proxy.setProxy(...) or the auth interceptor go
+    // unnoticed.
+    //
+    // RestClient has no public accessor for its request factory or interceptors, so we walk the
+    // DefaultRestClient fields by type rather than by name (resilient to Spring-internal renames).
+    // For the proxy-auth interceptor we exercise it against a MockClientHttpRequest and assert on
+    // the resulting Proxy-Authorization header (RFC 7235 §4.4) instead of reflecting into the
+    // interceptor's internals. Proxy credentials must NOT be carried in the origin-server
+    // Authorization header (they would leak to the origin and the proxy would never see them).
+
+    private static final String EXPECTED_PROXY_HOST = "proxy.example.com";
+    private static final int EXPECTED_PROXY_PORT = 8080;
+    private static final String PROXY_USER = "proxy-user";
+    private static final String PROXY_PASS = "proxy-pass";
+
+    @Test
+    public void restClientWithNoProxyConfigured() {
+        KindeOAuth2Properties props = Mockito.mock(KindeOAuth2Properties.class);
+        when(props.getProxy()).thenReturn(null);
+
+        RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
+        assertNotNull(client);
+
+        assertNull(proxyOf(requestFactoryOf(client)),
+                "Expected no proxy on the request factory when properties#getProxy() is null");
+        assertFalse(hasProxyAuthInterceptor(interceptorsOf(client)),
+                "Expected no ProxyBasicAuthenticationInterceptor when no proxy is configured");
+    }
+
+    @Test
+    public void restClientWithProxyHostAndPort() {
+        KindeOAuth2Properties props = propertiesWithProxy(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT, "", "");
+
+        RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
+        assertProxyAddress(proxyOf(requestFactoryOf(client)));
+        assertFalse(hasProxyAuthInterceptor(interceptorsOf(client)),
+                "Expected no ProxyBasicAuthenticationInterceptor when username/password are blank");
+    }
+
+    @Test
+    public void restClientWithAuthenticatedProxy() throws Exception {
+        KindeOAuth2Properties props = propertiesWithProxy(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT, PROXY_USER, PROXY_PASS);
+
+        RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
+        assertProxyAddress(proxyOf(requestFactoryOf(client)));
+        assertProxyAuthInterceptorEmits(interceptorsOf(client), PROXY_USER, PROXY_PASS);
+    }
+
+    @Test
+    public void restTemplateWithNoProxyConfigured() {
+        KindeOAuth2Properties props = Mockito.mock(KindeOAuth2Properties.class);
+        when(props.getProxy()).thenReturn(null);
+
+        RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
+        assertNull(proxyOf(requestFactoryOf(template)),
+                "Expected no proxy on the request factory when properties#getProxy() is null");
+        assertFalse(hasProxyAuthInterceptor(template.getInterceptors()),
+                "Expected no ProxyBasicAuthenticationInterceptor when no proxy is configured");
+    }
+
+    @Test
+    public void restTemplateWithProxyHostAndPort() {
+        KindeOAuth2Properties props = propertiesWithProxy(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT, "", "");
+
+        RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
+        assertProxyAddress(proxyOf(requestFactoryOf(template)));
+        assertFalse(hasProxyAuthInterceptor(template.getInterceptors()),
+                "Expected no ProxyBasicAuthenticationInterceptor when username/password are blank");
+    }
+
+    @Test
+    public void restTemplateWithAuthenticatedProxy() throws Exception {
+        KindeOAuth2Properties props = propertiesWithProxy(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT, PROXY_USER, PROXY_PASS);
+
+        RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
+        assertProxyAddress(proxyOf(requestFactoryOf(template)));
+        assertProxyAuthInterceptorEmits(template.getInterceptors(), PROXY_USER, PROXY_PASS);
+    }
+
+    // Regression: previously the proxy block called proxyProperties.getUsername().trim() /
+    // getPassword().trim() unconditionally. Spring binds unset @ConfigurationProperties fields
+    // to null, so configuring `kinde.oauth2.proxy.host`/`.port` without credentials would NPE
+    // during bean initialisation. The two tests below pin that null credentials are treated the
+    // same as blank ones: the proxy address is honoured, no auth interceptor is installed,
+    // and nothing throws.
+
+    @Test
+    public void restClientWithProxyHostAndNullCredentials() {
+        KindeOAuth2Properties props = propertiesWithProxy(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT, null, null);
+
+        RestClient client = KindeOAuth2ResourceServerAutoConfig.restClient(props);
+        assertProxyAddress(proxyOf(requestFactoryOf(client)));
+        assertFalse(hasProxyAuthInterceptor(interceptorsOf(client)),
+                "Expected no ProxyBasicAuthenticationInterceptor when username/password are null");
+    }
+
+    @Test
+    public void restTemplateWithProxyHostAndNullCredentials() {
+        KindeOAuth2Properties props = propertiesWithProxy(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT, null, null);
+
+        RestTemplate template = KindeOAuth2ResourceServerAutoConfig.restTemplate(props);
+        assertProxyAddress(proxyOf(requestFactoryOf(template)));
+        assertFalse(hasProxyAuthInterceptor(template.getInterceptors()),
+                "Expected no ProxyBasicAuthenticationInterceptor when username/password are null");
+    }
+
+    // --- helpers ---------------------------------------------------------------------------------
+
+    private static KindeOAuth2Properties propertiesWithProxy(String host, int port, String user, String pass) {
+        KindeOAuth2Properties.Proxy proxyProps = new KindeOAuth2Properties.Proxy();
+        proxyProps.setHost(host);
+        proxyProps.setPort(port);
+        proxyProps.setUsername(user);
+        proxyProps.setPassword(pass);
+
+        KindeOAuth2Properties props = Mockito.mock(KindeOAuth2Properties.class);
+        when(props.getProxy()).thenReturn(proxyProps);
+        return props;
+    }
+
+    private static Proxy proxyOf(SimpleClientHttpRequestFactory factory) {
+        return (Proxy) ReflectionTestUtils.getField(factory, "proxy");
+    }
+
+    private static void assertProxyAddress(Proxy proxy) {
+        assertNotNull(proxy, "Expected proxy to be set on the request factory");
+        assertEquals(Proxy.Type.HTTP, proxy.type(), "Expected an HTTP-typed proxy");
+        assertEquals(new InetSocketAddress(EXPECTED_PROXY_HOST, EXPECTED_PROXY_PORT), proxy.address(),
+                "Expected proxy address to match the configured host/port");
+    }
+
+    private static boolean hasProxyAuthInterceptor(List<ClientHttpRequestInterceptor> interceptors) {
+        return interceptors.stream().anyMatch(ProxyBasicAuthenticationInterceptor.class::isInstance);
+    }
+
+    private static void assertProxyAuthInterceptorEmits(
+            List<ClientHttpRequestInterceptor> interceptors, String user, String pass) throws Exception {
+        ClientHttpRequestInterceptor auth = interceptors.stream()
+                .filter(ProxyBasicAuthenticationInterceptor.class::isInstance)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Expected a ProxyBasicAuthenticationInterceptor when proxy credentials are configured"));
+
+        MockClientHttpRequest outgoing = new MockClientHttpRequest(HttpMethod.GET, URI.create("https://example.test"));
+        auth.intercept(outgoing, new byte[0],
+                (req, body) -> new MockClientHttpResponse(new byte[0], HttpStatus.OK));
+
+        String expected = "Basic " + Base64.getEncoder()
+                .encodeToString((user + ":" + pass).getBytes(StandardCharsets.UTF_8));
+        assertEquals(expected, outgoing.getHeaders().getFirst(HttpHeaders.PROXY_AUTHORIZATION),
+                "ProxyBasicAuthenticationInterceptor must emit Proxy-Authorization header for the configured credentials");
+        assertNull(outgoing.getHeaders().getFirst(HttpHeaders.AUTHORIZATION),
+                "Proxy credentials must not leak into the origin-server Authorization header");
+    }
+
+    /**
+     * Returns the {@link SimpleClientHttpRequestFactory} that was passed to
+     * {@code RestTemplate#setRequestFactory}, bypassing the {@code InterceptingClientHttpRequestFactory}
+     * that {@link RestTemplate#getRequestFactory()} auto-wraps around it whenever interceptors are
+     * registered. The {@code requestFactory} field lives on {@code HttpAccessor} and has been stable
+     * across Spring Framework's public API for many releases.
+     */
+    private static SimpleClientHttpRequestFactory requestFactoryOf(RestTemplate template) {
+        return (SimpleClientHttpRequestFactory) ReflectionTestUtils.getField(template, "requestFactory");
+    }
+
+    /**
+     * Walks {@code DefaultRestClient}'s declared fields and returns the first
+     * {@link SimpleClientHttpRequestFactory} found. RestClient has no public accessor for its
+     * request factory; matching by type keeps this resilient to Spring-internal field renames.
+     */
+    private static SimpleClientHttpRequestFactory requestFactoryOf(RestClient client) {
+        for (Field field : client.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                Object value = field.get(client);
+                if (value instanceof SimpleClientHttpRequestFactory factory) {
+                    return factory;
+                }
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+        throw new AssertionError(
+                "No SimpleClientHttpRequestFactory field found on " + client.getClass().getName());
+    }
+
+    /**
+     * Walks {@code DefaultRestClient}'s declared fields and returns the first non-empty
+     * {@code List<ClientHttpRequestInterceptor>}. Same rationale as {@link #requestFactoryOf}.
+     */
+    @SuppressWarnings("unchecked")
+    private static List<ClientHttpRequestInterceptor> interceptorsOf(RestClient client) {
+        for (Field field : client.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                Object value = field.get(client);
+                if (value instanceof List<?> list
+                        && !list.isEmpty()
+                        && list.get(0) instanceof ClientHttpRequestInterceptor) {
+                    return (List<ClientHttpRequestInterceptor>) list;
+                }
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+        return List.of();
     }
 
 }

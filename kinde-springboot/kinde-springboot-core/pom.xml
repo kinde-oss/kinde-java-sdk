@@ -12,11 +12,78 @@
   <version>2.3.0</version>
   <name>kinde-springboot-core</name>
   <url>http://maven.apache.org</url>
+
+  <properties>
+    <spring-boot.version>4.0.6</spring-boot.version>
+    <spring-security.version>7.0.5</spring-security.version>
+    <!-- Spring Boot 4.0.x ships JUnit Platform 6.0.x; override the root parent POM's pin (5.13.x). -->
+    <junit-jupiter.version>6.0.3</junit-jupiter.version>
+    <!--
+      Override Netty to patch transitive CVEs reported against the Spring Boot 4.0.6 pin (4.2.12.Final):
+        - io.netty:netty-codec-http3
+        - io.netty:netty-codec-compression
+        - io.netty:netty-transport-classes-epoll
+      Imported via the netty-bom below so every Netty module stays aligned.
+    -->
+    <netty.version>4.2.13.Final</netty.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!--
+        Netty BOM is imported before Spring Boot's BOM so the patched 4.2.13.Final versions
+        take precedence over the 4.2.12.Final versions managed by spring-boot-dependencies
+        (Maven uses "first declaration wins" for imported BOMs in dependencyManagement).
+      -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>${netty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- Spring Boot 4 BOM aligns Spring Boot, Spring Framework 7, Tomcat 11, etc. -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- Spring Security 7 BOM keeps the security modules consistent. -->
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-bom</artifactId>
+        <version>${spring-security.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!--
+        Override the JUnit Jupiter pins inherited from the root parent POM (5.13.x) to align
+        with the JUnit Platform 6.0.x that Spring Boot 4.0.x ships transitively.
+      -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit-jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit-jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-params</artifactId>
+        <version>${junit-jupiter.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <version>6.1.0</version>
       <scope>provided</scope>
     </dependency>
 
@@ -30,74 +97,69 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
       <optional>true</optional>
-      <version>3.5.10</version>
     </dependency>
 
-          <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-webflux</artifactId>
-        <optional>true</optional>
-        <version>3.5.13</version>
-      </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+      <optional>true</optional>
+    </dependency>
 
     <dependency>
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
-      <version>3.1.1</version>
     </dependency>
 
     <!-- security -->
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
-      <version>6.5.10</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.5.6</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-client</artifactId>
-      <version>6.5.10</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-jose</artifactId>
-      <version>6.5.10</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-resource-server</artifactId>
-      <version>6.5.10</version>
     </dependency>
 
-    <!-- Spring deps-->
+    <!-- Spring Boot 4 split OAuth2 client / resource-server auto-configuration into dedicated modules. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-      <version>3.5.6</version>
+      <artifactId>spring-boot-security-oauth2-client</artifactId>
+      <optional>true</optional>
     </dependency>
-          <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-configuration-processor</artifactId>
-        <optional>true</optional>
-        <version>3.5.5</version>
-      </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-security-oauth2-resource-server</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
 
     <!-- Test deps -->
-          <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-test</artifactId>
-        <scope>test</scope>
-        <version>3.5.5</version>
-      </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-test</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <scope>test</scope>
-      <version>6.2.18</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -119,17 +181,15 @@
       <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
-    <!-- JUnit 5 API and Engine -->
+    <!-- JUnit 5 API and Engine (versions managed by the JUnit Jupiter BOM override above). -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.13.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.13.4</version>
       <scope>test</scope>
     </dependency>
 
@@ -137,21 +197,13 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>5.13.4</version>
       <scope>test</scope>
     </dependency>
 
-    <!-- Mockito (if you are using it for mocking) -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>5.19.0</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.17.7</version> <!-- Replace with the latest version -->
+      <version>1.17.7</version>
     </dependency>
 
     <dependency>
@@ -186,7 +238,7 @@
       <artifactId>slf4j-api</artifactId>
       <version>2.0.17</version>
     </dependency>
-    
+
     <!-- Shared test utilities -->
     <dependency>
       <groupId>com.kinde</groupId>
@@ -208,7 +260,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.14</version> <!-- Use the latest version available -->
+        <version>0.8.14</version>
         <executions>
           <execution>
             <goals>
@@ -217,7 +269,7 @@
           </execution>
           <execution>
             <id>report</id>
-            <phase>verify</phase> <!-- Or you can bind it to another phase -->
+            <phase>verify</phase>
             <goals>
               <goal>report</goal>
             </goals>
@@ -227,10 +279,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.15.0</version> <!-- You can use the latest version -->
+        <version>3.15.0</version>
         <configuration>
-          <source>17</source> <!-- Specify your desired Java version -->
-          <target>17</target> <!-- Specify your desired Java version -->
+          <release>17</release>
         </configuration>
       </plugin>
     </plugins>

@@ -64,17 +64,31 @@ final class TokenUtil {
         return mappedAuthorities;
     }
 
-    static OAuth2TokenValidator<Jwt> jwtValidator(String issuer, String audience ) {
+    static OAuth2TokenValidator<Jwt> jwtValidator(String issuer, String audience) {
         List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
-            validators.add(new JwtTimestampValidator());
-            validators.add(new JwtIssuerValidator(issuer));
+        validators.add(new JwtTimestampValidator());
+        validators.add(new JwtIssuerValidator(issuer));
+        // Audience validation is opt-in: only enforced when an expected audience is explicitly
+        // configured (kinde.oauth2.audience). Kinde access tokens issued for clients without a
+        // configured API resource carry an empty `aud` array, so requiring a default audience
+        // such as "api://default" would reject every default Kinde token. When no audience is
+        // configured we therefore skip the audience check entirely; in production deployments
+        // that have a Kinde API resource set up, callers SHOULD set kinde.oauth2.audience to
+        // the matching value.
+        if (StringUtils.hasText(audience)) {
+            final String expected = audience;
             validators.add(token -> {
+                List<String> tokenAudience = token.getAudience();
+                if (tokenAudience == null || tokenAudience.isEmpty()) {
+                    return OAuth2TokenValidatorResult.failure(INVALID_AUDIENCE);
+                }
                 Set<String> expectedAudience = new HashSet<>();
-                expectedAudience.add(audience);
-                return !Collections.disjoint(token.getAudience(), expectedAudience)
+                expectedAudience.add(expected);
+                return !Collections.disjoint(tokenAudience, expectedAudience)
                         ? OAuth2TokenValidatorResult.success()
                         : OAuth2TokenValidatorResult.failure(INVALID_AUDIENCE);
             });
+        }
         return new DelegatingOAuth2TokenValidator<>(validators);
     }
 
@@ -100,12 +114,12 @@ final class TokenUtil {
             if (tokenizedUri.length >= 2 &&
                 "oauth2".equals(tokenizedUri[0]) &&
                 !tokenizedUri[1].trim().isEmpty()) {
-                log.debug("The issuer URL: '{}' is an Okta custom authorization server", issuerUri);
+                log.debug("The issuer URL: '{}' is a custom authorization server", issuerUri);
                 return false;
             }
         }
 
-        log.debug("The issuer URL: '{}' is an Okta root/org authorization server", issuerUri);
+        log.debug("The issuer URL: '{}' is a root/org authorization server", issuerUri);
         return true;
     }
 }

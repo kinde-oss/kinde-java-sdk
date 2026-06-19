@@ -26,14 +26,6 @@ public class IDTokenTest {
         assertTrue( kindeToken2.token().equals(token2) );
         assertTrue( kindeToken2.valid() );
 
-
-        String tokenString = JwtGenerator.generateIDToken();
-        System.out.println(tokenString);
-
-        KindeToken kindeToken4 = IDToken.init(tokenString,true);
-
-        System.out.println(kindeToken4.getPermissions());
-
         assertTrue(kindeToken2.getStringFlag("test_str").equals("test_str"));
         assertTrue(kindeToken2.getIntegerFlag("test_integer").equals(1));
         assertTrue(kindeToken2.getBooleanFlag("test_boolean").equals(false));

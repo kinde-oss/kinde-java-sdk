@@ -7,15 +7,12 @@ import com.kinde.spring.sdk.KindeSdkClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.List;
 
 import static org.mockito.Mockito.when;
 
@@ -33,9 +30,7 @@ public class ReactiveKindeOAuth2ResourceServerAutoConfigTest {
     public static class MyTestConfig {
         @Bean
         public ReactiveKindeOAuth2ResourceServerAutoConfig reactiveKindeOAuth2AutoConfig() {
-            System.out.println("Hello 3");
-            ReactiveKindeOAuth2ResourceServerAutoConfig reactiveKindeOAuth2ResourceServerAutoConfig = new ReactiveKindeOAuth2ResourceServerAutoConfig();
-            return reactiveKindeOAuth2ResourceServerAutoConfig;
+            return new ReactiveKindeOAuth2ResourceServerAutoConfig();
         }
 
         @Bean

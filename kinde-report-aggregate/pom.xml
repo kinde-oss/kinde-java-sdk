@@ -27,6 +27,8 @@
     <artifactId>report</artifactId>
     <name>Aggregate Report</name>
     <version>2.3.0</version>
+    <!-- Pure JaCoCo aggregator; produces no jar of its own. -->
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
@@ -54,7 +56,6 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

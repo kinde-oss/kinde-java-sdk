@@ -4,10 +4,14 @@ spring:
       client:
         provider:
           kinde:
-            issuer-uri: https://burntjam.kinde.com
-        registration: 
-          pkce: 
+            issuer-uri: ${KINDE_DOMAIN:https://your-domain.kinde.com}
+        registration:
+          # Registration id intentionally set to "kinde" so Spring's default callback
+          # (/login/oauth2/code/kinde) lines up with the redirect URI already registered
+          # on the Kinde application. PKCE is force-enabled by the custom
+          # ServerOAuth2AuthorizationRequestResolver in OAuth2ClientConfiguration.
+          kinde:
             provider: kinde
-            client-id: d129efa11ffe436ca46e66aa16753e02
-            client-secret: x9kxMgGeMuHD5rgs3xK4aulij5qnpqM6zRaRz4RsWwCt4Bu1e0a
+            client-id: ${KINDE_CLIENT_ID:your-client-id-here}
+            client-secret: ${KINDE_CLIENT_SECRET:your-client-secret-here}
             scope: openid,email

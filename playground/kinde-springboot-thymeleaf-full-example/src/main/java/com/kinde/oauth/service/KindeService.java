@@ -159,14 +159,4 @@ public class KindeService {
         return "redirect:" + authorizationUrl.getUrl().toString();
     }
 
-    public String logout() {
-        KindeClient kindeClient = KindeClientBuilder.builder().build();
-        try {
-            kindeClient.clientSession().logout();
-        } catch (Exception e) {
-            log.error("Error during logout: {}", e.getMessage());
-            return "error";
-        }
-        return "redirect:/login";
-    }
 }

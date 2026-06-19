@@ -1,8 +1,8 @@
 package com.kinde.spring.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -16,7 +16,8 @@ public final class KindeOAuth2Properties implements Validator {
 
     /**
      * Login route path. This property should NOT be used with applications that have multiple OAuth2 providers.
-     * NOTE: this does NOT work with WebFlux, where the redirect URI will always be: /login/oauth2/code/okta
+     * NOTE: this does NOT work with WebFlux, where the redirect URI is derived from the OAuth2 client
+     * registration id and defaults to {@code /login/oauth2/code/kinde} for the Kinde registration.
      */
     private String redirectUri;
 
@@ -36,7 +37,8 @@ public final class KindeOAuth2Properties implements Validator {
     private String authorizationGrantType;
 
     /**
-     * Custom authorization server issuer URL: i.e. 'https://dev-123456.oktapreview.com/oauth2/ausar5cbq5TRooicu812'.
+     * Kinde authorization server URL: e.g. {@code https://your-subdomain.kinde.com}. This is the
+     * issuer URI for the OIDC provider.
      */
     private String domain;
 
@@ -47,8 +49,14 @@ public final class KindeOAuth2Properties implements Validator {
 
     /**
      * Expected access token audience claim value.
+     *
+     * <p>Defaults to {@code null}, meaning audience validation is disabled. This matches Kinde's
+     * out-of-the-box behaviour: tokens issued for clients without a configured API resource
+     * carry an empty {@code aud} array. When you have a Kinde API resource configured, set this
+     * property to the matching audience value so {@link com.kinde.spring.TokenUtil#jwtValidator}
+     * enforces it.
      */
-    private String audience = "api://default";
+    private String audience;
 
     /**
      * Access token permissions claim key.
