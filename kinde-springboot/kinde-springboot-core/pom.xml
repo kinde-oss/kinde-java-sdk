@@ -25,7 +25,7 @@
         - io.netty:netty-transport-classes-epoll
       Imported via the netty-bom below so every Netty module stays aligned.
     -->
-    <netty.version>4.2.13.Final</netty.version>
+    <netty.version>4.2.15.Final</netty.version>
   </properties>
 
   <dependencyManagement>
