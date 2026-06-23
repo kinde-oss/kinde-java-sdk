@@ -14,3 +14,4 @@ The following subprojects are included with the playground:
 | [kinde-springboot-pkce-client-example](springboot-pkce-client-example/README.md)             | A Spring Boot PKCE example           |
 | [kinde-springboot-thymeleaf-full-example](kinde-``springboot-thymeleaf-full-example/README.md) | A Spring Boot Thymeleaf Full example |
 | [kinde-springboot-starter-example](kinde-springboot-starter-example/README.md)               | A Kinde Spring Boot Core example     |
+| [kinde-springboot-jwt-example](kinde-springboot-jwt-example/README.md)                       | A Kinde Spring Boot JWT example      |
