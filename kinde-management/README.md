@@ -14,7 +14,7 @@ To use this SDK, include the following dependency in your `pom.xml`:
    <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-management</artifactId>
-      <version>2.0.0</version>
+      <version>3.0.0</version>
    </dependency>
    ```
 
@@ -23,7 +23,7 @@ To use this SDK, include the following dependency in your `pom.xml`:
 For Gradle, add the following dependency to your build file:
 
    ```groovy
-   implementation('com.kinde:kinde-management:2.0.0')
+   implementation('com.kinde:kinde-management:3.0.0')
    ```
 
 ## Building the SDK from Source

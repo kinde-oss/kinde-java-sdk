@@ -4,12 +4,10 @@
   <parent>
     <groupId>com.kinde.spring</groupId>
     <artifactId>kinde-spring-parent-pom</artifactId>
-    <version>2.3.0</version>
+    <version>3.0.0</version>
   </parent>
-  <groupId>com.kinde.spring</groupId>
   <artifactId>kinde-springboot-core</artifactId>
   <packaging>jar</packaging>
-  <version>2.3.0</version>
   <name>kinde-springboot-core</name>
   <url>http://maven.apache.org</url>
 
@@ -90,7 +88,7 @@
     <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-core</artifactId>
-      <version>2.3.0</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -243,7 +241,7 @@
     <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-test-utils</artifactId>
-      <version>2.3.0</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
