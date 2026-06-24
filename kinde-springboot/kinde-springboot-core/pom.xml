@@ -59,8 +59,7 @@
         <scope>import</scope>
       </dependency>
       <!--
-        Override the JUnit Jupiter pins inherited from the root parent POM (5.13.x) to align
-        with the JUnit Platform 6.0.x that Spring Boot 4.0.x ships transitively.
+        Override the JUnit Jupiter + Platform pins so all JUnit modules stay on the same version.
       -->
       <dependency>
         <groupId>org.junit.jupiter</groupId>
@@ -75,6 +74,16 @@
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-params</artifactId>
+        <version>${junit-jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-commons</artifactId>
+        <version>${junit-jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-engine</artifactId>
         <version>${junit-jupiter.version}</version>
       </dependency>
     </dependencies>
