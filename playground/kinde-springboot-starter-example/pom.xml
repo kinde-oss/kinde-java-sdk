@@ -14,9 +14,9 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <spring-boot.version>4.0.6</spring-boot.version>
-    <spring-security.version>7.0.5</spring-security.version>
-    <junit-jupiter.version>6.0.3</junit-jupiter.version>
+    <spring-boot.version>4.1.0</spring-boot.version>
+    <spring-security.version>7.1.0</spring-security.version>
+    <junit-jupiter.version>6.1.0</junit-jupiter.version>
   </properties>
 
   <dependencyManagement>
@@ -48,6 +48,22 @@
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-params</artifactId>
+        <version>${junit-jupiter.version}</version>
+      </dependency>
+      <!-- Keep JUnit Platform aligned with JUnit Jupiter (shared version in the JUnit 6 line). -->
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-commons</artifactId>
+        <version>${junit-jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-engine</artifactId>
+        <version>${junit-jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-launcher</artifactId>
         <version>${junit-jupiter.version}</version>
       </dependency>
     </dependencies>
