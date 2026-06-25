@@ -57,6 +57,22 @@
                 <artifactId>junit-jupiter-params</artifactId>
                 <version>${junit-jupiter.version}</version>
             </dependency>
+            <!-- Keep JUnit Platform aligned with JUnit Jupiter (shared version in the JUnit 6 line). -->
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-commons</artifactId>
+                <version>${junit-jupiter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-engine</artifactId>
+                <version>${junit-jupiter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-launcher</artifactId>
+                <version>${junit-jupiter.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
