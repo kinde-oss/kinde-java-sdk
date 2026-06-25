@@ -1,6 +1,6 @@
 # MIGRATION
 
-## V 2.x (Spring Boot 3) to V 2.2 (Spring Boot 4)
+## V 2.x (Spring Boot 3) to V 3.x (Spring Boot 4)
 
 `kinde-springboot-starter` and `kinde-springboot-core` were upgraded to
 [Spring Boot 4.0.x](https://spring.io/blog/2025/11/20/spring-boot-4-0-0-available-now)

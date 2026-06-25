@@ -5,12 +5,11 @@
     <parent>
         <groupId>com.kinde</groupId>
         <artifactId>kinde-parent-pom</artifactId>
-        <version>2.3.0</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>kinde-core</artifactId>
     <packaging>jar</packaging>
-    <version>2.3.0</version>
     <name>kinde-core</name>
     <url>http://maven.apache.org</url>
 
@@ -205,7 +204,6 @@
         <dependency>
             <groupId>com.kinde</groupId>
             <artifactId>kinde-test-utils</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         

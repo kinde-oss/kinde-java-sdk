@@ -5,11 +5,10 @@
     <parent>
         <groupId>com.kinde</groupId>
         <artifactId>kinde-parent-pom</artifactId>
-        <version>2.3.0</version>
+        <version>3.0.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>kinde-springboot-pkce-client-example</artifactId>
-    <version>2.3.0</version>
 
     <properties>
         <spring-boot.version>4.1.0</spring-boot.version>

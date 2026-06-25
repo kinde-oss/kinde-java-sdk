@@ -12,7 +12,7 @@ In order to use configure Spring Boot to use Kinde for authentication include th
     <dependency>
       <groupId>com.kinde.spring</groupId>
       <artifactId>kinde-springboot-starter</artifactId>
-      <version>2.0.0</version>
+      <version>3.0.0</version>
     </dependency>
 ```
 
@@ -21,7 +21,7 @@ In order to use configure Spring Boot to use Kinde for authentication include th
 In order to use the SDK with a Gradle build process please use the following dependency.
 
 ```groovy
-    configuration('com.kinde.spring:kinde-springboot-starter:2.0.0')
+    configuration('com.kinde.spring:kinde-springboot-starter:3.0.0')
 ```
 
 ## Usage

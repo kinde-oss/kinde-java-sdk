@@ -14,7 +14,7 @@ This project should not be included directly, rather use the kinde-springboot-st
     <dependency>
       <groupId>com.kinde.spring</groupId>
       <artifactId>kinde-springboot-starter</artifactId>
-      <version>2.0.0</version>
+      <version>3.0.0</version>
     </dependency>
 ```
 
@@ -23,5 +23,5 @@ This project should not be included directly, rather use the kinde-springboot-st
 To use the SDK with a Gradle build, please include the following dependency.
 
 ```groovy
-    configuration('com.kinde.spring:kinde-springboot-starter:2.0.0')
+    configuration('com.kinde.spring:kinde-springboot-starter:3.0.0')
 ```
