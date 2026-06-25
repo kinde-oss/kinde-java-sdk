@@ -97,7 +97,6 @@
         <dependency>
             <groupId>com.kinde</groupId>
             <artifactId>kinde-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

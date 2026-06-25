@@ -27,12 +27,10 @@
     <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-management</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
