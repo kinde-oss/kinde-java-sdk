@@ -15,9 +15,9 @@
 
   <properties>
     <spring-boot.version>4.0.6</spring-boot.version>
-    <spring-security.version>7.0.5</spring-security.version>
+    <spring-security.version>7.1.0</spring-security.version>
     <!-- Spring Boot 4.0.x ships JUnit Platform 6.0.x; override the root parent POM's pin (5.13.x). -->
-    <junit-jupiter.version>6.0.3</junit-jupiter.version>
+    <junit-jupiter.version>6.1.0</junit-jupiter.version>
     <!--
       Override Netty to patch transitive CVEs reported against the Spring Boot 4.0.6 pin (4.2.12.Final):
         - io.netty:netty-codec-http3
@@ -59,8 +59,7 @@
         <scope>import</scope>
       </dependency>
       <!--
-        Override the JUnit Jupiter pins inherited from the root parent POM (5.13.x) to align
-        with the JUnit Platform 6.0.x that Spring Boot 4.0.x ships transitively.
+        Override the JUnit Jupiter + Platform pins so all JUnit modules stay on the same version.
       -->
       <dependency>
         <groupId>org.junit.jupiter</groupId>
@@ -77,12 +76,6 @@
         <artifactId>junit-jupiter-params</artifactId>
         <version>${junit-jupiter.version}</version>
       </dependency>
-      <!--
-        Pin the JUnit Platform artifacts to the same version as JUnit Jupiter. In the JUnit 6
-        line Jupiter and Platform share the same version, and the engine requires the matching
-        Platform; otherwise the inherited Platform from Spring Boot's BOM splits from Jupiter
-        and fails at runtime with IllegalAccessError.
-      -->
       <dependency>
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-commons</artifactId>
@@ -236,7 +229,7 @@
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-netty</artifactId>
-      <version>5.15.0</version>
+      <version>7.2.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
