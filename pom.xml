@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.kinde</groupId>
     <artifactId>kinde-parent-pom</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <name>parent-project</name>
     <description>Kinde Java SDK</description>
     <packaging>pom</packaging>

@@ -14,7 +14,7 @@ In order to use this SDK include following POM dependency.
     <dependency>
       <groupId>com.kinde</groupId>
       <artifactId>kinde-core</artifactId>
-      <version>3.0.0</version>
+      <version>3.0.1</version>
     </dependency>
 ```
 
@@ -23,7 +23,7 @@ In order to use this SDK include following POM dependency.
 In order to use the SDK with a Gradle build process please use the following dependency.
 
 ```groovy
-    configuration('com.kinde:kinde-core:3.0.0')
+    configuration('com.kinde:kinde-core:3.0.1')
 ```
 
 ## Building the SDK from Source
