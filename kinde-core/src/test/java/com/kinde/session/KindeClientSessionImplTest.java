@@ -290,5 +290,94 @@ class KindeClientSessionImplTest {
         assertTrue(url.contains("org_name=TestOrg"), "URL should contain trimmed org_name");
         assertFalse(url.contains("org_name=+"), "URL should not contain leading whitespace in org_name");
     }
+
+    @Test
+    @DisplayName("login with connectionId includes connection_id on the authorize URL")
+    void loginWithConnectionIdIncludesParam() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.login(null, "conn_abc123");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("connection_id=conn_abc123"), "URL should contain connection_id");
+        assertTrue(url.contains("supports_reauth=true"), "URL should still contain supports_reauth");
+        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
+    }
+
+    @Test
+    @DisplayName("login with invitationCode and connectionId includes both params")
+    void loginWithInvitationAndConnectionIdIncludesBothParams() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.login("inv_login123", "conn_abc123");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("invitation_code=inv_login123"), "URL should contain invitation_code");
+        assertTrue(url.contains("is_invitation=true"), "URL should contain is_invitation=true");
+        assertTrue(url.contains("connection_id=conn_abc123"), "URL should contain connection_id");
+        assertTrue(url.contains("supports_reauth=true"), "URL should contain supports_reauth");
+    }
+
+    @Test
+    @DisplayName("login with whitespace-only connectionId omits connection_id")
+    void loginWithWhitespaceOnlyConnectionIdOmitsParam() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.login(null, "   ");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertFalse(url.contains("connection_id"), "URL should not contain connection_id");
+        assertTrue(url.contains("supports_reauth=true"), "URL should still contain supports_reauth");
+    }
+
+    @Test
+    @DisplayName("login trims connectionId in the generated URL")
+    void loginTrimsConnectionId() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.login(null, "  conn_abc123  ");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("connection_id=conn_abc123"), "URL should contain trimmed connection_id");
+    }
+
+    @Test
+    @DisplayName("register with connectionId includes connection_id and register params")
+    void registerWithConnectionIdIncludesParam() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.register(null, "conn_reg456");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("connection_id=conn_reg456"), "URL should contain connection_id");
+        assertTrue(url.contains("prompt=create"), "URL should contain register-specific prompt=create");
+        assertTrue(url.contains("supports_reauth=true"), "URL should contain supports_reauth");
+    }
+
+    @Test
+    @DisplayName("createOrg with connectionId includes connection_id and createOrg params")
+    void createOrgWithConnectionIdIncludesParam() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.createOrg("TestOrg", null, "conn_org789");
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("connection_id=conn_org789"), "URL should contain connection_id");
+        assertTrue(url.contains("org_name=TestOrg"), "URL should contain org_name");
+        assertTrue(url.contains("is_create_org=true"), "URL should contain is_create_org");
+        assertFalse(url.contains("invitation_code"), "URL should not contain invitation_code");
+    }
+
+    @Test
+    @DisplayName("authorizationUrlWithParameters includes connection_id from the map")
+    void authorizationUrlWithParametersIncludesConnectionId() throws Exception {
+        KindeClientSessionImpl session = createSessionWithOidc();
+        AuthorizationUrl result = session.authorizationUrlWithParameters(
+                java.util.Map.of("connection_id", "conn_map123"));
+
+        assertNotNull(result);
+        String url = result.getUrl().toString();
+        assertTrue(url.contains("connection_id=conn_map123"), "URL should contain connection_id from parameters map");
+    }
 }
 

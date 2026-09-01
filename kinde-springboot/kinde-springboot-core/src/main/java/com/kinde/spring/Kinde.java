@@ -12,11 +12,14 @@ public class Kinde {
 
 
     /**
-     * Configures the {@code http} with an OAuth2 Login, that supports PKCE and invitation code handling.
-     * The default Spring Security implementation only enables PKCE for public clients.
+     * Configures the {@code http} with an OAuth2 Login, that supports PKCE, invitation code,
+     * and connection ID handling. The default Spring Security implementation only enables PKCE
+     * for public clients.
      * <p>
      * When the originating request contains an {@code invitation_code} query parameter,
      * it is forwarded to the authorization endpoint along with {@code is_invitation=true}.
+     * When it contains a {@code connection_id} query parameter, that value is forwarded
+     * so Kinde can skip the identity picker.
      * <p>
      * <b>NOTE:</b> Enabling PKCE will be required for all clients (public and confidential) in the future OAuth 2.1 spec.
      *
@@ -39,9 +42,10 @@ public class Kinde {
      * Configures the {@code http} with an OAuth2 Login that supports PKCE.
      * <p>
      * <b>NOTE:</b> This reactive overload does not currently forward {@code invitation_code}
-     * parameters to the authorization endpoint. Invitation code handling is only supported
-     * via the servlet-based {@link #configureOAuth2WithPkce(HttpSecurity, ClientRegistrationRepository)}
-     * overload. If you need invitation support in a reactive application, implement a custom
+     * or {@code connection_id} parameters to the authorization endpoint. Those are only
+     * supported via the servlet-based
+     * {@link #configureOAuth2WithPkce(HttpSecurity, ClientRegistrationRepository)} overload.
+     * If you need them in a reactive application, implement a custom
      * {@code ServerOAuth2AuthorizationRequestResolver} that mirrors the logic in
      * {@link KindeOAuth2AuthorizationRequestResolver}.
      *

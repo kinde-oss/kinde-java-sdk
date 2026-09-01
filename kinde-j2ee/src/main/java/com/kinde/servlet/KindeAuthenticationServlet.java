@@ -46,8 +46,8 @@ public class KindeAuthenticationServlet extends HttpServlet {
         }
 
         String code = req.getParameter("code");
-        String rawInvitationCode = req.getParameter(INVITATION_CODE);
-        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isBlank()) ? rawInvitationCode.trim() : null;
+        String invitationCode = optionalQueryParam(req, INVITATION_CODE);
+        String connectionId = optionalQueryParam(req, CONNECTION_ID);
         if (code == null) {
             String postLoginUrl = req.getParameter(POST_LOGIN_URL);
             if (postLoginUrl == null) {
@@ -55,18 +55,8 @@ public class KindeAuthenticationServlet extends HttpServlet {
             }
             // Redirect to the OAuth provider's authorization page
             KindeClientSession kindeClientSession = createKindeClientSession(req);
-            AuthorizationUrl authorizationUrl = null;
-            if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
-                authorizationUrl = kindeClientSession.login(invitationCode);
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register(invitationCode);
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
-                String orgName = req.getParameter(ORG_NAME);
-                if (orgName == null || orgName.isBlank()) {
-                    throw new ServletException("Must provide org_name query parameter to create an organisation.");
-                }
-                authorizationUrl = kindeClientSession.createOrg(orgName.trim(), invitationCode);
-            }
+            AuthorizationUrl authorizationUrl = startAuthorization(
+                    kindeClientSession, kindeAuthenticationAction, req, invitationCode, connectionId);
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             req.getSession().setAttribute(POST_LOGIN_URL,postLoginUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
@@ -90,6 +80,39 @@ public class KindeAuthenticationServlet extends HttpServlet {
                 throw new ServletException("OAuth token exchange failed", e);
             }
         }
+    }
+
+    private static AuthorizationUrl startAuthorization(
+            KindeClientSession kindeClientSession,
+            KindeAuthenticationAction kindeAuthenticationAction,
+            HttpServletRequest req,
+            String invitationCode,
+            String connectionId) throws ServletException {
+        if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
+            return connectionId != null
+                    ? kindeClientSession.login(invitationCode, connectionId)
+                    : kindeClientSession.login(invitationCode);
+        }
+        if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
+            return connectionId != null
+                    ? kindeClientSession.register(invitationCode, connectionId)
+                    : kindeClientSession.register(invitationCode);
+        }
+        if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
+            String orgName = req.getParameter(ORG_NAME);
+            if (orgName == null || orgName.isBlank()) {
+                throw new ServletException("Must provide org_name query parameter to create an organisation.");
+            }
+            return connectionId != null
+                    ? kindeClientSession.createOrg(orgName.trim(), invitationCode, connectionId)
+                    : kindeClientSession.createOrg(orgName.trim(), invitationCode);
+        }
+        throw new ServletException("Unknown authentication action: " + kindeAuthenticationAction);
+    }
+
+    private static String optionalQueryParam(HttpServletRequest req, String name) {
+        String raw = req.getParameter(name);
+        return (raw != null && !raw.isBlank()) ? raw.trim() : null;
     }
 
     private static KindeClientSession createKindeClientSession(HttpServletRequest req) {

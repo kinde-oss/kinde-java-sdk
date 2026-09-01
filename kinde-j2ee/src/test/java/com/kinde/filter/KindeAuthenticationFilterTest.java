@@ -333,4 +333,127 @@ public class KindeAuthenticationFilterTest {
 
         filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
     }
+
+    @Test
+    public void testConnectionIdOnLoginPassesIdToLogin() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(request.getParameter("connection_id")).thenReturn("conn_filter123");
+        AuthorizationUrl connectionAuthUrl = mock(AuthorizationUrl.class);
+        when(connectionAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?connection_id=conn_filter123"));
+        when(mockSession.login(null, "conn_filter123")).thenReturn(connectionAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login(null, "conn_filter123");
+        verify(session).setAttribute(AUTHORIZATION_URL, connectionAuthUrl);
+        verify(response).sendRedirect(connectionAuthUrl.getUrl().toString());
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void testConnectionIdOnRegisterPassesIdToRegister() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(request.getParameter("connection_id")).thenReturn("conn_filter_reg");
+        AuthorizationUrl connectionAuthUrl = mock(AuthorizationUrl.class);
+        when(connectionAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?connection_id=conn_filter_reg"));
+        when(mockSession.register(null, "conn_filter_reg")).thenReturn(connectionAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.REGISTER);
+
+        verify(mockSession).register(null, "conn_filter_reg");
+        verify(response).sendRedirect(connectionAuthUrl.getUrl().toString());
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void testConnectionIdOnCreateOrgPassesIdToCreateOrg() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(request.getParameter("connection_id")).thenReturn("conn_org_create");
+        when(request.getParameter("org_name")).thenReturn("MyOrg");
+        AuthorizationUrl connectionAuthUrl = mock(AuthorizationUrl.class);
+        when(connectionAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?connection_id=conn_org_create"));
+        when(mockSession.createOrg("MyOrg", null, "conn_org_create")).thenReturn(connectionAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.CREATE_ORG);
+
+        verify(mockSession).createOrg("MyOrg", null, "conn_org_create");
+        verify(response).sendRedirect(connectionAuthUrl.getUrl().toString());
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void testInvitationCodeAndConnectionIdArePassedTogether() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_filter123");
+        when(request.getParameter("connection_id")).thenReturn("conn_filter123");
+        AuthorizationUrl combinedAuthUrl = mock(AuthorizationUrl.class);
+        when(combinedAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?invitation_code=inv_filter123&connection_id=conn_filter123"));
+        when(mockSession.login("inv_filter123", "conn_filter123")).thenReturn(combinedAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login("inv_filter123", "conn_filter123");
+        verify(response).sendRedirect(combinedAuthUrl.getUrl().toString());
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void testEmptyConnectionIdFallsThroughToLogin() throws Exception {
+        when(request.getParameter("connection_id")).thenReturn("");
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://auth.url"));
+        when(mockSession.login()).thenReturn(mockAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login();
+        verify(response).sendRedirect("http://auth.url");
+    }
+
+    @Test
+    public void testWhitespaceOnlyConnectionIdFallsThroughToLogin() throws Exception {
+        when(request.getParameter("connection_id")).thenReturn("   ");
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://auth.url"));
+        when(mockSession.login()).thenReturn(mockAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login();
+        verify(response).sendRedirect("http://auth.url");
+    }
+
+    @Test
+    public void testPaddedConnectionIdIsTrimmedBeforePassing() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+        when(request.getParameter("connection_id")).thenReturn("  conn_filter123  ");
+        AuthorizationUrl connectionAuthUrl = mock(AuthorizationUrl.class);
+        when(connectionAuthUrl.getUrl()).thenReturn(new URL("http://auth.url?connection_id=conn_filter123"));
+        when(mockSession.login(null, "conn_filter123")).thenReturn(connectionAuthUrl);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login(null, "conn_filter123");
+        verify(response).sendRedirect(connectionAuthUrl.getUrl().toString());
+    }
+
+    @Test
+    public void testConnectionIdDoesNotOverrideExistingSession() throws Exception {
+        Principal principal = mock(KindePrincipal.class);
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(principal);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(mockAuthUrl);
+        when(request.getParameter("connection_id")).thenReturn("conn_should_not_reauth");
+        when(request.getParameter("code")).thenReturn(null);
+
+        filter.doFilter(request, response, filterChain, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession, never()).login(any(), any());
+        verify(filterChain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        verify(response, never()).sendRedirect(anyString());
+    }
 }
