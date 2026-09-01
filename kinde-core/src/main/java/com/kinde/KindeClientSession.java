@@ -29,8 +29,11 @@ public interface KindeClientSession {
      * @param invitationCode optional invitation code; ignored when null or blank
      * @param connectionId optional connection ID; ignored when null or blank
      * @return the authorization URL to redirect the user to
+     * @throws UnsupportedOperationException if {@code connectionId} is non-blank and this
+     *         implementation does not support connection IDs
      */
     default AuthorizationUrl login(String invitationCode, String connectionId) {
+        requireConnectionIdSupport(connectionId);
         return login(invitationCode);
     }
 
@@ -47,8 +50,11 @@ public interface KindeClientSession {
      * @param invitationCode optional invitation code; ignored when null or blank
      * @param connectionId optional connection ID; ignored when null or blank
      * @return the authorization URL to redirect the user to
+     * @throws UnsupportedOperationException if {@code connectionId} is non-blank and this
+     *         implementation does not support connection IDs
      */
     default AuthorizationUrl createOrg(String orgName, String invitationCode, String connectionId) {
+        requireConnectionIdSupport(connectionId);
         return createOrg(orgName, invitationCode);
     }
 
@@ -64,8 +70,11 @@ public interface KindeClientSession {
      * @param invitationCode optional invitation code; ignored when null or blank
      * @param connectionId optional connection ID; ignored when null or blank
      * @return the authorization URL to redirect the user to
+     * @throws UnsupportedOperationException if {@code connectionId} is non-blank and this
+     *         implementation does not support connection IDs
      */
     default AuthorizationUrl register(String invitationCode, String connectionId) {
+        requireConnectionIdSupport(connectionId);
         return register(invitationCode);
     }
 
@@ -105,5 +114,11 @@ public interface KindeClientSession {
      */
     default String getAccessToken() {
         return null;
+    }
+
+    private static void requireConnectionIdSupport(String connectionId) {
+        if (connectionId != null && !connectionId.isBlank()) {
+            throw new UnsupportedOperationException("connectionId is not supported by this implementation");
+        }
     }
 }

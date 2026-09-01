@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/","/index.css", "/registration", "/oauth2/authorization/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2Login -> oauth2Login
+                        .defaultSuccessUrl("/home", true)
                         .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
                                 .authorizationRequestResolver(customAuthorizationRequestResolver))
                 );
