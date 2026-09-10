@@ -265,4 +265,86 @@ public class KindeAuthenticationServletTest {
 
         servlet.doGet(request, response, KindeAuthenticationAction.CREATE_ORG);
     }
+
+    @Test
+    public void testDoGet_LoginWithConnectionId_PassesIdToLogin() throws Exception {
+        when(request.getParameter("connection_id")).thenReturn("conn_test123");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://kinde.com/oauth2/auth?connection_id=conn_test123"));
+        when(mockSession.login(null, "conn_test123")).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login(null, "conn_test123");
+        verify(session).setAttribute(AUTHORIZATION_URL, mockAuthUrl);
+        verify(session).setAttribute(POST_LOGIN_URL, "http://example.com/dashboard");
+        verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
+    }
+
+    @Test
+    public void testDoGet_RegisterWithConnectionId_PassesIdToRegister() throws Exception {
+        when(request.getParameter("connection_id")).thenReturn("conn_reg456");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://kinde.com/oauth2/auth?connection_id=conn_reg456"));
+        when(mockSession.register(null, "conn_reg456")).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.REGISTER);
+
+        verify(mockSession).register(null, "conn_reg456");
+        verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
+    }
+
+    @Test
+    public void testDoGet_CreateOrgWithConnectionId_PassesIdToCreateOrg() throws Exception {
+        when(request.getParameter("connection_id")).thenReturn("conn_org789");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(request.getParameter("org_name")).thenReturn("TestOrg");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://kinde.com/oauth2/auth?connection_id=conn_org789"));
+        when(mockSession.createOrg("TestOrg", null, "conn_org789")).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.CREATE_ORG);
+
+        verify(mockSession).createOrg("TestOrg", null, "conn_org789");
+        verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
+    }
+
+    @Test
+    public void testDoGet_InvitationCodeAndConnectionId_ArePassedTogether() throws Exception {
+        when(request.getParameter("invitation_code")).thenReturn("inv_test123");
+        when(request.getParameter("connection_id")).thenReturn("conn_test123");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://kinde.com/oauth2/auth?invitation_code=inv_test123&connection_id=conn_test123"));
+        when(mockSession.login("inv_test123", "conn_test123")).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login("inv_test123", "conn_test123");
+        verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
+    }
+
+    @Test
+    public void testDoGet_PaddedConnectionId_TrimsBeforePassing() throws Exception {
+        when(request.getParameter("connection_id")).thenReturn("  conn_test123  ");
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com/dashboard");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://kinde.com/oauth2/auth?connection_id=conn_test123"));
+        when(mockSession.login(null, "conn_test123")).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login(null, "conn_test123");
+        verify(response).sendRedirect(mockAuthUrl.getUrl().toString());
+    }
+
+    @Test
+    public void testDoGet_EmptyConnectionId_FallsThrough() throws Exception {
+        when(request.getParameter("connection_id")).thenReturn("");
+        when(request.getParameter("code")).thenReturn(null);
+        when(request.getParameter(POST_LOGIN_URL)).thenReturn("http://example.com");
+        when(mockAuthUrl.getUrl()).thenReturn(new URL("http://test.kinde.com"));
+        when(mockSession.login((String) null)).thenReturn(mockAuthUrl);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.LOGIN);
+
+        verify(mockSession).login((String) null);
+    }
 }

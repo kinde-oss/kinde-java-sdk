@@ -255,9 +255,15 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public AuthorizationUrl login(String invitationCode) {
+        return login(invitationCode, null);
+    }
+
+    @Override
+    public AuthorizationUrl login(String invitationCode, String connectionId) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("supports_reauth", "true");
         addInvitationParams(parameters, invitationCode);
+        addConnectionIdParam(parameters, connectionId);
         return authorizationUrlWithParameters(parameters);
     }
 
@@ -268,6 +274,11 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public AuthorizationUrl createOrg(String orgName, String invitationCode) {
+        return createOrg(orgName, invitationCode, null);
+    }
+
+    @Override
+    public AuthorizationUrl createOrg(String orgName, String invitationCode, String connectionId) {
         if (orgName == null || orgName.isBlank()) {
             throw new IllegalArgumentException("createOrg requires a non-blank orgName");
         }
@@ -276,6 +287,7 @@ public class KindeClientSessionImpl implements KindeClientSession {
         parameters.put("is_create_org", Boolean.TRUE.toString());
         parameters.put("org_name", orgName.trim());
         addInvitationParams(parameters, invitationCode);
+        addConnectionIdParam(parameters, connectionId);
         return authorizationUrlWithParameters(parameters);
     }
 
@@ -286,10 +298,16 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     public AuthorizationUrl register(String invitationCode) {
+        return register(invitationCode, null);
+    }
+
+    @Override
+    public AuthorizationUrl register(String invitationCode, String connectionId) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("prompt", Prompt.Type.CREATE.toString());
         parameters.put("supports_reauth", "true");
         addInvitationParams(parameters, invitationCode);
+        addConnectionIdParam(parameters, connectionId);
         return authorizationUrlWithParameters(parameters);
     }
 
@@ -307,6 +325,12 @@ public class KindeClientSessionImpl implements KindeClientSession {
         if (invitationCode != null && !invitationCode.isBlank()) {
             parameters.put(KindeRequestParameters.INVITATION_CODE, invitationCode);
             parameters.put(KindeRequestParameters.IS_INVITATION, Boolean.TRUE.toString());
+        }
+    }
+
+    private void addConnectionIdParam(Map<String, String> parameters, String connectionId) {
+        if (connectionId != null && !connectionId.isBlank()) {
+            parameters.put(KindeRequestParameters.CONNECTION_ID, connectionId.trim());
         }
     }
 

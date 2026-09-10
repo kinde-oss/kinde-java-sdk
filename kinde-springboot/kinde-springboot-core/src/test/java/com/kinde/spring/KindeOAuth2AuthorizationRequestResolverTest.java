@@ -156,4 +156,93 @@ class KindeOAuth2AuthorizationRequestResolverTest {
         assertNull(authRequest.getAdditionalParameters().get("invitation_code"));
         assertNull(authRequest.getAdditionalParameters().get("is_invitation"));
     }
+
+    @Test
+    @DisplayName("Resolve with connection_id adds connection_id to authorization request")
+    void resolveWithConnectionIdAddsParam() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("connection_id", "conn_abc123");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertNotNull(authRequest);
+        assertEquals("conn_abc123", authRequest.getAdditionalParameters().get("connection_id"));
+        assertNull(authRequest.getAdditionalParameters().get("invitation_code"));
+
+        String authUri = authRequest.getAuthorizationRequestUri();
+        assertTrue(authUri.contains("connection_id=conn_abc123"), "Redirect URI should contain connection_id");
+    }
+
+    @Test
+    @DisplayName("Resolve with invitation_code and connection_id adds both params")
+    void resolveWithInvitationCodeAndConnectionIdAddsBothParams() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("invitation_code", "inv_abc123");
+        request.setParameter("connection_id", "conn_abc123");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertNotNull(authRequest);
+        assertEquals("inv_abc123", authRequest.getAdditionalParameters().get("invitation_code"));
+        assertEquals("true", authRequest.getAdditionalParameters().get("is_invitation"));
+        assertEquals("conn_abc123", authRequest.getAdditionalParameters().get("connection_id"));
+
+        String authUri = authRequest.getAuthorizationRequestUri();
+        assertTrue(authUri.contains("invitation_code=inv_abc123"));
+        assertTrue(authUri.contains("connection_id=conn_abc123"));
+    }
+
+    @Test
+    @DisplayName("Resolve with empty connection_id does not add connection_id")
+    void resolveWithEmptyConnectionIdDoesNotAddParam() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("connection_id", "");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertNotNull(authRequest);
+        assertNull(authRequest.getAdditionalParameters().get("connection_id"));
+    }
+
+    @Test
+    @DisplayName("Resolve with whitespace-only connection_id does not add connection_id")
+    void resolveWithWhitespaceOnlyConnectionIdDoesNotAddParam() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("connection_id", "   ");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertNotNull(authRequest);
+        assertNull(authRequest.getAdditionalParameters().get("connection_id"));
+    }
+
+    @Test
+    @DisplayName("Resolve trims connection_id before adding it")
+    void resolveTrimsConnectionId() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("connection_id", "  conn_abc123  ");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertNotNull(authRequest);
+        assertEquals("conn_abc123", authRequest.getAdditionalParameters().get("connection_id"));
+    }
+
+    @Test
+    @DisplayName("Resolve with clientRegistrationId and connection_id adds param")
+    void resolveWithClientRegistrationIdAndConnectionIdAddsParam() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        request.setParameter("connection_id", "conn_client_reg");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request, "kinde");
+
+        assertNotNull(authRequest);
+        assertEquals("conn_client_reg", authRequest.getAdditionalParameters().get("connection_id"));
+    }
 }

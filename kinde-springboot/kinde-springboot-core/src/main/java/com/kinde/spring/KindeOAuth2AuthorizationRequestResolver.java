@@ -14,11 +14,12 @@ import java.util.Map;
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers.withPkce;
 
 /**
- * Custom OAuth2 authorization request resolver that adds invitation code support
- * on top of the default PKCE-enabled resolver. When the originating HTTP request
- * contains an {@code invitation_code} parameter, this resolver appends
- * {@code invitation_code} and {@code is_invitation=true} to the authorization
- * request's additional parameters.
+ * Custom OAuth2 authorization request resolver that adds Kinde-specific
+ * authorize URL parameters on top of the default PKCE-enabled resolver.
+ * When the originating HTTP request contains an {@code invitation_code}
+ * parameter, this resolver appends {@code invitation_code} and
+ * {@code is_invitation=true}. When it contains a {@code connection_id}
+ * parameter, that value is forwarded so Kinde can skip the identity picker.
  */
 public class KindeOAuth2AuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
 
@@ -35,27 +36,35 @@ public class KindeOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
     @Override
     public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
         OAuth2AuthorizationRequest authorizationRequest = defaultResolver.resolve(request);
-        return addInvitationParameters(request, authorizationRequest);
+        return addKindeParameters(request, authorizationRequest);
     }
 
     @Override
     public OAuth2AuthorizationRequest resolve(HttpServletRequest request, String clientRegistrationId) {
         OAuth2AuthorizationRequest authorizationRequest = defaultResolver.resolve(request, clientRegistrationId);
-        return addInvitationParameters(request, authorizationRequest);
+        return addKindeParameters(request, authorizationRequest);
     }
 
-    private OAuth2AuthorizationRequest addInvitationParameters(
+    private OAuth2AuthorizationRequest addKindeParameters(
             HttpServletRequest request, OAuth2AuthorizationRequest authorizationRequest) {
         if (authorizationRequest == null) {
             return null;
         }
         String invitationCode = request.getParameter(KindeRequestParameters.INVITATION_CODE);
-        if (invitationCode == null || invitationCode.isBlank()) {
+        String connectionId = request.getParameter(KindeRequestParameters.CONNECTION_ID);
+        boolean hasInvitation = invitationCode != null && !invitationCode.isBlank();
+        boolean hasConnectionId = connectionId != null && !connectionId.isBlank();
+        if (!hasInvitation && !hasConnectionId) {
             return authorizationRequest;
         }
         Map<String, Object> additionalParams = new HashMap<>(authorizationRequest.getAdditionalParameters());
-        additionalParams.put(KindeRequestParameters.INVITATION_CODE, invitationCode);
-        additionalParams.put(KindeRequestParameters.IS_INVITATION, "true");
+        if (hasInvitation) {
+            additionalParams.put(KindeRequestParameters.INVITATION_CODE, invitationCode);
+            additionalParams.put(KindeRequestParameters.IS_INVITATION, "true");
+        }
+        if (hasConnectionId && connectionId != null) {
+            additionalParams.put(KindeRequestParameters.CONNECTION_ID, connectionId.trim());
+        }
         return OAuth2AuthorizationRequest.from(authorizationRequest)
                 .additionalParameters(additionalParams)
                 .build();

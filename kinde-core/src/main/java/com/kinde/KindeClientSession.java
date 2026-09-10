@@ -21,16 +21,61 @@ public interface KindeClientSession {
         return login();
     }
 
+    /**
+     * Starts a login flow, optionally including an invitation code and/or connection ID.
+     * A connection ID skips Kinde's identity picker and sends the user to a specific
+     * authentication method (for example a social or enterprise connection).
+     *
+     * @param invitationCode optional invitation code; ignored when null or blank
+     * @param connectionId optional connection ID; ignored when null or blank
+     * @return the authorization URL to redirect the user to
+     * @throws UnsupportedOperationException if {@code connectionId} is non-blank and this
+     *         implementation does not support connection IDs
+     */
+    default AuthorizationUrl login(String invitationCode, String connectionId) {
+        requireConnectionIdSupport(connectionId);
+        return login(invitationCode);
+    }
+
     AuthorizationUrl createOrg(String orgName);
 
     default AuthorizationUrl createOrg(String orgName, String invitationCode) {
         return createOrg(orgName);
     }
 
+    /**
+     * Starts a create-organization flow, optionally including an invitation code and/or connection ID.
+     *
+     * @param orgName the organization name; must be non-blank
+     * @param invitationCode optional invitation code; ignored when null or blank
+     * @param connectionId optional connection ID; ignored when null or blank
+     * @return the authorization URL to redirect the user to
+     * @throws UnsupportedOperationException if {@code connectionId} is non-blank and this
+     *         implementation does not support connection IDs
+     */
+    default AuthorizationUrl createOrg(String orgName, String invitationCode, String connectionId) {
+        requireConnectionIdSupport(connectionId);
+        return createOrg(orgName, invitationCode);
+    }
+
     AuthorizationUrl register();
 
     default AuthorizationUrl register(String invitationCode) {
         return register();
+    }
+
+    /**
+     * Starts a registration flow, optionally including an invitation code and/or connection ID.
+     *
+     * @param invitationCode optional invitation code; ignored when null or blank
+     * @param connectionId optional connection ID; ignored when null or blank
+     * @return the authorization URL to redirect the user to
+     * @throws UnsupportedOperationException if {@code connectionId} is non-blank and this
+     *         implementation does not support connection IDs
+     */
+    default AuthorizationUrl register(String invitationCode, String connectionId) {
+        requireConnectionIdSupport(connectionId);
+        return register(invitationCode);
     }
 
     default AuthorizationUrl handleInvitation(String invitationCode) {
@@ -69,5 +114,11 @@ public interface KindeClientSession {
      */
     default String getAccessToken() {
         return null;
+    }
+
+    private static void requireConnectionIdSupport(String connectionId) {
+        if (connectionId != null && !connectionId.isBlank()) {
+            throw new UnsupportedOperationException("connectionId is not supported by this implementation");
+        }
     }
 }

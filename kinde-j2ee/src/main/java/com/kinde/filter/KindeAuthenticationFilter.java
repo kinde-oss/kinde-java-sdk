@@ -51,40 +51,20 @@ public abstract class KindeAuthenticationFilter implements Filter {
         }
 
         String code = req.getParameter("code");
-        String rawInvitationCode = req.getParameter(INVITATION_CODE);
-        String invitationCode = (rawInvitationCode != null && !rawInvitationCode.isBlank()) ? rawInvitationCode.trim() : null;
+        String invitationCode = optionalQueryParam(req, INVITATION_CODE);
+        String connectionId = optionalQueryParam(req, CONNECTION_ID);
         Principal userPrincipal = (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
         AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
         if (invitationCode != null) {
             // Invitation code always starts a new auth flow, even if already authenticated
             KindeClientSession kindeClientSession = createKindeClientSession(req);
-            if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
-                authorizationUrl = kindeClientSession.login(invitationCode);
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register(invitationCode);
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
-                String orgName = req.getParameter(ORG_NAME);
-                if (orgName == null || orgName.isBlank()) {
-                    throw new ServletException("Must provide org_name query parameter to create an organisation.");
-                }
-                authorizationUrl = kindeClientSession.createOrg(orgName.trim(), invitationCode);
-            }
+            authorizationUrl = startAuthorization(kindeClientSession, kindeAuthenticationAction, req, invitationCode, connectionId);
             req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
         } else if (userPrincipal == null || authorizationUrl == null) {
             // Redirect to the OAuth provider's authorization page
             KindeClientSession kindeClientSession = createKindeClientSession(req);
-            if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
-                authorizationUrl = kindeClientSession.login();
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
-                authorizationUrl = kindeClientSession.register();
-            } else if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
-                String orgName = req.getParameter(ORG_NAME);
-                if (orgName == null || orgName.isBlank()) {
-                    throw new ServletException("Must provide org_name query parameter to create an organisation.");
-                }
-                authorizationUrl = kindeClientSession.createOrg(orgName.trim());
-            }
+            authorizationUrl = startAuthorization(kindeClientSession, kindeAuthenticationAction, req, null, connectionId);
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
         } else if (code != null) {
@@ -110,6 +90,45 @@ public abstract class KindeAuthenticationFilter implements Filter {
             HttpServletRequest wrappedRequest = new KindeHttpRequestWrapper(req, userPrincipal);
             filterChain.doFilter(wrappedRequest,servletResponse);
         }
+    }
+
+    private static AuthorizationUrl startAuthorization(
+            KindeClientSession kindeClientSession,
+            KindeAuthenticationAction kindeAuthenticationAction,
+            HttpServletRequest req,
+            String invitationCode,
+            String connectionId) throws ServletException {
+        if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
+            if (connectionId != null) {
+                return kindeClientSession.login(invitationCode, connectionId);
+            }
+            return invitationCode != null ? kindeClientSession.login(invitationCode) : kindeClientSession.login();
+        }
+        if (kindeAuthenticationAction == KindeAuthenticationAction.REGISTER) {
+            if (connectionId != null) {
+                return kindeClientSession.register(invitationCode, connectionId);
+            }
+            return invitationCode != null ? kindeClientSession.register(invitationCode) : kindeClientSession.register();
+        }
+        if (kindeAuthenticationAction == KindeAuthenticationAction.CREATE_ORG) {
+            String orgName = req.getParameter(ORG_NAME);
+            if (orgName == null || orgName.isBlank()) {
+                throw new ServletException("Must provide org_name query parameter to create an organisation.");
+            }
+            String trimmedOrgName = orgName.trim();
+            if (connectionId != null) {
+                return kindeClientSession.createOrg(trimmedOrgName, invitationCode, connectionId);
+            }
+            return invitationCode != null
+                    ? kindeClientSession.createOrg(trimmedOrgName, invitationCode)
+                    : kindeClientSession.createOrg(trimmedOrgName);
+        }
+        throw new ServletException("Unknown authentication action: " + kindeAuthenticationAction);
+    }
+
+    private static String optionalQueryParam(HttpServletRequest req, String name) {
+        String raw = req.getParameter(name);
+        return (raw != null && !raw.isBlank()) ? raw.trim() : null;
     }
 
     private static KindeClientSession createKindeClientSession(HttpServletRequest req) {
