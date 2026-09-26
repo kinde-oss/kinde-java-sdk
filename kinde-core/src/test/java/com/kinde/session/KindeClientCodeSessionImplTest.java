@@ -2,6 +2,7 @@ package com.kinde.session;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -240,6 +241,21 @@ public class KindeClientCodeSessionImplTest {
         assertNotNull(authorizationUrl1);
         assertNotNull(authorizationUrl1.getUrl());
         assertTrue(authorizationUrl1.getUrl().toString().contains("redirect="));
+    }
+
+    @Test
+    public void testLogoutUrlEncodesRedirectUri() throws Exception {
+        KindeClient kindeClient = KindeClientBuilder.builder()
+                .domain("http://localhost:8089")
+                .clientId("test")
+                .clientSecret("test")
+                .logoutRedirectUri("http://localhost:8080/goodbye?from=app&x=1")
+                .build();
+        KindeClientSession kindeClientSession = kindeClient.initClientSession("test", null);
+        AuthorizationUrl logoutUrl = kindeClientSession.logout();
+
+        assertEquals("http://localhost:8089/logout?redirect=http%3A%2F%2Flocalhost%3A8080%2Fgoodbye%3Ffrom%3Dapp%26x%3D1",
+                logoutUrl.getUrl().toString());
     }
 
     @Test

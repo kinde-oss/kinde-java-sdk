@@ -53,7 +53,7 @@ public class KindeOAuth2AutoConfigTest {
      * Minimal Spring context for the autoconfig under test. {@link KindeOAuth2AutoConfig} is
      * instantiated directly (instead of being picked up via auto-configuration) so we can test
      * its bean-factory methods in isolation, while the {@link KindeSdkClient} chain is mocked
-     * end-to-end so individual tests can re-stub {@code logoutRedirectUri()} per scenario.
+     * end-to-end.
      */
     @TestConfiguration
     public static class MyTestConfig {
@@ -106,17 +106,15 @@ public class KindeOAuth2AutoConfigTest {
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
-    @Autowired
-    private KindeConfig kindeConfig;
-
     // --- oidcLogoutSuccessHandler (covers both branches of the {baseUrl} ternary) --------------
 
     @Test
     public void oidcLogoutSuccessHandlerWithAbsoluteUriDoesNotPrependBaseUrl() throws Exception {
-        when(kindeConfig.logoutRedirectUri()).thenReturn("http://localhost:8080/");
+        KindeOAuth2Properties props = mock(KindeOAuth2Properties.class);
+        when(props.getPostLogoutRedirectUri()).thenReturn("http://localhost:8080/");
 
         OidcClientInitiatedLogoutSuccessHandler handler =
-                kindeOAuth2AutoConfig.oidcLogoutSuccessHandler(clientRegistrationRepository);
+                kindeOAuth2AutoConfig.oidcLogoutSuccessHandler(props, clientRegistrationRepository);
 
         assertNotNull(handler);
         assertEquals("http://localhost:8080/", postLogoutRedirectUriOf(handler),
@@ -125,10 +123,11 @@ public class KindeOAuth2AutoConfigTest {
 
     @Test
     public void oidcLogoutSuccessHandlerWithRelativePathPrependsBaseUrlPlaceholder() throws Exception {
-        when(kindeConfig.logoutRedirectUri()).thenReturn("/post-logout");
+        KindeOAuth2Properties props = mock(KindeOAuth2Properties.class);
+        when(props.getPostLogoutRedirectUri()).thenReturn("/post-logout");
 
         OidcClientInitiatedLogoutSuccessHandler handler =
-                kindeOAuth2AutoConfig.oidcLogoutSuccessHandler(clientRegistrationRepository);
+                kindeOAuth2AutoConfig.oidcLogoutSuccessHandler(props, clientRegistrationRepository);
 
         assertNotNull(handler);
         assertEquals("{baseUrl}/post-logout", postLogoutRedirectUriOf(handler),
