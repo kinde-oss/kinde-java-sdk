@@ -45,9 +45,10 @@ class KindeOAuth2AutoConfig {
 
     @Bean
     @ConditionalOnProperty(name = "kinde.oauth2.post-logout-redirect-uri")
-    OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(ClientRegistrationRepository clientRegistrationRepository) {
+    OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(KindeOAuth2Properties kindeOAuth2Properties,
+                                                                     ClientRegistrationRepository clientRegistrationRepository) {
         OidcClientInitiatedLogoutSuccessHandler successHandler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
-        String logoutUri = kindeSdkClient.getClient().kindeConfig().logoutRedirectUri();
+        String logoutUri = kindeOAuth2Properties.getPostLogoutRedirectUri();
         successHandler.setPostLogoutRedirectUri((logoutUri.startsWith("/") ? "{baseUrl}" : "") + logoutUri);
         return successHandler;
     }
