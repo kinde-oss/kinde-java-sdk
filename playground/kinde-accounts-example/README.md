@@ -16,7 +16,7 @@ The Kinde Accounts API allows front-end applications to query the current user's
 
 1. A Kinde account with a configured application
 2. Your Kinde domain, client ID, and client secret
-3. Java 17 or higher
+3. Java 25 or higher
 4. Maven
 
 ## Configuration
