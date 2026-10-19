@@ -1,6 +1,59 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "timezone": "UTC",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 0,
+  "rebaseWhen": "conflicted",
+  "major": {
+    "dependencyDashboardApproval": true
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "labels": ["security"]
+  },
+  "packageRules": [
+    {
+      "description": "Batch non-major SDK dependency updates into one weekly PR",
+      "matchManagers": ["maven"],
+      "matchFileNames": ["pom.xml", "kinde-*/**"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "SDK non-major dependencies"
+    },
+    {
+      "description": "Auth/crypto libraries get their own PR so they are reviewed, not buried in a batch",
+      "matchManagers": ["maven"],
+      "matchFileNames": ["pom.xml", "kinde-*/**"],
+      "matchPackageNames": [
+        "com.nimbusds:**",
+        "org.springframework.security:**"
+      ],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "auth libraries",
+      "labels": ["security"]
+    },
+    {
+      "description": "Build plugins only touch the build, batch them separately",
+      "matchManagers": ["maven"],
+      "matchDepTypes": ["build"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "Maven build plugins"
+    },
+    {
+      "description": "Playground apps are examples, not shipped: one monthly PR",
+      "matchFileNames": ["playground/**"],
+      "groupName": "playground dependencies",
+      "schedule": ["before 6am on the first day of the month"]
+    },
+    {
+      "description": "GitHub Actions in one PR",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    }
   ]
 }
