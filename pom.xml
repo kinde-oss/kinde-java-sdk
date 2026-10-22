@@ -253,7 +253,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.6</version>
+                    <version>3.6.0</version>
                     <configuration>
                         <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
                     </configuration>
@@ -273,7 +273,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.15.0</version>
+                <version>3.16.0</version>
                 <configuration>
                     <release>17</release>
                     <annotationProcessorPaths>
@@ -377,7 +377,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.11.0</version>
+                        <version>0.12.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
