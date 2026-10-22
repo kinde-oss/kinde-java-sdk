@@ -9,8 +9,8 @@ If you depend on either, here is what changes for you.
 
 ### Baseline requirements
 
-- **Java 17 or later.** Spring Boot 4 raised the minimum JVM. The SDK
-  itself is built on Java 25 but produces Java 17-compatible bytecode.
+- **Java 25 or later.** Spring Boot 4 itself requires Java 17 or later, but
+  this SDK release emits Java 25 bytecode and therefore requires Java 25 at runtime.
 - **Spring Boot 4.x** in your application. Spring Boot 3.x consumers
   should stay on the previous Kinde SDK release line.
 
