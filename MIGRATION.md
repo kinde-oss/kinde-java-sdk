@@ -14,6 +14,19 @@ If you depend on either, here is what changes for you.
 - **Spring Boot 4.x** in your application. Spring Boot 3.x consumers
   should stay on the previous Kinde SDK release line.
 
+### Feature flag and OAuth configuration corrections
+
+- Accounts API feature flag DTOs now expose the underlying boolean, string, or
+  numeric value as text, rather than generated wrapper metadata. Missing values
+  remain `null`. This also corrects boolean feature flag parsing in API fallbacks.
+- When a `kinde` OAuth client registration is configured, its authorization grant
+  type is now read from `authorization-grant-type`, not from the client secret.
+  If the registration omits the grant type, the local SDK property remains the fallback.
+
+Jackson 2 and Spring Framework patch BOMs are imported before Spring Boot's BOM
+so Spring modules and examples retain Jackson Core/Databind 2.22.3 and Spring
+Framework 7.0.9 instead of falling back to Boot-managed older versions.
+
 ### Behaviour change: JWT audience validation is now opt-in
 
 Previously the resource-server JWT validator was hardcoded to require an
