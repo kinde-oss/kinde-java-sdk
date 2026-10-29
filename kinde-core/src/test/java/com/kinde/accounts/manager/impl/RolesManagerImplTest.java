@@ -2,6 +2,7 @@ package com.kinde.accounts.manager.impl;
 
 import com.kinde.accounts.dto.RoleDto;
 import com.kinde.accounts.util.ApiResponseHandler;
+import com.kinde.accounts.util.ApiResponseHandlerImpl;
 import com.kinde.accounts.util.PaginationHelper;
 import org.junit.jupiter.api.Test;
 import org.openapitools.client.ApiException;
@@ -10,12 +11,13 @@ import org.openapitools.client.model.Role;
 import org.openapitools.client.model.RolesResponse;
 
 import java.util.List;
+import java.util.concurrent.CompletionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,14 +43,19 @@ class RolesManagerImplTest {
     }
 
     @Test
-    void reportsApiErrorsAndReturnsEmptyResult() throws ApiException {
+    void completesExceptionallyOnApiFailure() throws ApiException {
         DefaultApi api = mock(DefaultApi.class);
-        ApiResponseHandler responseHandler = mock(ApiResponseHandler.class);
-        when(api.getRoles(null, 100)).thenThrow(new ApiException("offline"));
+        ApiResponseHandler responseHandler = spy(new ApiResponseHandlerImpl());
+        ApiException apiException = new ApiException("offline");
+        when(api.getRoles(null, 100)).thenThrow(apiException);
 
         RolesManagerImpl manager = new RolesManagerImpl(api, mock(PaginationHelper.class), responseHandler);
 
-        assertTrue(manager.getAllRolesAsync().join().isEmpty());
-        verify(responseHandler).handleApiException(any(ApiException.class), eq("get roles"));
+        CompletionException exception = assertThrows(CompletionException.class,
+                () -> manager.getAllRolesAsync().join());
+        assertEquals("Failed to get roles (status 0): " + apiException.getMessage(),
+                exception.getCause().getMessage());
+        assertSame(apiException, exception.getCause().getCause());
+        verify(responseHandler).handleApiException(apiException, "get roles");
     }
 }

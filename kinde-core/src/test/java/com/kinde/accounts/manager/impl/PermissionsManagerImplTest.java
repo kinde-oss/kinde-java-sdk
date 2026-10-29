@@ -3,6 +3,7 @@ package com.kinde.accounts.manager.impl;
 import com.kinde.KindeClientSession;
 import com.kinde.accounts.dto.PermissionDto;
 import com.kinde.accounts.util.ApiResponseHandler;
+import com.kinde.accounts.util.ApiResponseHandlerImpl;
 import org.junit.jupiter.api.Test;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
@@ -12,11 +13,13 @@ import org.openapitools.client.model.PermissionResponse;
 import org.openapitools.client.model.PermissionsResponse;
 
 import java.util.List;
+import java.util.concurrent.CompletionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,19 +54,24 @@ class PermissionsManagerImplTest {
     }
 
     @Test
-    void convertsApiFailureToEmptyList() throws ApiException {
+    void completesExceptionallyOnApiFailure() throws ApiException {
         DefaultApi api = mock(DefaultApi.class);
         ApiClient apiClient = mock(ApiClient.class);
-        ApiResponseHandler responseHandler = mock(ApiResponseHandler.class);
+        ApiResponseHandler responseHandler = spy(new ApiResponseHandlerImpl());
         KindeClientSession session = mock(KindeClientSession.class);
         when(session.getAccessToken()).thenReturn("");
         when(api.getApiClient()).thenReturn(apiClient);
-        when(api.getPermissions(null, 100)).thenThrow(new ApiException("offline"));
+        ApiException apiException = new ApiException("offline");
+        when(api.getPermissions(null, 100)).thenThrow(apiException);
 
         PermissionsManagerImpl manager = new PermissionsManagerImpl(api, responseHandler, session);
 
-        assertEquals(List.of(), manager.getAllPermissionsAsync().join());
+        CompletionException exception = assertThrows(CompletionException.class,
+                () -> manager.getAllPermissionsAsync().join());
+        assertEquals("Failed to get permissions (status 0): " + apiException.getMessage(),
+                exception.getCause().getMessage());
+        assertSame(apiException, exception.getCause().getCause());
         verify(apiClient).setBearerToken((String) null);
-        verify(responseHandler).handleApiException(any(ApiException.class), eq("get permissions"));
+        verify(responseHandler).handleApiException(apiException, "get permissions");
     }
 }
