@@ -82,7 +82,7 @@ class DtoConverterTest {
         assertEquals("dark-mode", featureFlagDto.getKey());
         assertEquals("Dark mode", featureFlagDto.getName());
         assertEquals("boolean", featureFlagDto.getType());
-        assertEquals(featureFlag.getValue().toString(), featureFlagDto.getValue());
+        assertEquals("true", featureFlagDto.getValue());
         assertTrue(featureFlagDto.isEnabled());
         assertNull(featureFlagDto.getDescription());
         assertNull(DtoConverter.toFeatureFlagDto(null));
@@ -106,5 +106,27 @@ class DtoConverterTest {
         assertNull(DtoConverter.toOrganizationDto(null));
         assertNull(DtoConverter.toOrganizationDtos(null));
         assertEquals("org-id", DtoConverter.toOrganizationDtos(List.of(organization)).get(0).getId());
+    }
+
+    @Test
+    void convertsUnderlyingFeatureFlagValuesWithoutWrapperMetadata() {
+        FeatureFlag featureFlag = new FeatureFlag();
+
+        featureFlag.setValue(new FeatureFlagValue(Boolean.FALSE));
+        assertEquals("false", DtoConverter.toFeatureFlagDto(featureFlag).getValue());
+
+        featureFlag.setValue(new FeatureFlagValue("enabled"));
+        assertEquals("enabled", DtoConverter.toFeatureFlagDto(featureFlag).getValue());
+
+        featureFlag.setValue(new FeatureFlagValue(new BigDecimal("42")));
+        assertEquals("42", DtoConverter.toFeatureFlagDto(featureFlag).getValue());
+    }
+
+    @Test
+    void preservesNullForFeatureFlagWrapperWithoutAnActualValue() {
+        FeatureFlag featureFlag = new FeatureFlag();
+        featureFlag.setValue(new FeatureFlagValue());
+
+        assertNull(DtoConverter.toFeatureFlagDto(featureFlag).getValue());
     }
 }

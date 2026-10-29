@@ -8,6 +8,7 @@ import org.openapitools.client.ApiException;
 import org.openapitools.client.api.DefaultApi;
 import org.openapitools.client.model.FeatureFlag;
 import org.openapitools.client.model.FeatureFlagResponse;
+import org.openapitools.client.model.FeatureFlagValue;
 import org.openapitools.client.model.FeatureFlagsResponse;
 import org.openapitools.client.model.FeatureFlagsResponseData;
 
@@ -31,7 +32,8 @@ class FeatureFlagsManagerImplTest {
         FeatureFlag flag = new FeatureFlag()
                 .key("new-dashboard")
                 .name("New dashboard")
-                .type("boolean");
+                .type("boolean")
+                .value(new FeatureFlagValue(Boolean.TRUE));
         when(api.getFeatureFlags(null, 100)).thenReturn(listResponse);
         when(listResponse.getData()).thenReturn(listData);
         when(listData.getFeatureFlags()).thenReturn(List.of(flag));
@@ -47,8 +49,10 @@ class FeatureFlagsManagerImplTest {
         assertEquals("new-dashboard", flags.get(0).getKey());
         assertEquals("New dashboard", flags.get(0).getName());
         assertTrue(flags.get(0).isEnabled());
+        assertEquals("true", flags.get(0).getValue());
         FeatureFlagDto result = manager.getFeatureFlagAsync("new-dashboard").join();
         assertEquals("boolean", result.getType());
+        assertEquals("true", result.getValue());
         verify(responseHandler).validateKey("new-dashboard", "feature flag");
     }
 }
