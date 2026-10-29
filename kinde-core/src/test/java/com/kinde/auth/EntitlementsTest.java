@@ -54,10 +54,27 @@ class EntitlementsTest {
         assertFalse(entitlements.hasAllEntitlements(List.of()));
         assertFalse(entitlements.hasAnyEntitlement(List.of("missing")));
         assertFalse(entitlements.hasAllEntitlements(List.of("missing")));
+        Entitlements withoutSession = new Entitlements() {
+            @Override
+            protected Optional<KindeClientSession> getSession() {
+                return Optional.empty();
+            }
+        };
+        assertNull(withoutSession.getEntitlement("missing"));
+        assertTrue(withoutSession.getAllEntitlements().isEmpty());
+    }
+
+    @Test
+    void rejectsInvalidKeysBeforeAccessingSession() {
+        Entitlements entitlements = new Entitlements() {
+            @Override
+            protected Optional<KindeClientSession> getSession() {
+                return fail("Invalid entitlement keys must not access the session");
+            }
+        };
+
         assertNull(entitlements.getEntitlement(null));
         assertNull(entitlements.getEntitlement("  "));
-        assertNull(entitlements.getEntitlement("missing"));
-        assertTrue(entitlements.getAllEntitlements().isEmpty());
     }
 
     private static final class TestEntitlements extends Entitlements {
