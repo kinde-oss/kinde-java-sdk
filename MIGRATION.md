@@ -24,7 +24,7 @@ If you depend on either, here is what changes for you.
   If the registration omits the grant type, the local SDK property remains the fallback.
 
 Jackson 2 and Spring Framework patch BOMs are imported before Spring Boot's BOM
-so Spring modules and examples retain Jackson Core/Databind 2.22.3 and Spring
+so Spring modules and examples retain Jackson Core/Databind 2.22.4 and Spring
 Framework 7.0.9 instead of falling back to Boot-managed older versions.
 
 ### Behaviour change: JWT audience validation is now opt-in
