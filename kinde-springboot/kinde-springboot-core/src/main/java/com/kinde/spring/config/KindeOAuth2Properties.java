@@ -102,7 +102,7 @@ public final class KindeOAuth2Properties implements Validator {
     }
 
     public String getAuthorizationGrantType() {
-        return getRegistration().map(OAuth2ClientProperties.Registration::getClientSecret)
+        return getRegistration().map(OAuth2ClientProperties.Registration::getAuthorizationGrantType)
                 .orElse(authorizationGrantType);
     }
 
