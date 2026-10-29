@@ -50,6 +50,33 @@ class KindeOAuth2PropertiesTest {
     }
 
     @Test
+    void readsAuthorizationGrantTypeFromConfiguredRegistration() {
+        OAuth2ClientProperties clientProperties = new OAuth2ClientProperties();
+        OAuth2ClientProperties.Registration registration = new OAuth2ClientProperties.Registration();
+        registration.setClientSecret("registration-secret");
+        registration.setAuthorizationGrantType("authorization_code");
+        clientProperties.getRegistration().put("kinde", registration);
+        KindeOAuth2Properties properties = new KindeOAuth2Properties(clientProperties);
+        properties.setAuthorizationGrantType("client_credentials");
+
+        assertEquals("authorization_code", properties.getAuthorizationGrantType());
+        assertEquals("registration-secret", properties.getClientSecret());
+    }
+
+    @Test
+    void fallsBackToLocalGrantTypeWhenRegistrationOmitsIt() {
+        OAuth2ClientProperties clientProperties = new OAuth2ClientProperties();
+        OAuth2ClientProperties.Registration registration = new OAuth2ClientProperties.Registration();
+        registration.setClientSecret("registration-secret");
+        clientProperties.getRegistration().put("kinde", registration);
+        KindeOAuth2Properties properties = new KindeOAuth2Properties(clientProperties);
+        properties.setAuthorizationGrantType("client_credentials");
+
+        assertEquals("client_credentials", properties.getAuthorizationGrantType());
+        assertEquals("registration-secret", properties.getClientSecret());
+    }
+
+    @Test
     void proxyPropertiesExposeConfiguredValues() {
         KindeOAuth2Properties.Proxy proxy = new KindeOAuth2Properties.Proxy();
         proxy.setHost("proxy.example");
