@@ -16,7 +16,7 @@ Run the app, go to `http://localhost:8080` and click sign up to add your new Kin
 
 ## Requirements
 
-- Java 25 or later
+- Java 17 or later
 - Maven 3.6+
 - Spring Boot 4.0.x (currently 4.0.6 — see `pom.xml`)
 

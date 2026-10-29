@@ -52,7 +52,7 @@ class DtoConverterTest {
         assertEquals("Read data", permissionDto.getDescription());
         assertNull(DtoConverter.toPermissionDto(null));
         assertNull(DtoConverter.toPermissionDtos(null));
-        assertEquals("read", DtoConverter.toPermissionDtos(List.of(permission)).getFirst().getName());
+        assertEquals("read", DtoConverter.toPermissionDtos(List.of(permission)).get(0).getName());
 
         Role role = new Role();
         role.setId("role-id");
@@ -67,7 +67,7 @@ class DtoConverterTest {
         assertNull(roleDto.getPermissions());
         assertNull(DtoConverter.toRoleDto(null));
         assertNull(DtoConverter.toRoleDtos(null));
-        assertEquals("admin", DtoConverter.toRoleDtos(List.of(role)).getFirst().getName());
+        assertEquals("admin", DtoConverter.toRoleDtos(List.of(role)).get(0).getName());
     }
 
     @Test
@@ -87,7 +87,7 @@ class DtoConverterTest {
         assertNull(featureFlagDto.getDescription());
         assertNull(DtoConverter.toFeatureFlagDto(null));
         assertNull(DtoConverter.toFeatureFlagDtos(null));
-        assertEquals("dark-mode", DtoConverter.toFeatureFlagDtos(List.of(featureFlag)).getFirst().getKey());
+        assertEquals("dark-mode", DtoConverter.toFeatureFlagDtos(List.of(featureFlag)).get(0).getKey());
 
         FeatureFlag withoutValue = new FeatureFlag();
         assertNull(DtoConverter.toFeatureFlagDto(withoutValue).getValue());
@@ -105,6 +105,6 @@ class DtoConverterTest {
         assertFalse(organizationDto.isDefault());
         assertNull(DtoConverter.toOrganizationDto(null));
         assertNull(DtoConverter.toOrganizationDtos(null));
-        assertEquals("org-id", DtoConverter.toOrganizationDtos(List.of(organization)).getFirst().getId());
+        assertEquals("org-id", DtoConverter.toOrganizationDtos(List.of(organization)).get(0).getId());
     }
 }

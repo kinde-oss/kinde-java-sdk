@@ -44,9 +44,9 @@ class UserInfoManagerImplTest {
 
         List<OrganizationDto> organizations = manager.getUserOrganizationsAsync().join();
         assertEquals(1, organizations.size());
-        assertEquals("org-id", organizations.getFirst().getId());
-        assertEquals("Example", organizations.getFirst().getName());
-        assertEquals("example", organizations.getFirst().getCode());
+        assertEquals("org-id", organizations.get(0).getId());
+        assertEquals("Example", organizations.get(0).getName());
+        assertEquals("example", organizations.get(0).getCode());
         assertSame(profile, manager.getUserProfileAsync().join());
         assertSame(currentOrganization, manager.getCurrentOrganizationAsync().join());
     }

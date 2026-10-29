@@ -42,7 +42,7 @@ class PermissionsManagerImplTest {
         PermissionsManagerImpl manager = new PermissionsManagerImpl(api, responseHandler, session);
 
         List<PermissionDto> permissions = manager.getAllPermissionsAsync().join();
-        assertEquals("read-id", permissions.getFirst().getId());
+        assertEquals("read-id", permissions.get(0).getId());
         PermissionDto result = manager.getPermissionAsync("read").join();
         assertEquals("read", result.getName());
         assertEquals("read-id", result.getKey());

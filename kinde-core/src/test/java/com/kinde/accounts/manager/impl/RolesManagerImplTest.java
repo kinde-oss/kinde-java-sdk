@@ -35,9 +35,9 @@ class RolesManagerImplTest {
         List<RoleDto> roles = manager.getAllRolesAsync().join();
 
         assertEquals(1, roles.size());
-        assertEquals("role-id", roles.getFirst().getId());
-        assertEquals("admin", roles.getFirst().getName());
-        assertEquals("role-id", roles.getFirst().getKey());
+        assertEquals("role-id", roles.get(0).getId());
+        assertEquals("admin", roles.get(0).getName());
+        assertEquals("role-id", roles.get(0).getKey());
     }
 
     @Test

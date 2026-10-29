@@ -44,9 +44,9 @@ class FeatureFlagsManagerImplTest {
 
         List<FeatureFlagDto> flags = manager.getAllFeatureFlagsAsync().join();
         assertEquals(1, flags.size());
-        assertEquals("new-dashboard", flags.getFirst().getKey());
-        assertEquals("New dashboard", flags.getFirst().getName());
-        assertTrue(flags.getFirst().isEnabled());
+        assertEquals("new-dashboard", flags.get(0).getKey());
+        assertEquals("New dashboard", flags.get(0).getName());
+        assertTrue(flags.get(0).isEnabled());
         FeatureFlagDto result = manager.getFeatureFlagAsync("new-dashboard").join();
         assertEquals("boolean", result.getType());
         verify(responseHandler).validateKey("new-dashboard", "feature flag");
