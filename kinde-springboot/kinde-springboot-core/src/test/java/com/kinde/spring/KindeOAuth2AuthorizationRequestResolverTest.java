@@ -245,4 +245,52 @@ class KindeOAuth2AuthorizationRequestResolverTest {
         assertNotNull(authRequest);
         assertEquals("conn_client_reg", authRequest.getAdditionalParameters().get("connection_id"));
     }
+
+    private static MockHttpServletRequest authorizationRequest() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        return request;
+    }
+
+    @Test
+    @DisplayName("Resolve with acr_values and max_age forwards normalized step-up params")
+    void resolveWithStepUpParamsForwardsThem() {
+        MockHttpServletRequest request = authorizationRequest();
+        request.setParameter("acr_values", " MFA ");
+        request.setParameter("max_age", "0300");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertNotNull(authRequest);
+        assertEquals("mfa", authRequest.getAdditionalParameters().get("acr_values"));
+        assertEquals("300", authRequest.getAdditionalParameters().get("max_age"));
+        String authUri = authRequest.getAuthorizationRequestUri();
+        assertTrue(authUri.contains("acr_values=mfa"), "Redirect URI should contain acr_values");
+        assertTrue(authUri.contains("max_age=300"), "Redirect URI should contain max_age");
+    }
+
+    @Test
+    @DisplayName("Resolve with max_age=0 forwards it, and blank step-up params are omitted")
+    void resolveWithMaxAgeZeroAndBlankParams() {
+        MockHttpServletRequest request = authorizationRequest();
+        request.setParameter("max_age", "0");
+        request.setParameter("acr_values", " ");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertEquals("0", authRequest.getAdditionalParameters().get("max_age"));
+        assertNull(authRequest.getAdditionalParameters().get("acr_values"));
+    }
+
+    @Test
+    @DisplayName("Resolve rejects an unrecognised acr_values or a malformed max_age")
+    void resolveRejectsInvalidStepUpParams() {
+        MockHttpServletRequest unknownAcr = authorizationRequest();
+        unknownAcr.setParameter("acr_values", "gold");
+        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(unknownAcr));
+
+        MockHttpServletRequest badMaxAge = authorizationRequest();
+        badMaxAge.setParameter("max_age", "undefined");
+        assertThrows(IllegalArgumentException.class, () -> resolver.resolve(badMaxAge));
+    }
 }

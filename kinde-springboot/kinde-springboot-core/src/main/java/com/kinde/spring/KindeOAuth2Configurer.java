@@ -149,9 +149,13 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
     }
 
     private void configureResourceServerForJwtValidation(HttpSecurity http, KindeOAuth2Properties kindeOAuth2Properties) {
-        http.oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(
-                        new KindeJwtAuthenticationConverter(kindeOAuth2Properties.getPermissionsClaim()))));
+        // The access denied handler answers a failed step-up check with the RFC 9470 challenge
+        // (401 insufficient_user_authentication) and otherwise behaves like Spring's default
+        http.oauth2ResourceServer(oauth2 -> {
+            oauth2.accessDeniedHandler(new KindeStepUpAccessDeniedHandler());
+            oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(
+                    new KindeJwtAuthenticationConverter(kindeOAuth2Properties.getPermissionsClaim())));
+        });
     }
 
     @SuppressWarnings("rawtypes")
