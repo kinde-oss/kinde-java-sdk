@@ -13,6 +13,10 @@ import com.kinde.client.OidcMetaData;
 import com.kinde.config.KindeConfig;
 import com.kinde.entitlements.KindeEntitlements;
 import com.kinde.exceptions.KindeClientSessionException;
+import com.kinde.exceptions.StepUpNotSupportedException;
+import com.kinde.stepup.AcrValue;
+import com.kinde.stepup.StepUp;
+import com.kinde.stepup.StepUpRequest;
 import com.kinde.token.KindeTokens;
 import com.kinde.token.KindeTokenFactoryImpl;
 import com.kinde.token.KindeToken;
@@ -201,7 +205,20 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
     @Override
     @SneakyThrows
-    public AuthorizationUrl authorizationUrlWithParameters(Map<String, String> parameters) {
+    public AuthorizationUrl authorizationUrlWithParameters(Map<String, String> requestParameters) {
+        Map<String, String> parameters = requestParameters == null ? new HashMap<>() : new HashMap<>(requestParameters);
+
+        // Never send an unset or malformed step-up parameter: Kinde reads a malformed
+        // max_age as "re-authenticate", which would hide the bug
+        String acrValues = StepUp.normalizeAcrValuesParameter(parameters.remove(KindeRequestParameters.ACR_VALUES));
+        if (acrValues != null) {
+            parameters.put(KindeRequestParameters.ACR_VALUES, acrValues);
+        }
+        String maxAge = StepUp.normalizeMaxAgeParameter(parameters.remove(KindeRequestParameters.MAX_AGE));
+        if (maxAge != null) {
+            parameters.put(KindeRequestParameters.MAX_AGE, maxAge);
+        }
+
         URI authzEndpoint = this.oidcMetaData.getOpMetadata().getAuthorizationEndpointURI();
         ClientID clientID = new ClientID(this.kindeConfig.clientId());
         Scope scope = new Scope();
@@ -245,7 +262,73 @@ public class KindeClientSessionImpl implements KindeClientSession {
 
         AuthorizationRequest request = builder.build();
 
-        return new AuthorizationUrl(request.toURI().toURL(), codeVerifier);
+        return new AuthorizationUrl(
+                request.toURI().toURL(),
+                codeVerifier,
+                state.getValue(),
+                acrValues,
+                maxAge == null ? null : Integer.valueOf(maxAge));
+    }
+
+    @Override
+    public AuthorizationUrl stepUp(StepUpRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("stepUp requires a StepUpRequest");
+        }
+        Map<String, String> parameters = new HashMap<>(request.getParameters());
+
+        // Kinde cannot collect a factor without showing a screen
+        if (StepUp.promptIncludesNone(parameters.get(KindeRequestParameters.PROMPT))) {
+            throw new IllegalArgumentException(
+                    "stepUp cannot be used with prompt=none: step-up authentication is interactive");
+        }
+
+        // Work out what will be sent. Raw parameters override the typed options.
+        String acrValues = request.getAcrValues().orElse(null);
+        String passthroughAcr = StepUp.normalizeAcrValuesParameter(parameters.remove(KindeRequestParameters.ACR_VALUES));
+        if (passthroughAcr != null) {
+            // Kinde silently ignores unrecognised values, which would skip the step-up
+            if (AcrValue.strongest(passthroughAcr).isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Unsupported acr_values '" + passthroughAcr + "'. Expected 'mfa' or 'phr'");
+            }
+            acrValues = passthroughAcr;
+        }
+
+        String maxAge = request.getMaxAge().map(String::valueOf).orElse(null);
+        String passthroughMaxAge = StepUp.normalizeMaxAgeParameter(parameters.remove(KindeRequestParameters.MAX_AGE));
+        if (passthroughMaxAge != null) {
+            maxAge = passthroughMaxAge;
+        }
+
+        if (acrValues == null && maxAge == null) {
+            throw new IllegalArgumentException("stepUp requires acr values, a max age, or both");
+        }
+
+        // Kinde ignores acr_values and max_age unless the environment advertises step-up.
+        // Sending them anyway would bring the user back unchanged, and a guard that asks
+        // again would redirect in a loop.
+        if (!isStepUpSupported()) {
+            throw new StepUpNotSupportedException(
+                    "Step-up authentication is not supported on this Kinde environment: its discovery "
+                            + "document has no acr_values_supported, so acr_values and max_age would be ignored. "
+                            + "To force a fresh sign-in there, start a login with prompt=login.");
+        }
+
+        if (acrValues != null) {
+            parameters.put(KindeRequestParameters.ACR_VALUES, acrValues);
+        }
+        if (maxAge != null) {
+            parameters.put(KindeRequestParameters.MAX_AGE, maxAge);
+        }
+        parameters.put("supports_reauth", "true");
+        return authorizationUrlWithParameters(parameters);
+    }
+
+    @Override
+    public boolean isStepUpSupported() {
+        List<?> acrs = this.oidcMetaData.getOpMetadata().getACRs();
+        return acrs != null && !acrs.isEmpty();
     }
 
     @Override

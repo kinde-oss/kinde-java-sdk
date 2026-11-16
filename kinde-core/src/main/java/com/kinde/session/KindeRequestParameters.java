@@ -8,4 +8,7 @@ public class KindeRequestParameters {
     public final static String INVITATION_CODE = "invitation_code";
     public final static String IS_INVITATION = "is_invitation";
     public final static String CONNECTION_ID = "connection_id";
+    public final static String ACR_VALUES = "acr_values";
+    public final static String MAX_AGE = "max_age";
+    public final static String PROMPT = "prompt";
 }
