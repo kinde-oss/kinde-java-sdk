@@ -1,10 +1,12 @@
 package com.kinde.spring;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.kinde.session.KindeRequestParameters;
 import com.kinde.stepup.StepUp;
@@ -26,9 +28,12 @@ import static org.springframework.security.oauth2.client.web.OAuth2Authorization
  * <p>For step-up authentication (RFC 9470), {@code acr_values} ({@code mfa} or {@code phr})
  * and {@code max_age} (seconds) are validated and forwarded, so
  * {@code /oauth2/authorization/kinde?acr_values=mfa&max_age=300} asks an already signed-in
- * user for a stronger or more recent authentication. Invalid values are rejected with an
- * {@link IllegalArgumentException}: Kinde would silently ignore an unknown {@code acr_values}
- * and read a malformed {@code max_age} as "re-authenticate".
+ * user for a stronger or more recent authentication. Invalid values are rejected with a
+ * {@link ResponseStatusException} for HTTP 400: Kinde would silently ignore an unknown
+ * {@code acr_values} and read a malformed {@code max_age} as "re-authenticate". Spring's
+ * redirect filter reports any resolver failure as HTTP 500 unless
+ * {@link KindeAuthorizationRequestFailureHandler} is set on it, which
+ * {@link Kinde#configureOAuth2WithPkce} does.
  */
 public class KindeOAuth2AuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
 
@@ -56,7 +61,11 @@ public class KindeOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
 
     private OAuth2AuthorizationRequest addKindeParameters(
             HttpServletRequest request, OAuth2AuthorizationRequest authorizationRequest) {
-        return withKindeParameters(authorizationRequest, request::getParameter);
+        try {
+            return withKindeParameters(authorizationRequest, request::getParameter);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     /**

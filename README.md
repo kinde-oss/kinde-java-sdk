@@ -274,7 +274,7 @@ When Kinde answers with an error, both throw a `ServletException` whose root cau
 ```
 
 ##### Spring Boot
-For a browser application, send the user to `/oauth2/authorization/kinde?acr_values=mfa&max_age=300`. The starter validates and forwards both parameters.
+For a browser application, send the user to `/oauth2/authorization/kinde?acr_values=mfa&max_age=300`. The starter validates and forwards both parameters, and answers invalid values with HTTP 400.
 
 For an API, check the verified access token on every request. A failed check is answered with `401` and `WWW-Authenticate: Bearer error="insufficient_user_authentication", acr_values="mfa", max_age="300"`:
 ```java

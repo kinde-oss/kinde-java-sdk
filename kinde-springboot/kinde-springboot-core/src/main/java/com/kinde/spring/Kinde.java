@@ -1,9 +1,11 @@
 package com.kinde.spring;
 
+import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 
 public class Kinde {
 
@@ -28,8 +30,17 @@ public class Kinde {
     public static HttpSecurity configureOAuth2WithPkce(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
         KindeOAuth2AuthorizationRequestResolver authorizationRequestResolver =
                 new KindeOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
-        http.oauth2Login(oauth2 -> oauth2
-                .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(authorizationRequestResolver)));
+        http.oauth2Login(oauth2 -> {
+            oauth2.authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(authorizationRequestResolver));
+            // Report invalid step-up parameters as HTTP 400 instead of Spring's blanket HTTP 500
+            oauth2.withObjectPostProcessor(new ObjectPostProcessor<OAuth2AuthorizationRequestRedirectFilter>() {
+                @Override
+                public <O extends OAuth2AuthorizationRequestRedirectFilter> O postProcess(O filter) {
+                    filter.setAuthenticationFailureHandler(new KindeAuthorizationRequestFailureHandler());
+                    return filter;
+                }
+            });
+        });
 
         return http;
     }
