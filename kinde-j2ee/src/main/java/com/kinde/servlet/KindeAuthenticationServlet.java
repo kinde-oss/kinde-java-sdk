@@ -3,6 +3,7 @@ package com.kinde.servlet;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
+import com.kinde.callback.KindeCallbackSupport;
 import com.kinde.constants.KindeAuthenticationAction;
 import com.kinde.principal.KindePrincipal;
 import com.kinde.token.KindeTokens;
@@ -46,6 +47,12 @@ public class KindeAuthenticationServlet extends HttpServlet {
         }
 
         String code = req.getParameter("code");
+        if (errorParam != null && !errorParam.isBlank()) {
+            // Kinde returned an OAuth error (for example unmet_authentication_requirements after
+            // a step-up). The state is validated first; the session's tokens are left untouched.
+            KindeCallbackSupport.validateCallback(req, KindeCallbackSupport.pendingAuthorization(req));
+            throw new ServletException("Authorization failed: " + errorParam);
+        }
         String invitationCode = optionalQueryParam(req, INVITATION_CODE);
         String connectionId = optionalQueryParam(req, CONNECTION_ID);
         if (code == null) {
@@ -62,8 +69,9 @@ public class KindeAuthenticationServlet extends HttpServlet {
             resp.sendRedirect(authorizationUrl.getUrl().toString());
         } else {
             // Exchange the authorization code for an access token
+            AuthorizationUrl authorizationUrl = KindeCallbackSupport.pendingAuthorization(req);
+            KindeCallbackSupport.validateCallback(req, authorizationUrl);
             try {
-                AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
                 String postLoginUrl = (String)req.getSession().getAttribute(POST_LOGIN_URL);
                 KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
                 KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
@@ -73,7 +81,11 @@ public class KindeAuthenticationServlet extends HttpServlet {
                 Principal principal = new KindePrincipal(kindeTokens.getAccessToken().getUser(), kindeTokens.getAccessToken().getPermissions(), userInfo);
                 req.getSession().setAttribute(AUTHENTICATED_USER,principal);
                 req.getSession().setAttribute(ID_TOKEN,kindeTokens.getIdToken());
+                // The new tokens replace all of the stored ones, so nothing issued before this
+                // authorization (such as a refresh token from before a step-up) is left behind
                 req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
+                // Single use: the same callback cannot be replayed
+                req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
 
                 resp.sendRedirect(postLoginUrl);
             } catch (Exception e) {
@@ -106,6 +118,10 @@ public class KindeAuthenticationServlet extends HttpServlet {
             return connectionId != null
                     ? kindeClientSession.createOrg(orgName.trim(), invitationCode, connectionId)
                     : kindeClientSession.createOrg(orgName.trim(), invitationCode);
+        }
+        if (kindeAuthenticationAction == KindeAuthenticationAction.STEP_UP) {
+            return KindeCallbackSupport.startStepUp(
+                    kindeClientSession, optionalQueryParam(req, ACR_VALUES), optionalQueryParam(req, MAX_AGE));
         }
         throw new ServletException("Unknown authentication action: " + kindeAuthenticationAction);
     }
