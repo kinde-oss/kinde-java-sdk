@@ -11,6 +11,7 @@ import com.kinde.stepup.StepUp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers.withPkce;
 
@@ -55,15 +56,27 @@ public class KindeOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
 
     private OAuth2AuthorizationRequest addKindeParameters(
             HttpServletRequest request, OAuth2AuthorizationRequest authorizationRequest) {
+        return withKindeParameters(authorizationRequest, request::getParameter);
+    }
+
+    /**
+     * Adds the Kinde-specific parameters found on the originating request to an authorization
+     * request. Shared with the reactive resolver.
+     *
+     * @param requestParameter looks up a query parameter of the originating request
+     * @throws IllegalArgumentException if {@code acr_values} or {@code max_age} is invalid
+     */
+    static OAuth2AuthorizationRequest withKindeParameters(
+            OAuth2AuthorizationRequest authorizationRequest, Function<String, String> requestParameter) {
         if (authorizationRequest == null) {
             return null;
         }
-        String invitationCode = request.getParameter(KindeRequestParameters.INVITATION_CODE);
-        String connectionId = request.getParameter(KindeRequestParameters.CONNECTION_ID);
-        String acrValuesParam = request.getParameter(KindeRequestParameters.ACR_VALUES);
+        String invitationCode = requestParameter.apply(KindeRequestParameters.INVITATION_CODE);
+        String connectionId = requestParameter.apply(KindeRequestParameters.CONNECTION_ID);
+        String acrValuesParam = requestParameter.apply(KindeRequestParameters.ACR_VALUES);
         String acrValues = acrValuesParam == null || acrValuesParam.isBlank()
                 ? null : StepUp.normalizeAcrValues(acrValuesParam);
-        String maxAge = StepUp.normalizeMaxAgeParameter(request.getParameter(KindeRequestParameters.MAX_AGE));
+        String maxAge = StepUp.normalizeMaxAgeParameter(requestParameter.apply(KindeRequestParameters.MAX_AGE));
         boolean hasInvitation = invitationCode != null && !invitationCode.isBlank();
         boolean hasConnectionId = connectionId != null && !connectionId.isBlank();
         if (!hasInvitation && !hasConnectionId && acrValues == null && maxAge == null) {
@@ -74,7 +87,7 @@ public class KindeOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
             additionalParams.put(KindeRequestParameters.INVITATION_CODE, invitationCode);
             additionalParams.put(KindeRequestParameters.IS_INVITATION, "true");
         }
-        if (hasConnectionId && connectionId != null) {
+        if (hasConnectionId) {
             additionalParams.put(KindeRequestParameters.CONNECTION_ID, connectionId.trim());
         }
         if (acrValues != null) {

@@ -40,9 +40,13 @@ class ReactiveKindeOAuth2ResourceServerHttpServerAutoConfig {
         public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof ServerHttpSecurity) {
                 final ServerHttpSecurity http = (ServerHttpSecurity) bean;
-                http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
-                        .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
-                                new KindeJwtAuthenticationConverter(kindeOAuth2Properties.getPermissionsClaim())))));
+                http.oauth2ResourceServer(oauth2 -> {
+                    // Answers a failed step-up check with the RFC 9470 challenge
+                    oauth2.accessDeniedHandler(new KindeStepUpServerAccessDeniedHandler());
+                    oauth2.jwt(jwt -> jwt
+                            .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
+                                    new KindeJwtAuthenticationConverter(kindeOAuth2Properties.getPermissionsClaim()))));
+                });
             }
             return bean;
         }

@@ -284,6 +284,14 @@ http.authorizeHttpRequests(requests -> requests
 ```
 or, inside a controller, `KindeStepUp.require(jwt, AcrValue.MFA, 300)`. If you configure `oauth2ResourceServer` yourself, register `new KindeStepUpAccessDeniedHandler()` as its access denied handler.
 
+Reactive (WebFlux) applications get the same behaviour. `/oauth2/authorization/kinde` forwards `acr_values` and `max_age` (and `invitation_code` and `connection_id`), and an API is protected with `ReactiveKindeStepUp`:
+```java
+http.authorizeExchange(exchanges -> exchanges
+        .pathMatchers("/api/transfers/**").access(ReactiveKindeStepUp.requires(AcrValue.MFA, 300))
+        .anyExchange().authenticated());
+```
+If you configure the reactive `oauth2ResourceServer` yourself, register `new KindeStepUpServerAccessDeniedHandler()` as its access denied handler.
+
 ## Migration
 [Follow the migration guide](./MIGRATION.md)
 

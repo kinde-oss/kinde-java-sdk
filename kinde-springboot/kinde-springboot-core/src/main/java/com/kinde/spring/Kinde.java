@@ -4,9 +4,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver;
-
-import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers.withPkce;
 
 public class Kinde {
 
@@ -39,24 +36,21 @@ public class Kinde {
 
 
     /**
-     * Configures the {@code http} with an OAuth2 Login that supports PKCE.
-     * <p>
-     * <b>NOTE:</b> This reactive overload does not currently forward {@code invitation_code}
-     * or {@code connection_id} parameters to the authorization endpoint. Those are only
-     * supported via the servlet-based
+     * Configures the {@code http} with an OAuth2 Login that supports PKCE, invitation code,
+     * connection ID and step-up authentication handling, like the servlet-based
      * {@link #configureOAuth2WithPkce(HttpSecurity, ClientRegistrationRepository)} overload.
-     * If you need them in a reactive application, implement a custom
-     * {@code ServerOAuth2AuthorizationRequestResolver} that mirrors the logic in
-     * {@link KindeOAuth2AuthorizationRequestResolver}.
+     * <p>
+     * The {@code invitation_code}, {@code connection_id}, {@code acr_values} and {@code max_age}
+     * query parameters of the originating request are forwarded to the authorization endpoint
+     * (see {@link ReactiveKindeOAuth2AuthorizationRequestResolver}).
      *
      * @param http the ServerHttpSecurity to configure
      * @param clientRegistrationRepository the reactive repository bean
      * @return the {@code http} to allow method chaining
      */
     public static ServerHttpSecurity configureOAuth2WithPkce(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
-        DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver =
-                new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
-        authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
+        ReactiveKindeOAuth2AuthorizationRequestResolver authorizationRequestResolver =
+                new ReactiveKindeOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
         http.oauth2Login(oauth2 -> oauth2.authorizationRequestResolver(authorizationRequestResolver));
 
         return http;
