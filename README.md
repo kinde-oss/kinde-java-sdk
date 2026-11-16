@@ -206,6 +206,84 @@ KindeClient kindeClient = KindeClientBuilder
 KindeTokens tokens = kindeClient.getKindeClient().initClientSession(code,authorizationUrl).retrieveTokens();
 ```
 
+### Step-up Authentication
+
+Step-up authentication ([RFC 9470](https://www.rfc-editor.org/rfc/rfc9470)) asks a user who is already signed in for a stronger or more recent authentication before a sensitive action. Kinde collects only what is missing and the user keeps their session. See the [Kinde documentation](https://docs.kinde.com/developer-tools/about/using-kinde-without-an-sdk/#step-up-authentication).
+
+| Requirement | Meaning |
+| --- | --- |
+| `AcrValue.MFA` (`acr_values=mfa`) | A second factor was verified |
+| `AcrValue.PHR` (`acr_values=phr`) | A phishing-resistant passkey with user verification. Also meets `MFA` |
+| `max_age` | Maximum age, in seconds, of the user's last authentication |
+
+Kinde omits the `acr` claim for a single-factor sign-in, so an absent `acr` meets neither `MFA` nor `PHR`.
+
+##### Check the session, then step up
+```java
+KindeTokens tokens = (KindeTokens) req.getSession().getAttribute("KINDE_TOKENS");
+
+if (!tokens.getAuthenticationContext().satisfies(AcrValue.MFA, 300)) {
+    AuthorizationUrl authorizationUrl = kindeClientSession.stepUp(StepUpRequest.of(AcrValue.MFA, 300));
+    req.getSession().setAttribute("AuthorizationUrl", authorizationUrl);
+    resp.sendRedirect(authorizationUrl.getUrl().toString());
+    return;
+}
+```
+`stepUp()` builds a normal authorization code + PKCE request with `acr_values` and/or `max_age`. It throws `IllegalArgumentException` for an invalid request (including `prompt=none`, because a step-up is interactive) and `StepUpNotSupportedException` when the environment's discovery document has no `acr_values_supported`; Kinde would ignore the parameters there. `kindeClientSession.isStepUpSupported()` tells you in advance.
+
+##### Handle the callback
+```java
+AuthorizationUrl pending = (AuthorizationUrl) req.getSession().getAttribute("AuthorizationUrl");
+try {
+    // Checks the state first, then throws if Kinde returned an error
+    AuthorizationCallback.validate(pending, req.getParameter("state"),
+            req.getParameter("error"), req.getParameter("error_description"));
+} catch (UnmetAuthenticationRequirementsException e) {
+    // Final answer: the user has no MFA factor or passkey. Don't retry, don't sign them out.
+    resp.sendRedirect("/step-up-unavailable");
+    return;
+}
+KindeTokens tokens = kindeClient.initClientSession(req.getParameter("code"), pending).retrieveTokens();
+// Replace ALL of the session's tokens. Refreshing a token issued before the
+// step-up keeps the old acr, amr and auth_time.
+```
+
+##### J2EE
+`kinde-j2ee` validates `state` on every callback and ships a servlet and a filter:
+```xml
+<!-- One-off verification: /step-up?acr_values=mfa&max_age=300&post_login_url=/transfer -->
+<servlet>
+  <servlet-name>KindeStepUpServlet</servlet-name>
+  <servlet-class>com.kinde.servlet.KindeStepUpServlet</servlet-class>
+</servlet>
+
+<!-- Everything under /private/admin/* needs MFA from the last 5 minutes -->
+<filter>
+  <filter-name>KindeStepUpFilter</filter-name>
+  <filter-class>com.kinde.filter.KindeStepUpFilter</filter-class>
+  <init-param><param-name>acr_values</param-name><param-value>mfa</param-value></init-param>
+  <init-param><param-name>max_age</param-name><param-value>300</param-value></init-param>
+</filter>
+```
+When Kinde answers with an error, both throw a `ServletException` whose root cause is the typed exception (also set as the `kindeCallbackError` request attribute), so it can be mapped with an `<error-page>`:
+```xml
+<error-page>
+  <exception-type>com.kinde.exceptions.UnmetAuthenticationRequirementsException</exception-type>
+  <location>/step-up-unavailable.jsp</location>
+</error-page>
+```
+
+##### Spring Boot
+For a browser application, send the user to `/oauth2/authorization/kinde?acr_values=mfa&max_age=300`. The starter validates and forwards both parameters.
+
+For an API, check the verified access token on every request. A failed check is answered with `401` and `WWW-Authenticate: Bearer error="insufficient_user_authentication", acr_values="mfa", max_age="300"`:
+```java
+http.authorizeHttpRequests(requests -> requests
+        .requestMatchers("/api/transfers/**").access(KindeStepUp.requires(AcrValue.MFA, 300))
+        .anyRequest().authenticated());
+```
+or, inside a controller, `KindeStepUp.require(jwt, AcrValue.MFA, 300)`. If you configure `oauth2ResourceServer` yourself, register `new KindeStepUpAccessDeniedHandler()` as its access denied handler.
+
 ## Migration
 [Follow the migration guide](./MIGRATION.md)
 

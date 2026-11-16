@@ -16,6 +16,11 @@
     <servlet-name>KindeRegisterServlet</servlet-name>
     <servlet-class>com.kinde.servlet.KindeRegistrationServlet</servlet-class>
   </servlet>
+  <!-- Step-up authentication: /step-up?acr_values=mfa&amp;max_age=300&amp;post_login_url=/private/ -->
+  <servlet>
+    <servlet-name>KindeStepUpServlet</servlet-name>
+    <servlet-class>com.kinde.servlet.KindeStepUpServlet</servlet-class>
+  </servlet>
   <filter>
     <filter-name>KindeLoginFilter</filter-name>
     <filter-class>com.kinde.filter.KindeLoginFilter</filter-class>
@@ -27,6 +32,10 @@
   <servlet-mapping>
     <servlet-name>KindeRegisterServlet</servlet-name>
     <url-pattern>/register</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>KindeStepUpServlet</servlet-name>
+    <url-pattern>/step-up</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>KindeLogoutServlet</servlet-name>
