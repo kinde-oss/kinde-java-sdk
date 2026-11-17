@@ -28,3 +28,6 @@ coverage/
 
 # Environment files — never commit secrets. Track a .env.example template instead.
 .env
+
+# Claude Code local settings and launch configurations
+.claude/
