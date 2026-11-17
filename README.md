@@ -276,6 +276,10 @@ When Kinde answers with an error, both throw a `ServletException` whose root cau
 ##### Spring Boot
 For a browser application, send the user to `/oauth2/authorization/kinde?acr_values=mfa&max_age=300`. The starter validates and forwards both parameters, and answers invalid values with HTTP 400.
 
+Two things to know when you write your own security configuration:
+- The HTTP 400 is sent through Spring Boot's error page. If `/error` requires authentication, the response becomes a redirect to login instead, so add `/error` to your permitted paths.
+- When the user cannot meet the requirement (for example `acr_values=phr` without a passkey), Kinde returns `error=unmet_authentication_requirements` and Spring shows its generic `/login?error` page. The user's session and tokens are kept. To tell the user why, set your own `failureHandler` on `oauth2Login` and read the error code from the `OAuth2AuthenticationException`.
+
 For an API, check the verified access token on every request. A failed check is answered with `401` and `WWW-Authenticate: Bearer error="insufficient_user_authentication", acr_values="mfa", max_age="300"`:
 ```java
 http.authorizeHttpRequests(requests -> requests
