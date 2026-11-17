@@ -42,6 +42,10 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
 
         if ("create".equals(request.getParameter("prompt"))) {
             additionalParameters.put("prompt", "create");
+        } else if (additionalParameters.containsKey("acr_values") || additionalParameters.containsKey("max_age")) {
+            // Step-up authentication: no prompt, so Kinde asks only for what is missing
+            // instead of a full sign-in
+            additionalParameters.remove("prompt");
         } else {
             additionalParameters.put("prompt", "login");
         }

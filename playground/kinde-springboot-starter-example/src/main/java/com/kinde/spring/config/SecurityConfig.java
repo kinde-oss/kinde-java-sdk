@@ -1,5 +1,11 @@
 package com.kinde.spring.config;
 
+import com.kinde.spring.KindeAuthorizationRequestFailureHandler;
+import com.kinde.spring.KindeStepUp;
+import com.kinde.spring.KindeStepUpAccessDeniedHandler;
+import com.kinde.stepup.AcrValue;
+import org.springframework.security.config.ObjectPostProcessor;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import com.kinde.spring.KindeOAuth2AuthorizationRequestResolver;
 import com.kinde.spring.resolver.CustomAuthorizationRequestResolver;
 import org.springframework.context.annotation.Bean;
@@ -32,13 +38,20 @@ public class SecurityConfig {
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/**")
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        // Step-up authentication: needs MFA from the last 5 minutes. A token
+                        // without it is answered with the RFC 9470 challenge (401
+                        // insufficient_user_authentication).
+                        .requestMatchers("/api/sensitive").access(KindeStepUp.requires(AcrValue.MFA, 300))
+                        .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(
                         org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(org.springframework.security.config.Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .accessDeniedHandler(new KindeStepUpAccessDeniedHandler())
+                        .jwt(org.springframework.security.config.Customizer.withDefaults()));
 
         return http.build();
     }
@@ -48,12 +61,20 @@ public class SecurityConfig {
         http
                 .securityMatcher("/**") // Explicitly match all requests to avoid conflict
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/","/index.css", "/registration", "/oauth2/authorization/**").permitAll()
+                        .requestMatchers("/","/index.css", "/registration", "/oauth2/authorization/**", "/error").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2Login -> oauth2Login
                         .defaultSuccessUrl("/home", true)
                         .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
                                 .authorizationRequestResolver(customAuthorizationRequestResolver))
+                        // Answer an invalid acr_values / max_age with HTTP 400 instead of 500
+                        .withObjectPostProcessor(new ObjectPostProcessor<OAuth2AuthorizationRequestRedirectFilter>() {
+                            @Override
+                            public <O extends OAuth2AuthorizationRequestRedirectFilter> O postProcess(O filter) {
+                                filter.setAuthenticationFailureHandler(new KindeAuthorizationRequestFailureHandler());
+                                return filter;
+                            }
+                        })
                 );
 
         return http.build();
