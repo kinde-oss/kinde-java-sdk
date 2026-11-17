@@ -1,7 +1,6 @@
 package com.kinde.spring;
 
 import com.kinde.stepup.AcrValue;
-import com.kinde.stepup.StepUp;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
@@ -16,7 +15,7 @@ import reactor.core.publisher.Mono;
  *
  * <pre>{@code
  * http.authorizeExchange(exchanges -> exchanges
- *         .pathMatchers("/api/transfers/**").access(ReactiveKindeStepUp.requires(AcrValue.MFA, 300))
+ *         .pathMatchers("/api/transfers/**").access(ReactiveKindeStepUp.requires(AcrValue.MFA, 300, stepUpSupported))
  *         .anyExchange().authenticated());
  * }</pre>
  *
@@ -38,22 +37,19 @@ public final class ReactiveKindeStepUp {
      *
      * @param requiredAcr required context, or null. {@link AcrValue#PHR} also meets {@link AcrValue#MFA}.
      * @param maxAge maximum age of the last authentication in seconds, or null
+     * @param stepUpSupported whether the environment advertises step-up (see
+     *        {@link KindeStepUp#isStepUpSupported}). Without it {@code auth_time} is not trusted
+     *        and no {@code maxAge} requirement is met.
      * @throws IllegalArgumentException if neither a context nor a maximum age is given, or
      *         {@code maxAge} is negative
      */
-    public static ReactiveAuthorizationManager<AuthorizationContext> requires(AcrValue requiredAcr, Integer maxAge) {
-        if (requiredAcr == null && maxAge == null) {
-            throw new IllegalArgumentException("A step-up requirement needs an acr value, a max age, or both");
-        }
-        if (maxAge != null) {
-            StepUp.normalizeMaxAge(maxAge);
-        }
+    public static ReactiveAuthorizationManager<AuthorizationContext> requires(
+            AcrValue requiredAcr, Integer maxAge, boolean stepUpSupported) {
+        KindeStepUp.validateRequirement(requiredAcr, maxAge);
         return (authentication, context) -> authentication
                 .filter(Authentication::isAuthenticated)
                 .<AuthorizationResult>map(current -> {
-                    if (!KindeStepUp.authenticationContext(current).satisfies(requiredAcr, maxAge)) {
-                        throw new InsufficientUserAuthenticationException(requiredAcr, maxAge);
-                    }
+                    KindeStepUp.require(KindeStepUp.authenticationContext(current, stepUpSupported), requiredAcr, maxAge);
                     return new AuthorizationDecision(true);
                 })
                 .defaultIfEmpty(new AuthorizationDecision(false));

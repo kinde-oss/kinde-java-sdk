@@ -35,14 +35,16 @@ public class SecurityConfig {
      */
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+        // auth_time is only trusted when the environment's discovery document advertises step-up
+        boolean stepUpSupported = KindeStepUp.isStepUpSupported(clientRegistrationRepository.findByRegistrationId("kinde"));
         http
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth
                         // Step-up authentication: needs MFA from the last 5 minutes. A token
                         // without it is answered with the RFC 9470 challenge (401
                         // insufficient_user_authentication).
-                        .requestMatchers("/api/sensitive").access(KindeStepUp.requires(AcrValue.MFA, 300))
+                        .requestMatchers("/api/sensitive").access(KindeStepUp.requires(AcrValue.MFA, 300, stepUpSupported))
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(

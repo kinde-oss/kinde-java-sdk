@@ -172,7 +172,11 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
                 unsetJwtConfigurer(existing);
             }
 
-            http.oauth2ResourceServer(oauth2 -> oauth2.opaqueToken(opaque -> {}));
+            // Step-up checks read the introspection response's claims (see KindeStepUp)
+            http.oauth2ResourceServer(oauth2 -> {
+                oauth2.accessDeniedHandler(new KindeStepUpAccessDeniedHandler());
+                oauth2.opaqueToken(opaque -> {});
+            });
         }
     }
 

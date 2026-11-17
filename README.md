@@ -222,14 +222,15 @@ Kinde omits the `acr` claim for a single-factor sign-in, so an absent `acr` meet
 ```java
 KindeTokens tokens = (KindeTokens) req.getSession().getAttribute("KINDE_TOKENS");
 
-if (!tokens.getAuthenticationContext().satisfies(AcrValue.MFA, 300)) {
+// auth_time is only trusted when the environment advertises step-up
+if (!tokens.getAuthenticationContext(kindeClientSession.isStepUpSupported()).satisfies(AcrValue.MFA, 300)) {
     AuthorizationUrl authorizationUrl = kindeClientSession.stepUp(StepUpRequest.of(AcrValue.MFA, 300));
     req.getSession().setAttribute("AuthorizationUrl", authorizationUrl);
     resp.sendRedirect(authorizationUrl.getUrl().toString());
     return;
 }
 ```
-`stepUp()` builds a normal authorization code + PKCE request with `acr_values` and/or `max_age`. It throws `IllegalArgumentException` for an invalid request (including `prompt=none`, because a step-up is interactive) and `StepUpNotSupportedException` when the environment's discovery document has no `acr_values_supported`; Kinde would ignore the parameters there. `kindeClientSession.isStepUpSupported()` tells you in advance.
+`stepUp()` builds a normal authorization code + PKCE request with `acr_values` and/or `max_age`. It throws `IllegalArgumentException` for an invalid request (including `prompt=none`, because a step-up is interactive) and `StepUpNotSupportedException` when the environment's discovery document has no `acr_values_supported`; Kinde would ignore the parameters there. `kindeClientSession.isStepUpSupported()` tells you in advance. Without step-up support, `auth_time` may be the token's issue time rather than the user's last sign-in, so `getAuthenticationContext(false)` leaves it out and no `max_age` requirement is met. A token whose signature could not be verified gives an empty context.
 
 ##### Handle the callback
 ```java
@@ -280,18 +281,20 @@ Two things to know when you write your own security configuration:
 - The HTTP 400 is sent through Spring Boot's error page. If `/error` requires authentication, the response becomes a redirect to login instead, so add `/error` to your permitted paths.
 - When the user cannot meet the requirement (for example `acr_values=phr` without a passkey), Kinde returns `error=unmet_authentication_requirements` and Spring shows its generic `/login?error` page. The user's session and tokens are kept. To tell the user why, set your own `failureHandler` on `oauth2Login` and read the error code from the `OAuth2AuthenticationException`.
 
-For an API, check the verified access token on every request. A failed check is answered with `401` and `WWW-Authenticate: Bearer error="insufficient_user_authentication", acr_values="mfa", max_age="300"`:
+For an API, check the verified access token (JWT or introspected opaque token) on every request. A failed check is answered with `401` and `WWW-Authenticate: Bearer error="insufficient_user_authentication", acr_values="mfa", max_age="300"`:
 ```java
+boolean stepUpSupported = KindeStepUp.isStepUpSupported(
+        clientRegistrationRepository.findByRegistrationId("kinde"));
 http.authorizeHttpRequests(requests -> requests
-        .requestMatchers("/api/transfers/**").access(KindeStepUp.requires(AcrValue.MFA, 300))
+        .requestMatchers("/api/transfers/**").access(KindeStepUp.requires(AcrValue.MFA, 300, stepUpSupported))
         .anyRequest().authenticated());
 ```
-or, inside a controller, `KindeStepUp.require(jwt, AcrValue.MFA, 300)`. If you configure `oauth2ResourceServer` yourself, register `new KindeStepUpAccessDeniedHandler()` as its access denied handler.
+or, inside a controller, `KindeStepUp.require(jwt, AcrValue.MFA, 300, stepUpSupported)` (or `require(oidcUser, ...)` for a signed-in browser user). `stepUpSupported` says whether the environment's discovery document lists `acr_values_supported`; `isStepUpSupported` reads it from the metadata Spring resolved for the registration's issuer. When it is false, `auth_time` is not trusted and every `max_age` requirement fails. If you configure `oauth2ResourceServer` yourself, register `new KindeStepUpAccessDeniedHandler()` as its access denied handler.
 
 Reactive (WebFlux) applications get the same behaviour. `/oauth2/authorization/kinde` forwards `acr_values` and `max_age` (and `invitation_code` and `connection_id`), and an API is protected with `ReactiveKindeStepUp`:
 ```java
 http.authorizeExchange(exchanges -> exchanges
-        .pathMatchers("/api/transfers/**").access(ReactiveKindeStepUp.requires(AcrValue.MFA, 300))
+        .pathMatchers("/api/transfers/**").access(ReactiveKindeStepUp.requires(AcrValue.MFA, 300, stepUpSupported))
         .anyExchange().authenticated());
 ```
 If you configure the reactive `oauth2ResourceServer` yourself, register `new KindeStepUpServerAccessDeniedHandler()` as its access denied handler.

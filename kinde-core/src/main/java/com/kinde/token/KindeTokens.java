@@ -21,18 +21,17 @@ public class KindeTokens {
      * claims of these tokens (step-up authentication).
      *
      * <p>Use {@link AuthenticationContext#satisfies} before a sensitive action, and start a
-     * step-up when it returns false. Refreshing tokens never changes the answer.
-     */
-    public AuthenticationContext getAuthenticationContext() {
-        return getAuthenticationContext(true);
-    }
-
-    /**
-     * @param trustAuthTime pass {@code false} when the Kinde environment does not support
-     *        step-up ({@code KindeClientSession.isStepUpSupported()}); {@code auth_time} may
-     *        then be the token's issue time, so it is left out
+     * step-up when it returns false. Refreshing tokens never changes the answer. A token whose
+     * signature could not be verified gives an empty context, which meets no requirement.
+     *
+     * @param trustAuthTime pass {@code KindeClientSession.isStepUpSupported()}. Without step-up
+     *        support {@code auth_time} may be the token's issue time, so it is left out and no
+     *        {@code max_age} requirement is met.
      */
     public AuthenticationContext getAuthenticationContext(boolean trustAuthTime) {
+        if ((idToken != null && !idToken.valid()) || (accessToken != null && !accessToken.valid())) {
+            return AuthenticationContext.empty();
+        }
         return AuthenticationContext.fromClaims(
                 idToken == null ? null : idToken::getClaim,
                 accessToken == null ? null : accessToken::getClaim,

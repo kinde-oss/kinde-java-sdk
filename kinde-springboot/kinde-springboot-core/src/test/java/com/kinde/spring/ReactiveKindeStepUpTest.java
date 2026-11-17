@@ -133,7 +133,7 @@ class ReactiveKindeStepUpTest {
     @Test
     @DisplayName("the reactive manager grants a token that meets the requirement")
     void managerGrants() {
-        var manager = ReactiveKindeStepUp.requires(AcrValue.MFA, 300);
+        var manager = ReactiveKindeStepUp.requires(AcrValue.MFA, 300, true);
         AuthorizationResult result = authorize(manager,
                 Mono.just(new JwtAuthenticationToken(jwt("phr", now() - 5), List.of()))).block();
         assertNotNull(result);
@@ -143,7 +143,7 @@ class ReactiveKindeStepUpTest {
     @Test
     @DisplayName("the reactive manager rejects a weaker or older token with the step-up exception")
     void managerRejects() {
-        var manager = ReactiveKindeStepUp.requires(AcrValue.MFA, 300);
+        var manager = ReactiveKindeStepUp.requires(AcrValue.MFA, 300, true);
         InsufficientUserAuthenticationException weak = assertThrows(
                 InsufficientUserAuthenticationException.class,
                 () -> authorize(manager, Mono.just(new JwtAuthenticationToken(jwt(null, now()), List.of()))).block());
@@ -154,9 +154,22 @@ class ReactiveKindeStepUpTest {
     }
 
     @Test
+    @DisplayName("without step-up support the reactive manager does not trust auth_time")
+    void managerDoesNotTrustAuthTimeWithoutSupport() {
+        var manager = ReactiveKindeStepUp.requires(AcrValue.MFA, 300, false);
+        assertThrows(InsufficientUserAuthenticationException.class,
+                () -> authorize(manager, Mono.just(new JwtAuthenticationToken(jwt("mfa", now()), List.of()))).block());
+
+        AuthorizationResult acrOnly = authorize(ReactiveKindeStepUp.requires(AcrValue.MFA, null, false),
+                Mono.just(new JwtAuthenticationToken(jwt("mfa", now()), List.of()))).block();
+        assertNotNull(acrOnly);
+        assertTrue(acrOnly.isGranted());
+    }
+
+    @Test
     @DisplayName("the reactive manager denies an unauthenticated caller without a challenge")
     void managerDeniesUnauthenticated() {
-        var manager = ReactiveKindeStepUp.requires(AcrValue.MFA, null);
+        var manager = ReactiveKindeStepUp.requires(AcrValue.MFA, null, true);
         AuthorizationResult result = authorize(manager, Mono.empty()).block();
         assertNotNull(result);
         assertFalse(result.isGranted());
@@ -165,8 +178,8 @@ class ReactiveKindeStepUpTest {
     @Test
     @DisplayName("a reactive requirement must ask for something valid")
     void managerValidatesRequirement() {
-        assertThrows(IllegalArgumentException.class, () -> ReactiveKindeStepUp.requires(null, null));
-        assertThrows(IllegalArgumentException.class, () -> ReactiveKindeStepUp.requires(null, -1));
+        assertThrows(IllegalArgumentException.class, () -> ReactiveKindeStepUp.requires(null, null, true));
+        assertThrows(IllegalArgumentException.class, () -> ReactiveKindeStepUp.requires(null, -1, true));
     }
 
     @Test

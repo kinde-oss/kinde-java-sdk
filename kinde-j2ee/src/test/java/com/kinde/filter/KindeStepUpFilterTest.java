@@ -5,6 +5,7 @@ import com.kinde.KindeClientBuilder;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.exceptions.InvalidStateException;
+import com.kinde.exceptions.StepUpNotSupportedException;
 import com.kinde.exceptions.UnmetAuthenticationRequirementsException;
 import com.kinde.principal.KindePrincipal;
 import com.kinde.servlet.KindeSingleton;
@@ -77,6 +78,7 @@ public class KindeStepUpFilterTest {
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/private/transfer"));
         when(singleton.getKindeClient()).thenReturn(mockClient);
         when(mockClient.initClientSession(anyString(), any())).thenReturn(mockSession);
+        when(mockSession.isStepUpSupported()).thenReturn(true);
         when(request.getSession()).thenReturn(session);
     }
 
@@ -101,8 +103,8 @@ public class KindeStepUpFilterTest {
         claims.put("acr", acr);
         claims.put("auth_time", authTime);
         KindeTokens tokens = mock(KindeTokens.class);
-        when(tokens.getAuthenticationContext())
-                .thenReturn(AuthenticationContext.fromClaims(claims, (Map<String, Object>) null, true));
+        when(tokens.getAuthenticationContext(anyBoolean())).thenAnswer(invocation ->
+                AuthenticationContext.fromClaims(claims, (Map<String, Object>) null, invocation.getArgument(0)));
         when(tokens.getAccessToken()).thenReturn(mock(AccessToken.class));
         return tokens;
     }
@@ -235,6 +237,84 @@ public class KindeStepUpFilterTest {
         verify(session, never()).setAttribute(eq(KINDE_TOKENS), any());
         verify(mockSession, never()).stepUp(any());
         verify(response, never()).sendRedirect(anyString());
+    }
+
+    @Test
+    public void aCallbackWhoseTokensAreTooOldDoesNotLoop() throws Exception {
+        KindeTokens oldTokens = tokens("mfa", now() - 3600);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(url("state-123"));
+        when(request.getParameter("code")).thenReturn("authCode");
+        when(request.getParameter("state")).thenReturn("state-123");
+        when(mockSession.retrieveTokens()).thenReturn(oldTokens);
+        when(mockSession.retrieveUserInfo()).thenReturn(mock(UserInfo.class));
+
+        assertThrows(ServletException.class, () -> filter.doFilter(request, response, filterChain));
+        verify(response, never()).sendRedirect(anyString());
+    }
+
+    @Test
+    public void aMaxAgeOnlyCallbackWithoutAuthTimeDoesNotLoop() throws Exception {
+        KindeStepUpFilter maxAgeOnly = new KindeStepUpFilter();
+        maxAgeOnly.init(config(null, "300"));
+        KindeTokens noAuthTime = tokens(null, null);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(url("state-123"));
+        when(request.getParameter("code")).thenReturn("authCode");
+        when(request.getParameter("state")).thenReturn("state-123");
+        when(mockSession.retrieveTokens()).thenReturn(noAuthTime);
+        when(mockSession.retrieveUserInfo()).thenReturn(mock(UserInfo.class));
+
+        assertThrows(ServletException.class, () -> maxAgeOnly.doFilter(request, response, filterChain));
+        verify(response, never()).sendRedirect(anyString());
+    }
+
+    @Test
+    public void aPendingCallbackWithoutStateIsRejected() throws Exception {
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(mock(KindePrincipal.class));
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(url("state-123"));
+        when(request.getParameter("code")).thenReturn("authCode");
+
+        ServletException ex = assertThrows(ServletException.class,
+                () -> filter.doFilter(request, response, filterChain));
+        assertTrue(ex.getRootCause() instanceof InvalidStateException);
+        verify(mockSession, never()).retrieveTokens();
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void aPendingErrorWithoutStateIsRejected() throws Exception {
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(url("state-123"));
+        when(request.getParameter("error")).thenReturn("unmet_authentication_requirements");
+
+        ServletException ex = assertThrows(ServletException.class,
+                () -> filter.doFilter(request, response, filterChain));
+        assertTrue(ex.getRootCause() instanceof InvalidStateException);
+        verify(mockSession, never()).stepUp(any());
+        verify(response, never()).sendRedirect(anyString());
+    }
+
+    @Test
+    public void withoutStepUpSupportAuthTimeIsNotTrusted() throws Exception {
+        KindeStepUpFilter maxAgeOnly = new KindeStepUpFilter();
+        maxAgeOnly.init(config(null, "300"));
+        when(mockSession.isStepUpSupported()).thenReturn(false);
+        when(mockSession.stepUp(any())).thenThrow(new StepUpNotSupportedException("not supported"));
+        signedInWith(tokens(null, now() - 10));
+
+        ServletException ex = assertThrows(ServletException.class,
+                () -> maxAgeOnly.doFilter(request, response, filterChain));
+        assertTrue(ex.getRootCause() instanceof StepUpNotSupportedException);
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void stepUpSupportIsReadFromDiscoveryOnce() throws Exception {
+        signedInWith(tokens("mfa", now() - 10));
+
+        filter.doFilter(request, response, filterChain);
+        filter.doFilter(request, response, filterChain);
+
+        verify(mockSession, times(1)).isStepUpSupported();
+        verify(filterChain, times(2)).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
 
     @Test

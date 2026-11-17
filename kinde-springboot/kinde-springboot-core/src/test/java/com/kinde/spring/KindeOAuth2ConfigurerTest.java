@@ -231,6 +231,7 @@ public class KindeOAuth2ConfigurerTest {
 
         verify(fx.httpSecurity).oauth2ResourceServer(any());
         verify(rsCustomizerTarget).opaqueToken(any());
+        verify(rsCustomizerTarget).accessDeniedHandler(any(KindeStepUpAccessDeniedHandler.class));
     }
 
     /**

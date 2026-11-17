@@ -76,11 +76,12 @@ class AuthenticationContextTokenTest {
                 AccessToken.init(jwt("kp_1", null, null, 5L), true),
                 null);
 
-        AuthenticationContext context = tokens.getAuthenticationContext();
+        AuthenticationContext context = tokens.getAuthenticationContext(true);
         assertEquals(Optional.of(AcrValue.PHR), context.getAcr());
         assertEquals(Optional.of(recent), context.getAuthTime());
         assertTrue(context.satisfies(AcrValue.MFA, 300));
         assertFalse(tokens.getAuthenticationContext(false).satisfies(AcrValue.MFA, 300));
+        assertTrue(tokens.getAuthenticationContext(false).satisfies(AcrValue.MFA, null));
     }
 
     @Test
@@ -88,8 +89,28 @@ class AuthenticationContextTokenTest {
     void accessTokenOnly() throws Exception {
         KindeTokens tokens = new KindeTokens(null, null,
                 AccessToken.init(jwt("kp_1", "mfa", null, null), true), null);
-        assertTrue(tokens.getAuthenticationContext().satisfies(AcrValue.MFA, null));
-        assertFalse(tokens.getAuthenticationContext().satisfies(AcrValue.PHR, null));
-        assertFalse(new KindeTokens(null, null, null, null).getAuthenticationContext().satisfies(AcrValue.MFA, null));
+        assertTrue(tokens.getAuthenticationContext(true).satisfies(AcrValue.MFA, null));
+        assertFalse(tokens.getAuthenticationContext(true).satisfies(AcrValue.PHR, null));
+        assertFalse(new KindeTokens(null, null, null, null).getAuthenticationContext(true).satisfies(AcrValue.MFA, null));
+    }
+
+    @Test
+    @DisplayName("KindeTokens with an unverified ID or access token meets no requirement")
+    void invalidTokensFailClosed() throws Exception {
+        long recent = System.currentTimeMillis() / 1000 - 30;
+        String forged = jwt("kp_1", "phr", List.of("passkey"), recent);
+
+        KindeTokens invalidId = new KindeTokens(null,
+                IDToken.init(forged, false), AccessToken.init(jwt("kp_1", null, null, null), true), null);
+        KindeTokens invalidAccess = new KindeTokens(null,
+                IDToken.init(jwt("kp_1", null, null, recent), true), AccessToken.init(forged, false), null);
+
+        for (KindeTokens tokens : List.of(invalidId, invalidAccess)) {
+            AuthenticationContext context = tokens.getAuthenticationContext(true);
+            assertEquals(Optional.empty(), context.getAcr());
+            assertEquals(Optional.empty(), context.getAuthTime());
+            assertFalse(context.satisfies(AcrValue.MFA, null));
+            assertFalse(context.satisfies(null, 300));
+        }
     }
 }
