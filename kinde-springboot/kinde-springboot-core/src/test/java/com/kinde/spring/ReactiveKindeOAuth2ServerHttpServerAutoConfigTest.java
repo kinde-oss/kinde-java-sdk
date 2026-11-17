@@ -64,9 +64,36 @@ public class ReactiveKindeOAuth2ServerHttpServerAutoConfigTest {
         OidcClientInitiatedServerLogoutSuccessHandler logoutHandler = mock(OidcClientInitiatedServerLogoutSuccessHandler.class);
 
         BeanPostProcessor processor = autoConfig.authManagerServerHttpSecurityBeanPostProcessor(
-                oAuth2UserService, oidcUserService, logoutHandler);
+                oAuth2UserService, oidcUserService, logoutHandler, null);
 
         assertNotNull(processor);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void postProcessorInstallsTheKindeAuthorizationRequestResolver() {
+        ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService = mock(ReactiveOAuth2UserService.class);
+        OidcReactiveOAuth2UserService oidcUserService = mock(OidcReactiveOAuth2UserService.class);
+        org.springframework.beans.factory.ObjectProvider<ReactiveClientRegistrationRepository> provider =
+                mock(org.springframework.beans.factory.ObjectProvider.class);
+        when(provider.getIfAvailable()).thenReturn(mock(ReactiveClientRegistrationRepository.class));
+
+        org.springframework.security.config.web.server.ServerHttpSecurity http =
+                mock(org.springframework.security.config.web.server.ServerHttpSecurity.class);
+        org.springframework.security.config.web.server.ServerHttpSecurity.OAuth2LoginSpec loginSpec =
+                mock(org.springframework.security.config.web.server.ServerHttpSecurity.OAuth2LoginSpec.class);
+        when(http.oauth2Login(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> {
+            org.springframework.security.config.Customizer<org.springframework.security.config.web.server.ServerHttpSecurity.OAuth2LoginSpec> customizer =
+                    invocation.getArgument(0);
+            customizer.customize(loginSpec);
+            return http;
+        });
+
+        autoConfig.authManagerServerHttpSecurityBeanPostProcessor(oAuth2UserService, oidcUserService, null, provider)
+                .postProcessAfterInitialization(http, "serverHttpSecurity");
+
+        org.mockito.Mockito.verify(loginSpec).authorizationRequestResolver(
+                org.mockito.ArgumentMatchers.any(ReactiveKindeOAuth2AuthorizationRequestResolver.class));
     }
 
     @Test
@@ -76,7 +103,7 @@ public class ReactiveKindeOAuth2ServerHttpServerAutoConfigTest {
         OidcReactiveOAuth2UserService oidcUserService = mock(OidcReactiveOAuth2UserService.class);
 
         BeanPostProcessor processor = autoConfig.authManagerServerHttpSecurityBeanPostProcessor(
-                oAuth2UserService, oidcUserService, null);
+                oAuth2UserService, oidcUserService, null, null);
 
         assertNotNull(processor, "logout handler is @Autowired(required=false) so null must be tolerated");
     }
@@ -183,7 +210,7 @@ public class ReactiveKindeOAuth2ServerHttpServerAutoConfigTest {
 
         ReactiveKindeOAuth2ServerHttpServerAutoConfig.KindeOAuth2LoginServerBeanPostProcessor processor =
                 new ReactiveKindeOAuth2ServerHttpServerAutoConfig.KindeOAuth2LoginServerBeanPostProcessor(
-                        oAuth2UserService, oidcUserService, null);
+                        oAuth2UserService, oidcUserService, null, null);
 
         ServerHttpSecurity http = mock(ServerHttpSecurity.class);
         when(http.oauth2Login(any())).thenReturn(http);
@@ -203,7 +230,7 @@ public class ReactiveKindeOAuth2ServerHttpServerAutoConfigTest {
 
         ReactiveKindeOAuth2ServerHttpServerAutoConfig.KindeOAuth2LoginServerBeanPostProcessor processor =
                 new ReactiveKindeOAuth2ServerHttpServerAutoConfig.KindeOAuth2LoginServerBeanPostProcessor(
-                        oAuth2UserService, oidcUserService, null);
+                        oAuth2UserService, oidcUserService, null, null);
 
         Object input = "not-a-server-http-security";
 

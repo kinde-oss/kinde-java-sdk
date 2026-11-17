@@ -21,6 +21,10 @@ final class ReactiveKindeOAuth2UserService extends DefaultReactiveOAuth2UserServ
 
     @Override
     public Mono<OAuth2User> loadUser(OAuth2UserRequest userRequest) {
-        return super.loadUser(userRequest).map(user -> UserUtil.decorateUser(user, userRequest, authoritiesProviders,null));
+        return super.loadUser(userRequest).map(user -> decorate(user, userRequest));
+    }
+
+    OAuth2User decorate(OAuth2User user, OAuth2UserRequest userRequest) {
+        return UserUtil.decorateUser(user, userRequest, authoritiesProviders, kindeSdkClient.getClient());
     }
 }
