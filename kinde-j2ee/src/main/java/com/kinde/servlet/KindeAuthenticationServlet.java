@@ -34,11 +34,15 @@ public class KindeAuthenticationServlet extends HttpServlet {
                     String normalized = reauthStateParam.replaceAll("\\s", "");
                     String urlParams = new String(Base64.getUrlDecoder().decode(normalized), StandardCharsets.UTF_8);
                     KindeClientSession kindeClientSession = createKindeClientSession(req);
-                    AuthorizationUrl authorizationUrl = kindeClientSession.login();
+                    // A step-up restarts as the same step-up, never as an ordinary login
+                    AuthorizationUrl pending = KindeCallbackSupport.pendingAuthorization(req);
+                    AuthorizationUrl authorizationUrl = KindeCallbackSupport.restartAfterExpiredLink(
+                            kindeClientSession, kindeAuthenticationAction,
+                            pending == null ? null : pending.getAcrValues(),
+                            pending == null || pending.getMaxAge() == null ? null : String.valueOf(pending.getMaxAge()));
                     req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
-                    String redirectUrl = authorizationUrl.getUrl().toString();
-                    redirectUrl = redirectUrl + (redirectUrl.contains("?") ? "&" : "?") + urlParams;
-                    resp.sendRedirect(redirectUrl);
+                    resp.sendRedirect(KindeCallbackSupport.appendReauthParameters(
+                            authorizationUrl.getUrl().toString(), urlParams, kindeAuthenticationAction));
                     return;
                 } catch (IllegalArgumentException ex) {
                     throw new ServletException("Error parsing reauth state: " + ex.getMessage(), ex);

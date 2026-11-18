@@ -105,14 +105,69 @@ public class KindeStepUpFilterTest {
         KindeTokens tokens = mock(KindeTokens.class);
         when(tokens.getAuthenticationContext(anyBoolean())).thenAnswer(invocation ->
                 AuthenticationContext.fromClaims(claims, (Map<String, Object>) null, invocation.getArgument(0)));
-        when(tokens.getAccessToken()).thenReturn(mock(AccessToken.class));
+        AccessToken accessToken = mock(AccessToken.class);
+        when(accessToken.getUser()).thenReturn("kp_1");
+        when(tokens.getAccessToken()).thenReturn(accessToken);
         return tokens;
     }
 
+    private static KindePrincipal principal(String name) {
+        KindePrincipal principal = mock(KindePrincipal.class);
+        when(principal.getName()).thenReturn(name);
+        return principal;
+    }
+
     private void signedInWith(KindeTokens tokens) throws Exception {
-        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(mock(KindePrincipal.class));
-        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(url("state-123").consumed());
+        KindePrincipal principal = principal("kp_1");
+        AuthorizationUrl consumed = url("state-123").consumed();
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(principal);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(consumed);
         when(session.getAttribute(KINDE_TOKENS)).thenReturn(tokens);
+    }
+
+    @Test
+    public void tokensOfAnotherUserNeverSatisfyTheRequirement() throws Exception {
+        signedInWith(tokens("phr", now() - 10));
+        KindePrincipal other = principal("kp_2");
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(other);
+        when(mockSession.isStepUpSupported()).thenReturn(true);
+        when(mockSession.stepUp(any())).thenReturn(url("state-456"));
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        verify(mockSession).stepUp(any());
+    }
+
+    @Test
+    public void principalAndTokensAreReadOncePerRequest() throws Exception {
+        signedInWith(tokens("phr", now() - 10));
+        when(mockSession.isStepUpSupported()).thenReturn(true);
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        verify(session, times(1)).getAttribute(KINDE_TOKENS);
+        verify(session, times(1)).getAttribute(AUTHENTICATED_USER);
+    }
+
+    @Test
+    public void anExpiredLoginLinkRestartsTheStepUpNotAPlainLogin() throws Exception {
+        String reauth = java.util.Base64.getUrlEncoder().encodeToString(
+                "login_hint=a%40b.c&acr_values=&max_age=99999&prompt=none&foo=bar".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        when(request.getParameter("error")).thenReturn("login_link_expired");
+        when(request.getParameter("reauth_state")).thenReturn(reauth);
+        when(mockSession.stepUp(any())).thenReturn(url("state-456"));
+
+        filter.doFilter(request, response, filterChain);
+
+        ArgumentCaptor<StepUpRequest> captor = ArgumentCaptor.forClass(StepUpRequest.class);
+        verify(mockSession).stepUp(captor.capture());
+        assertEquals(Optional.of("mfa"), captor.getValue().getAcrValues());
+        assertEquals("300", captor.getValue().getParameters().get("max_age"));
+        verify(mockSession, never()).login();
+        // Browser-supplied parameters cannot change the requirement or skip the prompt
+        verify(response).sendRedirect("http://test.kinde.com/oauth2/auth?login_hint=a%40b.c&foo=bar");
     }
 
     private static long now() {

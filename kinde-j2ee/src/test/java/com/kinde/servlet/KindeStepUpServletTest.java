@@ -205,4 +205,37 @@ public class KindeStepUpServletTest {
         verify(request, never()).setAttribute(eq(KINDE_CALLBACK_ERROR), any());
         verify(session, never()).setAttribute(eq(AUTHORIZATION_URL), any());
     }
+
+    @Test
+    public void anExpiredLoginLinkRestartsThePendingStepUp() throws Exception {
+        String reauth = java.util.Base64.getUrlEncoder().encodeToString("foo=bar".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        when(request.getParameter("error")).thenReturn("login_link_expired");
+        when(request.getParameter("reauth_state")).thenReturn(reauth);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(pending());
+        AuthorizationUrl restarted = new AuthorizationUrl(new URL("http://test.kinde.com/oauth2/auth"), null, "state-456", "mfa", 300);
+        when(mockSession.stepUp(any())).thenReturn(restarted);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.STEP_UP);
+
+        ArgumentCaptor<StepUpRequest> captor = ArgumentCaptor.forClass(StepUpRequest.class);
+        verify(mockSession).stepUp(captor.capture());
+        assertEquals(Optional.of("mfa"), captor.getValue().getAcrValues());
+        assertEquals("300", captor.getValue().getParameters().get("max_age"));
+        verify(mockSession, never()).login();
+        verify(session).setAttribute(AUTHORIZATION_URL, restarted);
+        verify(response).sendRedirect("http://test.kinde.com/oauth2/auth?foo=bar");
+    }
+
+    @Test
+    public void anExpiredLoginLinkWithNoKnownStepUpIsRejected() throws Exception {
+        String reauth = java.util.Base64.getUrlEncoder().encodeToString("foo=bar".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        when(request.getParameter("error")).thenReturn("login_link_expired");
+        when(request.getParameter("reauth_state")).thenReturn(reauth);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(null);
+
+        assertThrows(ServletException.class,
+                () -> servlet.doGet(request, response, KindeAuthenticationAction.STEP_UP));
+        verify(mockSession, never()).login();
+        verify(response, never()).sendRedirect(anyString());
+    }
 }

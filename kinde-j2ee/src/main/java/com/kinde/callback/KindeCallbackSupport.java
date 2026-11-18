@@ -3,6 +3,7 @@ package com.kinde.callback;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationCallback;
 import com.kinde.authorization.AuthorizationUrl;
+import com.kinde.constants.KindeAuthenticationAction;
 import com.kinde.exceptions.InvalidStateException;
 import com.kinde.exceptions.KindeCallbackException;
 import com.kinde.exceptions.StepUpNotSupportedException;
@@ -85,4 +86,58 @@ public final class KindeCallbackSupport {
             throw new ServletException("Cannot start step-up authentication: " + e.getMessage(), e);
         }
     }
+
+    /**
+     * Starts a new authorization after Kinde reported {@code error=login_link_expired}.
+     *
+     * <p>For {@link KindeAuthenticationAction#STEP_UP} the restart is a step-up with the same
+     * requirement, never an ordinary login: a plain sign-in must not stand in for the stronger
+     * authentication that was asked for. A step-up with no known requirement is rejected.
+     *
+     * @param acrValues the required context of the step-up being restarted, or null
+     * @param maxAge the required maximum age of the step-up being restarted, as text, or null
+     */
+    public static AuthorizationUrl restartAfterExpiredLink(KindeClientSession session, KindeAuthenticationAction action,
+                                                           String acrValues, String maxAge) throws ServletException {
+        if (action != KindeAuthenticationAction.STEP_UP) {
+            return session.login();
+        }
+        if ((acrValues == null || acrValues.isBlank()) && (maxAge == null || maxAge.isBlank())) {
+            throw new ServletException("Cannot restart step-up authentication after an expired login link: "
+                    + "the step-up requirement is not known");
+        }
+        return startStepUp(session, acrValues, maxAge);
+    }
+
+    /**
+     * Appends the parameters Kinde returned in {@code reauth_state} to an authorization URL.
+     * For a step-up, parameters that would change the requirement or make it non-interactive
+     * ({@code acr_values}, {@code max_age}, {@code prompt}) are dropped: they come from the
+     * browser, and the requirement is the one the SDK set.
+     */
+    public static String appendReauthParameters(String authorizationUrl, String reauthParameters, KindeAuthenticationAction action) {
+        String params = reauthParameters;
+        if (action == KindeAuthenticationAction.STEP_UP && params != null) {
+            StringBuilder kept = new StringBuilder();
+            for (String pair : params.split("&")) {
+                String name = pair.contains("=") ? pair.substring(0, pair.indexOf('=')) : pair;
+                String decoded = java.net.URLDecoder.decode(name, java.nio.charset.StandardCharsets.UTF_8).trim();
+                if (decoded.isEmpty() || STEP_UP_CONTROLLED.contains(decoded.toLowerCase(java.util.Locale.ROOT))) {
+                    continue;
+                }
+                if (kept.length() > 0) {
+                    kept.append('&');
+                }
+                kept.append(pair);
+            }
+            params = kept.toString();
+        }
+        if (params == null || params.isEmpty()) {
+            return authorizationUrl;
+        }
+        return authorizationUrl + (authorizationUrl.contains("?") ? "&" : "?") + params;
+    }
+
+    private static final java.util.Set<String> STEP_UP_CONTROLLED = java.util.Set.of(
+            KindeRequestParameters.ACR_VALUES, KindeRequestParameters.MAX_AGE, KindeRequestParameters.PROMPT);
 }

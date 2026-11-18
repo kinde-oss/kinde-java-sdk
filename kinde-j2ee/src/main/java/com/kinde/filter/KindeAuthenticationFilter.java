@@ -49,16 +49,16 @@ public abstract class KindeAuthenticationFilter implements Filter {
                     String normalized = reauthStateParam.replaceAll("\\s", "");
                     String urlParams = new String(Base64.getUrlDecoder().decode(normalized), StandardCharsets.UTF_8);
                     KindeClientSession kindeClientSession = createKindeClientSession(req);
-                    AuthorizationUrl authorizationUrl = kindeClientSession.login();
+                    // A step-up filter restarts with its own requirement, never as an ordinary login
+                    AuthorizationUrl authorizationUrl = KindeCallbackSupport.restartAfterExpiredLink(
+                            kindeClientSession, kindeAuthenticationAction, requiredAcrValues,
+                            requiredMaxAge == null ? null : String.valueOf(requiredMaxAge));
                     req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
-                    String redirectUrl = authorizationUrl.getUrl().toString();
-                    if (redirectUrl.contains("?")) {
-                        redirectUrl = redirectUrl + "&" + urlParams;
-                    } else {
-                        redirectUrl = redirectUrl + "?" + urlParams;
-                    }
-                    resp.sendRedirect(redirectUrl);
+                    resp.sendRedirect(KindeCallbackSupport.appendReauthParameters(
+                            authorizationUrl.getUrl().toString(), urlParams, kindeAuthenticationAction));
                     return;
+                } catch (ServletException ex) {
+                    throw ex;
                 } catch (Exception ex) {
                     throw new ServletException("Error parsing reauth state: " + ex.getMessage(), ex);
                 }
@@ -68,7 +68,10 @@ public abstract class KindeAuthenticationFilter implements Filter {
         String code = req.getParameter("code");
         String invitationCode = optionalQueryParam(req, INVITATION_CODE);
         String connectionId = optionalQueryParam(req, CONNECTION_ID);
+        // The principal and the tokens are read together, and the step-up check below uses
+        // only this pair, so a callback completing in parallel cannot mix two authentications
         Principal userPrincipal = (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
+        Object sessionTokens = req.getSession().getAttribute(KINDE_TOKENS);
         AuthorizationUrl authorizationUrl = KindeCallbackSupport.pendingAuthorization(req);
         boolean stepUp = kindeAuthenticationAction == KindeAuthenticationAction.STEP_UP;
         String maxAgeText = requiredMaxAge == null ? null : String.valueOf(requiredMaxAge);
@@ -123,7 +126,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
             authorizationUrl = startAuthorization(kindeClientSession, kindeAuthenticationAction, req, null, connectionId, requiredAcrValues, maxAgeText);
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
-        } else if (stepUp && !meetsStoredRequirement(req, requiredAcrValues, requiredMaxAge)) {
+        } else if (stepUp && !meetsStoredRequirement(req, userPrincipal, sessionTokens, requiredAcrValues, requiredMaxAge)) {
             // Signed in, but not strongly or recently enough: ask Kinde for what is missing.
             // The current tokens stay in place until the callback replaces them. Without
             // step-up support this fails rather than trusting auth_time.
@@ -137,15 +140,24 @@ public abstract class KindeAuthenticationFilter implements Filter {
         }
     }
 
-    private boolean meetsStoredRequirement(HttpServletRequest req, String requiredAcrValues, Integer requiredMaxAge) {
-        Object tokens = req.getSession().getAttribute(KINDE_TOKENS);
-        if (!(tokens instanceof KindeTokens)) {
+    private boolean meetsStoredRequirement(HttpServletRequest req, Principal principal, Object tokens,
+                                           String requiredAcrValues, Integer requiredMaxAge) {
+        if (!(tokens instanceof KindeTokens) || !sameSubject(principal, (KindeTokens) tokens)) {
+            // Fails closed: the user is sent through a step-up, whose callback stores a
+            // matching principal and tokens
             return false;
         }
         boolean trustAuthTime = stepUpSupported != null
                 ? stepUpSupported
                 : stepUpSupported(createKindeClientSession(req));
         return meetsRequirement((KindeTokens) tokens, requiredAcrValues, requiredMaxAge, trustAuthTime);
+    }
+
+    /** Whether the principal and the tokens belong to the same user. */
+    private static boolean sameSubject(Principal principal, KindeTokens tokens) {
+        String name = principal == null ? null : principal.getName();
+        String subject = tokens.getAccessToken() == null ? null : tokens.getAccessToken().getUser();
+        return name != null && name.equals(subject);
     }
 
     private static boolean meetsRequirement(KindeTokens tokens, String requiredAcrValues, Integer requiredMaxAge, Boolean trustAuthTime) {
