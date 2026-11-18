@@ -82,4 +82,28 @@ class ReactiveStarterFixesTest {
                 .withProperty("spring.main.web-application-type", "servlet");
         assertFalse(ReactiveWebApplicationDetection.isReactive(configuredServlet, reactive));
     }
+
+    @Test
+    @DisplayName("the reactive OAuth2 user service never builds the Kinde client for another provider")
+    void reactiveUserServiceSkipsOtherProviders() {
+        KindeSdkClient kindeSdkClient = mock(KindeSdkClient.class);
+        ClientRegistration google = ClientRegistration.withRegistrationId("google")
+                .clientId("client")
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                .authorizationUri("https://accounts.example.com/auth")
+                .tokenUri("https://accounts.example.com/token")
+                .userInfoUri("https://accounts.example.com/userinfo")
+                .userNameAttributeName("sub")
+                .build();
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
+                "token", Instant.now(), Instant.now().plusSeconds(60));
+        OAuth2User user = new DefaultOAuth2User(AuthorityUtils.NO_AUTHORITIES, Map.of("sub", "g_1"), "sub");
+
+        OAuth2User result = new ReactiveKindeOAuth2UserService(List.of(), kindeSdkClient)
+                .decorate(user, new OAuth2UserRequest(google, accessToken));
+
+        assertSame(user, result);
+        org.mockito.Mockito.verifyNoInteractions(kindeSdkClient);
+    }
 }

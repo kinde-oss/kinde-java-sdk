@@ -28,6 +28,6 @@ final class ReactiveKindeOidcUserService extends OidcReactiveOAuth2UserService {
 
     @Override
     public Mono<OidcUser> loadUser(OidcUserRequest userRequest) {
-        return super.loadUser(userRequest).map(user -> UserUtil.decorateUser(user, userRequest,  authoritiesProviders, kindeSdkClient.getClient()));
+        return super.loadUser(userRequest).map(user -> UserUtil.decorateUser(user, userRequest, authoritiesProviders));
     }
 }

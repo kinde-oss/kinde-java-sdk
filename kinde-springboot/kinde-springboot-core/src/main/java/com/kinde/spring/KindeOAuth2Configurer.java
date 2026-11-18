@@ -39,6 +39,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
         // if OAuth2ClientProperties bean is not available do NOT configure
         OAuth2ClientProperties.Provider propertiesProvider;
         OAuth2ClientProperties.Registration propertiesRegistration;
+        boolean loginConfigured = false;
         if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
             && (propertiesProvider = context.getBean(OAuth2ClientProperties.class).getProvider().get("kinde")) != null
             && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("kinde")) != null
@@ -46,6 +47,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
             && StringUtils.hasText(propertiesRegistration.getClientId())) {
 
             configureLogin(http, kindeOAuth2Properties, context.getEnvironment());
+            loginConfigured = true;
 
             // check for RP-Initiated logout
             if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -54,22 +56,32 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
                 http.logout(logout -> logout.logoutSuccessHandler(handler));
             }
 
-            // Resource Server Config
-            OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
-
-            if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                log.debug("JWT configurer is set in OAuth resource server configuration. " +
-                    "JWT validation will be configured.");
-                configureResourceServerForJwtValidation(http, kindeOAuth2Properties);
-            } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
-                    "Opaque Token validation/introspection will be configured.");
-                configureResourceServerForOpaqueTokenValidation(http, kindeOAuth2Properties);
-            } else {
-                log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
-            }
         } else {
             log.debug("Kinde/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
+        }
+
+        // Resource Server Config
+        OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
+        boolean jwt = getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent();
+        boolean opaque = !jwt && getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent();
+
+        if (!loginConfigured) {
+            // An API that is only a resource server (no OAuth2 client registration) keeps its own
+            // token configuration, but still answers a failed step-up check with the RFC 9470
+            // challenge instead of a plain 403
+            if (jwt || opaque) {
+                http.oauth2ResourceServer(oauth2 -> oauth2.accessDeniedHandler(new KindeStepUpAccessDeniedHandler()));
+            }
+        } else if (jwt) {
+            log.debug("JWT configurer is set in OAuth resource server configuration. " +
+                "JWT validation will be configured.");
+            configureResourceServerForJwtValidation(http, kindeOAuth2Properties);
+        } else if (opaque) {
+            log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
+                "Opaque Token validation/introspection will be configured.");
+            configureResourceServerForOpaqueTokenValidation(http, kindeOAuth2Properties);
+        } else {
+            log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
         }
     }
 
@@ -161,7 +173,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
     @SuppressWarnings("rawtypes")
     private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, KindeOAuth2Properties kindeOAuth2Properties) {
 
-        if (!kindeOAuth2Properties.getClientId().isEmpty() && !kindeOAuth2Properties.getClientSecret().isEmpty()) {
+        if (StringUtils.hasText(kindeOAuth2Properties.getClientId()) && StringUtils.hasText(kindeOAuth2Properties.getClientSecret())) {
             // Spring (2.7.x+) configures JWT by default and this creates a startup failure ("Spring Security
             // only supports JWTs or Opaque Tokens, not both at the same time") when we try to configure Opaque Token
             // mode in the following call. Therefore, we unset the JWT configuration before attempting to configure

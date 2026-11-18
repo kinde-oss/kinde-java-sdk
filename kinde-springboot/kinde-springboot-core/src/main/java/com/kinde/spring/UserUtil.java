@@ -19,10 +19,17 @@ final class UserUtil {
 
     private UserUtil() {}
 
+    /** Whether the request belongs to the Kinde client registration. */
+    static boolean isKindeRegistration(OAuth2UserRequest userRequest) {
+        return userRequest != null
+                && userRequest.getClientRegistration() != null
+                && "kinde".equalsIgnoreCase(userRequest.getClientRegistration().getRegistrationId());
+    }
+
     static OAuth2User decorateUser(OAuth2User user, OAuth2UserRequest userRequest, Collection<AuthoritiesProvider> authoritiesProviders, KindeClient kindeClient) {
 
         // Only post process requests from the Kinde registration
-        if (!"kinde".equalsIgnoreCase(userRequest.getClientRegistration().getRegistrationId())) {
+        if (!isKindeRegistration(userRequest)) {
             return user;
         }
 
@@ -48,10 +55,10 @@ final class UserUtil {
         return new DefaultOAuth2User(authorities, attributes, userNameAttributeName);
     }
 
-    static OidcUser decorateUser(OidcUser user, OidcUserRequest userRequest, Collection<AuthoritiesProvider> authoritiesProviders, KindeClient kindeClient) {
+    static OidcUser decorateUser(OidcUser user, OidcUserRequest userRequest, Collection<AuthoritiesProvider> authoritiesProviders) {
 
         // Only post process requests from the Kinde registration
-        if (!"kinde".equalsIgnoreCase(userRequest.getClientRegistration().getRegistrationId())) {
+        if (!isKindeRegistration(userRequest)) {
             return user;
         }
 

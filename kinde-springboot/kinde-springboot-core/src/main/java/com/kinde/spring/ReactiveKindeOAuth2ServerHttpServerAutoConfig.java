@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAut
 import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -47,8 +48,10 @@ class ReactiveKindeOAuth2ServerHttpServerAutoConfig {
     BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(@Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
                                                                      @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService,
                                                                      @Autowired(required = false) OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler,
-                                                                     ObjectProvider<ReactiveClientRegistrationRepository> clientRegistrationRepository) {
-        return new KindeOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService, logoutSuccessHandler, clientRegistrationRepository);
+                                                                     ObjectProvider<ReactiveClientRegistrationRepository> clientRegistrationRepository,
+                                                                     ObjectProvider<ServerOAuth2AuthorizationRequestResolver> authorizationRequestResolvers) {
+        return new KindeOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService, logoutSuccessHandler,
+                clientRegistrationRepository, authorizationRequestResolvers);
     }
 
     @Bean
@@ -113,21 +116,24 @@ class ReactiveKindeOAuth2ServerHttpServerAutoConfig {
         private final OidcReactiveOAuth2UserService oidcUserService;
         private final OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler;
         private final ObjectProvider<ReactiveClientRegistrationRepository> clientRegistrationRepository;
+        private final ObjectProvider<ServerOAuth2AuthorizationRequestResolver> authorizationRequestResolvers;
 
         KindeOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
                                                OidcReactiveOAuth2UserService oidcUserService,
                                                @Nullable OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
-            this(oAuth2UserService, oidcUserService, logoutSuccessHandler, null);
+            this(oAuth2UserService, oidcUserService, logoutSuccessHandler, null, null);
         }
 
         KindeOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
                                                OidcReactiveOAuth2UserService oidcUserService,
                                                @Nullable OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler,
-                                               @Nullable ObjectProvider<ReactiveClientRegistrationRepository> clientRegistrationRepository) {
+                                               @Nullable ObjectProvider<ReactiveClientRegistrationRepository> clientRegistrationRepository,
+                                               @Nullable ObjectProvider<ServerOAuth2AuthorizationRequestResolver> authorizationRequestResolvers) {
             this.oAuth2UserService = oAuth2UserService;
             this.oidcUserService = oidcUserService;
             this.logoutSuccessHandler = logoutSuccessHandler;
             this.clientRegistrationRepository = clientRegistrationRepository;
+            this.authorizationRequestResolvers = authorizationRequestResolvers;
 
         }
 
@@ -140,10 +146,14 @@ class ReactiveKindeOAuth2ServerHttpServerAutoConfig {
 
                 // Every chain built from this ServerHttpSecurity, including Spring Boot's default
                 // one, forwards the Kinde authorize parameters (invitation_code, connection_id,
-                // acr_values, max_age) with PKCE. An application that sets its own resolver
-                // afterwards replaces this one.
-                ReactiveClientRegistrationRepository repository =
-                        clientRegistrationRepository == null ? null : clientRegistrationRepository.getIfAvailable();
+                // acr_values, max_age) with PKCE. It is only a fallback: an application's own
+                // resolver bean is left for Spring to pick up, an application that sets a resolver
+                // on its chain replaces this one, and with several repositories and no primary one
+                // the choice is left to the application.
+                boolean applicationResolver = authorizationRequestResolvers != null
+                        && authorizationRequestResolvers.stream().findAny().isPresent();
+                ReactiveClientRegistrationRepository repository = applicationResolver || clientRegistrationRepository == null
+                        ? null : clientRegistrationRepository.getIfUnique();
                 if (repository != null) {
                     httpSecurity.oauth2Login(oauth2 -> oauth2.authorizationRequestResolver(
                             new ReactiveKindeOAuth2AuthorizationRequestResolver(repository)));
