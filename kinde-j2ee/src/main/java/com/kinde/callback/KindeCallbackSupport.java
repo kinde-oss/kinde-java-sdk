@@ -8,6 +8,8 @@ import com.kinde.exceptions.InvalidStateException;
 import com.kinde.exceptions.KindeCallbackException;
 import com.kinde.exceptions.StepUpNotSupportedException;
 import com.kinde.session.KindeRequestParameters;
+import com.kinde.stepup.AcrValue;
+import com.kinde.token.KindeTokens;
 import com.kinde.stepup.StepUpRequest;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -84,6 +86,27 @@ public final class KindeCallbackSupport {
             return session.stepUp(request.build());
         } catch (IllegalArgumentException | StepUpNotSupportedException e) {
             throw new ServletException("Cannot start step-up authentication: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Checks that the tokens from a step-up callback meet the requirement of the request it
+     * answers. Does nothing for an ordinary sign-in (a request without {@code acr_values} or
+     * {@code max_age}). {@code auth_time} is trusted only when the environment advertises
+     * step-up, the same rule the step-up filter uses.
+     *
+     * @throws ServletException if the requirement is not met; the tokens must not be stored
+     */
+    public static void requireStepUpMet(KindeClientSession session, KindeTokens tokens, AuthorizationUrl pending)
+            throws ServletException {
+        if (pending == null || (pending.getAcrValues() == null && pending.getMaxAge() == null)) {
+            return;
+        }
+        AcrValue requiredAcr = AcrValue.strongest(pending.getAcrValues()).orElse(null);
+        boolean trustAuthTime = pending.getMaxAge() != null && session.isStepUpSupported();
+        if (tokens == null || !tokens.getAuthenticationContext(trustAuthTime).satisfies(requiredAcr, pending.getMaxAge())) {
+            throw new ServletException("Step-up authentication completed, but the new tokens do not meet the requirement: acr_values="
+                    + pending.getAcrValues() + ", max_age=" + pending.getMaxAge());
         }
     }
 

@@ -7,6 +7,7 @@ import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.exceptions.InvalidStateException;
 import com.kinde.exceptions.StepUpNotSupportedException;
 import com.kinde.exceptions.UnmetAuthenticationRequirementsException;
+import com.kinde.principal.KindeAuthentication;
 import com.kinde.principal.KindePrincipal;
 import com.kinde.servlet.KindeSingleton;
 import com.kinde.stepup.AuthenticationContext;
@@ -118,18 +119,19 @@ public class KindeStepUpFilterTest {
     }
 
     private void signedInWith(KindeTokens tokens) throws Exception {
-        KindePrincipal principal = principal("kp_1");
+        signedInWith(principal("kp_1"), tokens);
+    }
+
+    private void signedInWith(KindePrincipal principal, KindeTokens tokens) throws Exception {
         AuthorizationUrl consumed = url("state-123").consumed();
-        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(principal);
+        KindeAuthentication authentication = new KindeAuthentication(principal, tokens);
+        when(session.getAttribute(KINDE_AUTHENTICATION)).thenReturn(authentication);
         when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(consumed);
-        when(session.getAttribute(KINDE_TOKENS)).thenReturn(tokens);
     }
 
     @Test
     public void tokensOfAnotherUserNeverSatisfyTheRequirement() throws Exception {
-        signedInWith(tokens("phr", now() - 10));
-        KindePrincipal other = principal("kp_2");
-        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(other);
+        signedInWith(principal("kp_2"), tokens("phr", now() - 10));
         when(mockSession.isStepUpSupported()).thenReturn(true);
         when(mockSession.stepUp(any())).thenReturn(url("state-456"));
 
@@ -147,8 +149,43 @@ public class KindeStepUpFilterTest {
         filter.doFilter(request, response, filterChain);
 
         verify(filterChain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
-        verify(session, times(1)).getAttribute(KINDE_TOKENS);
-        verify(session, times(1)).getAttribute(AUTHENTICATED_USER);
+        // One attribute holds both, so the pair cannot change between two reads
+        verify(session, times(1)).getAttribute(KINDE_AUTHENTICATION);
+        verify(session, never()).getAttribute(KINDE_TOKENS);
+        verify(session, never()).getAttribute(AUTHENTICATED_USER);
+    }
+
+    @Test
+    public void theRequestRunsAsThePrincipalWhoseTokensWereChecked() throws Exception {
+        // The separate attributes hold an older sign-in of the same user with other permissions
+        KindePrincipal checked = principal("kp_1");
+        signedInWith(checked, tokens("phr", now() - 10));
+        KindePrincipal older = principal("kp_1");
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(older);
+        when(mockSession.isStepUpSupported()).thenReturn(true);
+
+        filter.doFilter(request, response, filterChain);
+
+        ArgumentCaptor<ServletRequest> passed = ArgumentCaptor.forClass(ServletRequest.class);
+        verify(filterChain).doFilter(passed.capture(), any(ServletResponse.class));
+        assertSame(checked, ((jakarta.servlet.http.HttpServletRequest) passed.getValue()).getUserPrincipal());
+    }
+
+    @Test
+    public void aSessionWithoutTheCombinedAttributeGoesThroughAStepUp() throws Exception {
+        // For example a session signed in before KINDE_AUTHENTICATION existed
+        KindePrincipal principal = principal("kp_1");
+        KindeTokens tokens = tokens("phr", now() - 10);
+        AuthorizationUrl consumed = url("state-123").consumed();
+        when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(principal);
+        when(session.getAttribute(KINDE_TOKENS)).thenReturn(tokens);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(consumed);
+        when(mockSession.stepUp(any())).thenReturn(url("state-456"));
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        verify(mockSession).stepUp(any());
     }
 
     @Test
@@ -245,6 +282,9 @@ public class KindeStepUpFilterTest {
         filter.doFilter(request, response, filterChain);
 
         verify(session).setAttribute(KINDE_TOKENS, newTokens);
+        ArgumentCaptor<Object> stored = ArgumentCaptor.forClass(Object.class);
+        verify(session).setAttribute(eq(KINDE_AUTHENTICATION), stored.capture());
+        assertSame(newTokens, ((KindeAuthentication) stored.getValue()).getTokens());
         ArgumentCaptor<AuthorizationUrl> consumed = ArgumentCaptor.forClass(AuthorizationUrl.class);
         verify(session).setAttribute(eq(AUTHORIZATION_URL), consumed.capture());
         assertNull(consumed.getValue().getState());

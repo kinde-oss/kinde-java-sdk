@@ -5,6 +5,7 @@ import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.callback.KindeCallbackSupport;
 import com.kinde.constants.KindeAuthenticationAction;
+import com.kinde.principal.KindeAuthentication;
 import com.kinde.principal.KindePrincipal;
 import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
@@ -79,6 +80,9 @@ public class KindeAuthenticationServlet extends HttpServlet {
                 String postLoginUrl = (String)req.getSession().getAttribute(POST_LOGIN_URL);
                 KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
                 KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
+                // A step-up callback succeeds only if the new tokens meet what was asked for;
+                // otherwise nothing is stored and the existing session is kept
+                KindeCallbackSupport.requireStepUpMet(kindeClientSession, kindeTokens, authorizationUrl);
                 req.getSession().setAttribute(KINDE_TOKENS,kindeTokens);
                 req.getSession().setAttribute(ACCESS_TOKEN,kindeTokens.getAccessToken());
                 UserInfo userInfo = kindeClientSession.retrieveUserInfo();
@@ -88,10 +92,13 @@ public class KindeAuthenticationServlet extends HttpServlet {
                 // The new tokens replace all of the stored ones, so nothing issued before this
                 // authorization (such as a refresh token from before a step-up) is left behind
                 req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
+                req.getSession().setAttribute(KINDE_AUTHENTICATION, new KindeAuthentication(principal, kindeTokens));
                 // Single use: the same callback cannot be replayed
                 req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
 
                 resp.sendRedirect(postLoginUrl);
+            } catch (ServletException e) {
+                throw e;
             } catch (Exception e) {
                 throw new ServletException("OAuth token exchange failed", e);
             }

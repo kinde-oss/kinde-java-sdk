@@ -121,11 +121,65 @@ public class KindeStepUpServletTest {
         assertTrue(ex.getRootCause() instanceof StepUpNotSupportedException);
     }
 
+    private static KindeTokens tokensWith(String acr, Long authTime) {
+        java.util.Map<String, Object> claims = new java.util.HashMap<>();
+        claims.put("acr", acr);
+        claims.put("auth_time", authTime);
+        KindeTokens tokens = mock(KindeTokens.class);
+        when(tokens.getAuthenticationContext(org.mockito.ArgumentMatchers.anyBoolean())).thenAnswer(invocation ->
+                com.kinde.stepup.AuthenticationContext.fromClaims(claims, (java.util.Map<String, Object>) null, invocation.getArgument(0)));
+        when(tokens.getAccessToken()).thenReturn(mock(AccessToken.class));
+        return tokens;
+    }
+
+    private void callbackWith(KindeTokens tokens) throws Exception {
+        AuthorizationUrl pending = pending();
+        when(request.getParameter("code")).thenReturn("authCode");
+        when(request.getParameter("state")).thenReturn("state-123");
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(pending);
+        when(session.getAttribute(POST_LOGIN_URL)).thenReturn("/transfer");
+        when(mockSession.retrieveTokens()).thenReturn(tokens);
+        when(mockSession.retrieveUserInfo()).thenReturn(mock(UserInfo.class));
+        when(mockSession.isStepUpSupported()).thenReturn(true);
+    }
+
+    @Test
+    public void aStepUpCallbackWhoseTokensMissTheContextStoresNothing() throws Exception {
+        callbackWith(tokensWith(null, System.currentTimeMillis() / 1000));
+
+        ServletException ex = assertThrows(ServletException.class,
+                () -> servlet.doGet(request, response, KindeAuthenticationAction.STEP_UP));
+
+        assertTrue(ex.getMessage().contains("do not meet the requirement"));
+        verify(session, never()).setAttribute(eq(KINDE_TOKENS), any());
+        verify(session, never()).setAttribute(eq(KINDE_AUTHENTICATION), any());
+        verify(response, never()).sendRedirect(anyString());
+    }
+
+    @Test
+    public void aStepUpCallbackWithAnOldAuthenticationStoresNothing() throws Exception {
+        callbackWith(tokensWith("mfa", System.currentTimeMillis() / 1000 - 3600));
+
+        assertThrows(ServletException.class,
+                () -> servlet.doGet(request, response, KindeAuthenticationAction.STEP_UP));
+        verify(session, never()).setAttribute(eq(KINDE_TOKENS), any());
+    }
+
+    @Test
+    public void withoutStepUpSupportAMaxAgeRequirementFailsClosed() throws Exception {
+        callbackWith(tokensWith("mfa", System.currentTimeMillis() / 1000));
+        when(mockSession.isStepUpSupported()).thenReturn(false);
+
+        assertThrows(ServletException.class,
+                () -> servlet.doGet(request, response, KindeAuthenticationAction.STEP_UP));
+        verify(session, never()).setAttribute(eq(KINDE_TOKENS), any());
+    }
+
     @Test
     public void callbackReplacesAllSessionTokensAndConsumesTheRequest() throws Exception {
-        KindeTokens tokens = mock(KindeTokens.class);
+        KindeTokens tokens = tokensWith("mfa", System.currentTimeMillis() / 1000);
+        when(mockSession.isStepUpSupported()).thenReturn(true);
         RefreshToken refreshToken = mock(RefreshToken.class);
-        when(tokens.getAccessToken()).thenReturn(mock(AccessToken.class));
         when(tokens.getRefreshToken()).thenReturn(refreshToken);
         when(request.getParameter("code")).thenReturn("authCode");
         when(request.getParameter("state")).thenReturn("state-123");
@@ -138,6 +192,7 @@ public class KindeStepUpServletTest {
 
         verify(session).setAttribute(KINDE_TOKENS, tokens);
         verify(session).setAttribute(REFRESH_TOKEN, refreshToken);
+        verify(session).setAttribute(eq(KINDE_AUTHENTICATION), any(com.kinde.principal.KindeAuthentication.class));
         ArgumentCaptor<AuthorizationUrl> consumed = ArgumentCaptor.forClass(AuthorizationUrl.class);
         verify(session).setAttribute(eq(AUTHORIZATION_URL), consumed.capture());
         assertNull(consumed.getValue().getState());

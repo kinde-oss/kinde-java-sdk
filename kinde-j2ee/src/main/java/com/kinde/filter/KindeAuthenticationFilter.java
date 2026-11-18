@@ -6,6 +6,7 @@ import com.kinde.authorization.AuthorizationUrl;
 import com.kinde.callback.KindeCallbackSupport;
 import com.kinde.stepup.AcrValue;
 import com.kinde.constants.KindeAuthenticationAction;
+import com.kinde.principal.KindeAuthentication;
 import com.kinde.principal.KindePrincipal;
 import com.kinde.servlet.KindeSingleton;
 import com.kinde.token.KindeTokens;
@@ -68,10 +69,16 @@ public abstract class KindeAuthenticationFilter implements Filter {
         String code = req.getParameter("code");
         String invitationCode = optionalQueryParam(req, INVITATION_CODE);
         String connectionId = optionalQueryParam(req, CONNECTION_ID);
-        // The principal and the tokens are read together, and the step-up check below uses
-        // only this pair, so a callback completing in parallel cannot mix two authentications
-        Principal userPrincipal = (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
-        Object sessionTokens = req.getSession().getAttribute(KINDE_TOKENS);
+        // The principal and the tokens come from one session attribute, so a callback completing
+        // in parallel cannot mix two sign-ins. The step-up check and the wrapped request both use
+        // this pair. A session without it fails the step-up check and goes through a step-up.
+        Object storedAuthentication = req.getSession().getAttribute(KINDE_AUTHENTICATION);
+        KindeAuthentication authentication = storedAuthentication instanceof KindeAuthentication
+                ? (KindeAuthentication) storedAuthentication : null;
+        Principal userPrincipal = authentication != null
+                ? authentication.getPrincipal()
+                : (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
+        KindeTokens sessionTokens = authentication != null ? authentication.getTokens() : null;
         AuthorizationUrl authorizationUrl = KindeCallbackSupport.pendingAuthorization(req);
         boolean stepUp = kindeAuthenticationAction == KindeAuthenticationAction.STEP_UP;
         String maxAgeText = requiredMaxAge == null ? null : String.valueOf(requiredMaxAge);
@@ -103,6 +110,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
                 req.getSession().setAttribute(AUTHENTICATED_USER,principal);
                 req.getSession().setAttribute(ID_TOKEN,kindeTokens.getIdToken());
                 req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
+                req.getSession().setAttribute(KINDE_AUTHENTICATION, new KindeAuthentication(principal, kindeTokens));
                 // Single use: the same callback cannot be replayed
                 req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
             } catch (Exception e) {
@@ -140,9 +148,9 @@ public abstract class KindeAuthenticationFilter implements Filter {
         }
     }
 
-    private boolean meetsStoredRequirement(HttpServletRequest req, Principal principal, Object tokens,
+    private boolean meetsStoredRequirement(HttpServletRequest req, Principal principal, KindeTokens tokens,
                                            String requiredAcrValues, Integer requiredMaxAge) {
-        if (!(tokens instanceof KindeTokens) || !sameSubject(principal, (KindeTokens) tokens)) {
+        if (tokens == null || !sameSubject(principal, tokens)) {
             // Fails closed: the user is sent through a step-up, whose callback stores a
             // matching principal and tokens
             return false;
@@ -150,7 +158,7 @@ public abstract class KindeAuthenticationFilter implements Filter {
         boolean trustAuthTime = stepUpSupported != null
                 ? stepUpSupported
                 : stepUpSupported(createKindeClientSession(req));
-        return meetsRequirement((KindeTokens) tokens, requiredAcrValues, requiredMaxAge, trustAuthTime);
+        return meetsRequirement(tokens, requiredAcrValues, requiredMaxAge, trustAuthTime);
     }
 
     /** Whether the principal and the tokens belong to the same user. */
