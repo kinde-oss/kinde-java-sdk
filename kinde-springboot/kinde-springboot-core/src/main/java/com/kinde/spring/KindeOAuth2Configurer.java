@@ -7,6 +7,7 @@ import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2Clien
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
@@ -70,7 +71,8 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
             // token configuration, but still answers a failed step-up check with the RFC 9470
             // challenge instead of a plain 403
             if (jwt || opaque) {
-                http.oauth2ResourceServer(oauth2 -> oauth2.accessDeniedHandler(new KindeStepUpAccessDeniedHandler()));
+                AccessDeniedHandler handler = stepUpAccessDeniedHandler(oAuth2ResourceServerConfigurer);
+                http.oauth2ResourceServer(oauth2 -> oauth2.accessDeniedHandler(handler));
             }
         } else if (jwt) {
             log.debug("JWT configurer is set in OAuth resource server configuration. " +
@@ -100,6 +102,22 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
     }
 
     @SuppressWarnings("unchecked")
+    /**
+     * The step-up access denied handler, wrapping the handler already configured on the resource
+     * server (the application's own, or Spring's default). Ordinary denials keep going to that
+     * handler; only a failed step-up check is answered with the RFC 9470 challenge.
+     */
+    private AccessDeniedHandler stepUpAccessDeniedHandler(OAuth2ResourceServerConfigurer<?> resourceServer) {
+        Optional<AccessDeniedHandler> current = resourceServer == null
+                ? Optional.empty()
+                : getFieldValue(resourceServer, "accessDeniedHandler");
+        if (current.isPresent() && current.get() instanceof KindeStepUpAccessDeniedHandler) {
+            return current.get();
+        }
+        return current.<AccessDeniedHandler>map(KindeStepUpAccessDeniedHandler::new)
+                .orElseGet(KindeStepUpAccessDeniedHandler::new);
+    }
+
     private <T> Optional<T> getFieldValue(Object source, String fieldName) {
         Field field;
         try {
@@ -164,7 +182,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
         // The access denied handler answers a failed step-up check with the RFC 9470 challenge
         // (401 insufficient_user_authentication) and otherwise behaves like Spring's default
         http.oauth2ResourceServer(oauth2 -> {
-            oauth2.accessDeniedHandler(new KindeStepUpAccessDeniedHandler());
+            oauth2.accessDeniedHandler(stepUpAccessDeniedHandler(oauth2));
             oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(
                     new KindeJwtAuthenticationConverter(kindeOAuth2Properties.getPermissionsClaim())));
         });
@@ -186,7 +204,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
 
             // Step-up checks read the introspection response's claims (see KindeStepUp)
             http.oauth2ResourceServer(oauth2 -> {
-                oauth2.accessDeniedHandler(new KindeStepUpAccessDeniedHandler());
+                oauth2.accessDeniedHandler(stepUpAccessDeniedHandler(oauth2));
                 oauth2.opaqueToken(opaque -> {});
             });
         }

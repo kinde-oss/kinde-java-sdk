@@ -106,4 +106,82 @@ class ReactiveStarterFixesTest {
         assertSame(user, result);
         org.mockito.Mockito.verifyNoInteractions(kindeSdkClient);
     }
+
+    private static ClientRegistration registration(String id) {
+        return ClientRegistration.withRegistrationId(id)
+                .clientId("client")
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                .authorizationUri("https://idp.example.com/auth")
+                .tokenUri("https://idp.example.com/token")
+                .userInfoUri("https://idp.example.com/userinfo")
+                .userNameAttributeName("sub")
+                .build();
+    }
+
+    /** A user service whose user-info call answers {"sub":"..."} without any network. */
+    private static ReactiveKindeOAuth2UserService serviceAnswering(KindeSdkClient kindeSdkClient, String subject) {
+        ReactiveKindeOAuth2UserService service = new ReactiveKindeOAuth2UserService(List.of(), kindeSdkClient);
+        service.setWebClient(org.springframework.web.reactive.function.client.WebClient.builder()
+                .exchangeFunction(request -> reactor.core.publisher.Mono.just(
+                        org.springframework.web.reactive.function.client.ClientResponse
+                                .create(org.springframework.http.HttpStatus.OK)
+                                .header("Content-Type", "application/json")
+                                .body("{\"sub\":\"" + subject + "\"}")
+                                .build()))
+                .build());
+        return service;
+    }
+
+    private static OAuth2UserRequest request(String registrationId) {
+        return new OAuth2UserRequest(registration(registrationId), new OAuth2AccessToken(
+                OAuth2AccessToken.TokenType.BEARER, "not-a-jwt", Instant.now(), Instant.now().plusSeconds(60)));
+    }
+
+    @Test
+    @DisplayName("loadUser returns another provider's user untouched, without the Kinde client")
+    void loadUserForAnotherProvider() {
+        KindeSdkClient kindeSdkClient = mock(KindeSdkClient.class);
+
+        OAuth2User user = serviceAnswering(kindeSdkClient, "g_1").loadUser(request("google")).block();
+
+        assertNotNull(user);
+        assertEquals("g_1", user.getName());
+        assertFalse(user.getAttributes().containsKey("KindeUserInfo"));
+        org.mockito.Mockito.verifyNoInteractions(kindeSdkClient);
+    }
+
+    @Test
+    @DisplayName("loadUser decorates a Kinde user off the calling thread")
+    void loadUserForKinde() {
+        UserInfo userInfo = mock(UserInfo.class);
+        KindeClientSession session = mock(KindeClientSession.class);
+        String[] decoratedOn = new String[1];
+        when(session.retrieveUserInfo()).thenAnswer(invocation -> {
+            decoratedOn[0] = Thread.currentThread().getName();
+            return userInfo;
+        });
+        KindeClient kindeClient = mock(KindeClient.class);
+        when(kindeClient.initClientSession(any(com.kinde.token.KindeToken.class))).thenReturn(session);
+        KindeSdkClient kindeSdkClient = mock(KindeSdkClient.class);
+        when(kindeSdkClient.getClient()).thenReturn(kindeClient);
+
+        OAuth2User user = serviceAnswering(kindeSdkClient, "kp_1").loadUser(request("kinde")).block();
+
+        assertNotNull(user);
+        assertEquals("kp_1", user.getName());
+        assertSame(userInfo, user.getAttributes().get("KindeUserInfo"));
+        assertTrue(decoratedOn[0].startsWith("boundedElastic"), "decorated on " + decoratedOn[0]);
+    }
+
+    @Test
+    @DisplayName("loadUser propagates a decoration failure through the returned Mono")
+    void loadUserPropagatesDecorationFailure() {
+        KindeSdkClient kindeSdkClient = mock(KindeSdkClient.class);
+        when(kindeSdkClient.getClient()).thenThrow(new IllegalStateException("discovery failed"));
+
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> serviceAnswering(kindeSdkClient, "kp_1").loadUser(request("kinde")).block());
+        assertEquals("discovery failed", failure.getMessage());
+    }
 }
