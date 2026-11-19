@@ -124,7 +124,14 @@ public abstract class KindeAuthenticationFilter implements Filter {
                 req.getSession().setAttribute(AUTHENTICATED_USER,principal);
                 req.getSession().setAttribute(ID_TOKEN,kindeTokens.getIdToken());
                 req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
-                req.getSession().setAttribute(KINDE_AUTHENTICATION, new KindeAuthentication(principal, kindeTokens));
+                KindeAuthentication checked = new KindeAuthentication(principal, kindeTokens);
+                req.getSession().setAttribute(KINDE_AUTHENTICATION, checked);
+                if (stepUp) {
+                    // The redirect below reaches the page with this sign-in, which was just
+                    // checked against the request it answers. A max_age shorter than the time
+                    // the redirect takes would otherwise start another step-up, in a loop.
+                    req.getSession().setAttribute(KINDE_STEP_UP_GRANT, new StepUpGrant(checked, req.getRequestURI()));
+                }
                 // Single use: the same callback cannot be replayed
                 req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
             } catch (Exception e) {
@@ -143,7 +150,8 @@ public abstract class KindeAuthenticationFilter implements Filter {
             authorizationUrl = startAuthorization(kindeClientSession, kindeAuthenticationAction, req, null, connectionId, requiredAcrValues, maxAgeText);
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
-        } else if (stepUp && !meetsStoredRequirement(req, userPrincipal, sessionTokens, requiredAcrValues, requiredMaxAge)) {
+        } else if (stepUp && !consumeStepUpGrant(req, authentication)
+                && !meetsStoredRequirement(req, userPrincipal, sessionTokens, requiredAcrValues, requiredMaxAge)) {
             // Signed in, but not strongly or recently enough: ask Kinde for what is missing.
             // The current tokens stay in place until the callback replaces them. Without
             // step-up support this fails rather than trusting auth_time.
@@ -168,6 +176,34 @@ public abstract class KindeAuthenticationFilter implements Filter {
                 ? stepUpSupported
                 : stepUpSupported(createKindeClientSession(req));
         return meetsRequirement(tokens, requiredAcrValues, requiredMaxAge, trustAuthTime);
+    }
+
+    /**
+     * Uses the one-use pass left by an accepted step-up callback. It lets the redirected request
+     * through once, for the same page and the same sign-in; it is removed whether or not it
+     * matches, so every later request is checked against the configured requirement.
+     */
+    private static boolean consumeStepUpGrant(HttpServletRequest req, KindeAuthentication authentication) {
+        Object grant = req.getSession().getAttribute(KINDE_STEP_UP_GRANT);
+        if (grant == null) {
+            return false;
+        }
+        req.getSession().removeAttribute(KINDE_STEP_UP_GRANT);
+        return grant instanceof StepUpGrant
+                && authentication != null
+                && ((StepUpGrant) grant).authentication == authentication
+                && ((StepUpGrant) grant).requestUri.equals(req.getRequestURI());
+    }
+
+    /** A one-use pass for the page an accepted step-up callback redirects to. */
+    private static final class StepUpGrant {
+        private final KindeAuthentication authentication;
+        private final String requestUri;
+
+        private StepUpGrant(KindeAuthentication authentication, String requestUri) {
+            this.authentication = authentication;
+            this.requestUri = requestUri;
+        }
     }
 
     /** Whether the principal and the tokens belong to the same user. */

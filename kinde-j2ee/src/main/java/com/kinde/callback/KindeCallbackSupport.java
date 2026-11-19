@@ -14,6 +14,10 @@ import com.kinde.stepup.StepUpRequest;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+
 import static com.kinde.constants.KindeJ2eeConstants.AUTHORIZATION_URL;
 import static com.kinde.constants.KindeJ2eeConstants.KINDE_CALLBACK_ERROR;
 
@@ -124,13 +128,25 @@ public final class KindeCallbackSupport {
      */
     public static boolean callbackMeets(KindeTokens tokens, String acrValues, Integer maxAge,
                                         AuthorizationUrl pending, boolean trustAuthTime) {
+        return callbackMeets(tokens, acrValues, maxAge, pending, trustAuthTime, Clock.systemUTC());
+    }
+
+    /**
+     * Same as {@link #callbackMeets(KindeTokens, String, Integer, AuthorizationUrl, boolean)},
+     * reading the time from {@code clock}. The clock is read once, and that one instant is
+     * used both for the allowed age and for the authentication's age.
+     */
+    public static boolean callbackMeets(KindeTokens tokens, String acrValues, Integer maxAge,
+                                        AuthorizationUrl pending, boolean trustAuthTime, Clock clock) {
         if (tokens == null) {
             return false;
         }
+        Instant now = clock.instant();
         Integer allowedAge = AuthorizationUrl.effectiveMaxAge(
-                maxAge, pending == null ? null : pending.getRequestedAt(), java.time.Instant.now().getEpochSecond());
+                maxAge, pending == null ? null : pending.getRequestedAt(), now.getEpochSecond());
         AcrValue requiredAcr = AcrValue.strongest(acrValues).orElse(null);
-        return tokens.getAuthenticationContext(trustAuthTime).satisfies(requiredAcr, allowedAge);
+        return tokens.getAuthenticationContext(trustAuthTime)
+                .satisfies(requiredAcr, allowedAge, Clock.fixed(now, ZoneOffset.UTC), 0);
     }
 
     /**

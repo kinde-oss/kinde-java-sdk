@@ -334,6 +334,52 @@ public class KindeStepUpFilterTest {
 
         verify(session).setAttribute(KINDE_TOKENS, fresh);
         verify(response).sendRedirect("/private/transfer");
+
+        // Follow the redirect: the page is reached with the sign-in that was just checked,
+        // although it is already older than max_age=1
+        ArgumentCaptor<Object> authentication = ArgumentCaptor.forClass(Object.class);
+        verify(session).setAttribute(eq(KINDE_AUTHENTICATION), authentication.capture());
+        ArgumentCaptor<Object> grant = ArgumentCaptor.forClass(Object.class);
+        verify(session).setAttribute(eq(KINDE_STEP_UP_GRANT), grant.capture());
+        AuthorizationUrl consumed = pending.consumed();
+        Object stored = authentication.getValue();
+        Object pass = grant.getValue();
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(consumed);
+        when(session.getAttribute(KINDE_AUTHENTICATION)).thenReturn(stored);
+        when(session.getAttribute(KINDE_STEP_UP_GRANT)).thenReturn(pass);
+        HttpServletRequest redirected = mock(HttpServletRequest.class);
+        when(redirected.getSession()).thenReturn(session);
+        when(redirected.getRequestURI()).thenReturn("/private/transfer");
+        when(redirected.getRequestURL()).thenReturn(new StringBuffer("http://localhost/private/transfer"));
+
+        strict.doFilter(redirected, response, filterChain);
+
+        verify(filterChain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        verify(session).removeAttribute(KINDE_STEP_UP_GRANT);
+        verify(mockSession, never()).stepUp(any());
+
+        // The pass is used up: the next request is checked against max_age=1 again
+        when(session.getAttribute(KINDE_STEP_UP_GRANT)).thenReturn(null);
+        when(mockSession.stepUp(any())).thenReturn(url("state-789"));
+
+        strict.doFilter(redirected, response, filterChain);
+
+        verify(mockSession).stepUp(any());
+    }
+
+    @Test
+    public void aStepUpPassOnlyWorksForItsOwnPageAndSignIn() throws Exception {
+        signedInWith(tokens("mfa", now() - 3600));
+        // A pass for another page is discarded, not used
+        when(session.getAttribute(KINDE_STEP_UP_GRANT)).thenReturn(new Object());
+        when(mockSession.isStepUpSupported()).thenReturn(true);
+        when(mockSession.stepUp(any())).thenReturn(url("state-456"));
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(session).removeAttribute(KINDE_STEP_UP_GRANT);
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        verify(mockSession).stepUp(any());
     }
 
     @Test
