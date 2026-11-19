@@ -95,12 +95,26 @@ public abstract class KindeAuthenticationFilter implements Filter {
             KindeCallbackSupport.validateCallback(req, authorizationUrl);
             // Exchange the authorization code for tokens
             KindeTokens kindeTokens;
+            KindeClientSession kindeClientSession;
+            boolean trustAuthTime = false;
             try {
-                KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
+                kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
                 if (stepUp) {
-                    stepUpSupported(kindeClientSession);
+                    trustAuthTime = stepUpSupported(kindeClientSession);
                 }
                 kindeTokens = kindeClientSession.retrieveTokens();
+            } catch (Exception e) {
+                throw new ServletException("OAuth token exchange failed", e);
+            }
+            // Checked before anything is stored: a rejected step-up leaves the existing sign-in
+            // in place. Asking again would only redirect in a loop, so this fails instead.
+            if (stepUp && !KindeCallbackSupport.callbackMeets(
+                    kindeTokens, requiredAcrValues, requiredMaxAge, authorizationUrl, trustAuthTime)) {
+                req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
+                throw new ServletException("Step-up authentication completed, but the new tokens do not meet the requirement: acr_values="
+                        + requiredAcrValues + ", max_age=" + requiredMaxAge);
+            }
+            try {
                 UserInfo userInfo = kindeClientSession.retrieveUserInfo();
                 Principal principal = new KindePrincipal(kindeTokens.getAccessToken().getUser(), kindeTokens.getAccessToken().getPermissions(), userInfo);
                 // The new tokens replace all of the stored ones, so nothing issued before this
@@ -115,11 +129,6 @@ public abstract class KindeAuthenticationFilter implements Filter {
                 req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
             } catch (Exception e) {
                 throw new ServletException("OAuth token exchange failed", e);
-            }
-            if (stepUp && !meetsRequirement(kindeTokens, requiredAcrValues, requiredMaxAge, stepUpSupported)) {
-                // Asking again would only redirect in a loop
-                throw new ServletException("Step-up authentication completed, but the new tokens do not meet the requirement: acr_values="
-                        + requiredAcrValues + ", max_age=" + requiredMaxAge);
             }
             resp.sendRedirect(req.getRequestURI());
         } else if (invitationCode != null) {

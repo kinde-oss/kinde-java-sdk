@@ -293,4 +293,47 @@ public class KindeStepUpServletTest {
         verify(mockSession, never()).login();
         verify(response, never()).sendRedirect(anyString());
     }
+
+    private void callbackFor(AuthorizationUrl pending, KindeTokens tokens) {
+        when(request.getParameter("code")).thenReturn("authCode");
+        when(request.getParameter("state")).thenReturn("state-123");
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(pending);
+        when(session.getAttribute(POST_LOGIN_URL)).thenReturn("/transfer");
+        when(mockSession.retrieveTokens()).thenReturn(tokens);
+        when(mockSession.retrieveUserInfo()).thenReturn(mock(UserInfo.class));
+        when(mockSession.isStepUpSupported()).thenReturn(true);
+    }
+
+    @Test
+    public void maxAgeZeroAcceptsAFreshVerificationWhoseCallbackArrivesLater() throws Exception {
+        long now = System.currentTimeMillis() / 1000;
+        // Sent 5 seconds ago; the user verified 2 seconds ago; the callback arrives now
+        AuthorizationUrl pending = new AuthorizationUrl(new URL("http://test.kinde.com/oauth2/auth"), null,
+                "state-123", "mfa", 0, now - 5);
+        KindeTokens fresh = tokensWith("mfa", now - 2);
+        when(fresh.getRefreshToken()).thenReturn(mock(RefreshToken.class));
+        callbackFor(pending, fresh);
+
+        servlet.doGet(request, response, KindeAuthenticationAction.STEP_UP);
+
+        verify(session).setAttribute(KINDE_TOKENS, fresh);
+        verify(response).sendRedirect("/transfer");
+    }
+
+    @Test
+    public void maxAgeZeroRejectsAnAuthenticationFromBeforeTheRequest() throws Exception {
+        long now = System.currentTimeMillis() / 1000;
+        AuthorizationUrl pending = new AuthorizationUrl(new URL("http://test.kinde.com/oauth2/auth"), null,
+                "state-123", "mfa", 0, now - 5);
+        callbackFor(pending, tokensWith("mfa", now - 30));
+
+        assertThrows(ServletException.class,
+                () -> servlet.doGet(request, response, KindeAuthenticationAction.STEP_UP));
+
+        verify(session, never()).setAttribute(eq(KINDE_TOKENS), any());
+        verify(session, never()).setAttribute(eq(KINDE_AUTHENTICATION), any());
+        ArgumentCaptor<AuthorizationUrl> consumed = ArgumentCaptor.forClass(AuthorizationUrl.class);
+        verify(session).setAttribute(eq(AUTHORIZATION_URL), consumed.capture());
+        assertNull(consumed.getValue().getState());
+    }
 }

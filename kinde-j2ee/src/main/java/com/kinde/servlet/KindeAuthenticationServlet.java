@@ -82,7 +82,13 @@ public class KindeAuthenticationServlet extends HttpServlet {
                 KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
                 // A step-up callback succeeds only if the new tokens meet what was asked for;
                 // otherwise nothing is stored and the existing session is kept
-                KindeCallbackSupport.requireStepUpMet(kindeClientSession, kindeTokens, authorizationUrl);
+                try {
+                    KindeCallbackSupport.requireStepUpMet(kindeClientSession, kindeTokens, authorizationUrl);
+                } catch (ServletException unmet) {
+                    // The answer has arrived: the same callback cannot be replayed
+                    req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
+                    throw unmet;
+                }
                 req.getSession().setAttribute(KINDE_TOKENS,kindeTokens);
                 req.getSession().setAttribute(ACCESS_TOKEN,kindeTokens.getAccessToken());
                 UserInfo userInfo = kindeClientSession.retrieveUserInfo();

@@ -102,12 +102,35 @@ public final class KindeCallbackSupport {
         if (pending == null || (pending.getAcrValues() == null && pending.getMaxAge() == null)) {
             return;
         }
-        AcrValue requiredAcr = AcrValue.strongest(pending.getAcrValues()).orElse(null);
         boolean trustAuthTime = pending.getMaxAge() != null && session.isStepUpSupported();
-        if (tokens == null || !tokens.getAuthenticationContext(trustAuthTime).satisfies(requiredAcr, pending.getMaxAge())) {
+        if (!callbackMeets(tokens, pending.getAcrValues(), pending.getMaxAge(), pending, trustAuthTime)) {
             throw new ServletException("Step-up authentication completed, but the new tokens do not meet the requirement: acr_values="
                     + pending.getAcrValues() + ", max_age=" + pending.getMaxAge());
         }
+    }
+
+    /**
+     * Whether the tokens from a callback meet a step-up requirement.
+     *
+     * <p>An authentication performed after the request was sent is fresh for it, so
+     * {@code max_age} is measured against the larger of {@code max_age} and the time since the
+     * request (see {@link AuthorizationUrl#effectiveMaxAge}). Without that, {@code max_age=0}
+     * would reject the user's fresh verification because the callback arrives a moment later.
+     *
+     * @param acrValues the required context, or null
+     * @param maxAge the required maximum age in seconds, or null
+     * @param pending the request the callback answers, used for the time it was sent
+     * @param trustAuthTime whether {@code auth_time} can be trusted (step-up supported)
+     */
+    public static boolean callbackMeets(KindeTokens tokens, String acrValues, Integer maxAge,
+                                        AuthorizationUrl pending, boolean trustAuthTime) {
+        if (tokens == null) {
+            return false;
+        }
+        Integer allowedAge = AuthorizationUrl.effectiveMaxAge(
+                maxAge, pending == null ? null : pending.getRequestedAt(), java.time.Instant.now().getEpochSecond());
+        AcrValue requiredAcr = AcrValue.strongest(acrValues).orElse(null);
+        return tokens.getAuthenticationContext(trustAuthTime).satisfies(requiredAcr, allowedAge);
     }
 
     /**

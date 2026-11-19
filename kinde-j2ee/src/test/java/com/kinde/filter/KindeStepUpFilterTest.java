@@ -302,6 +302,55 @@ public class KindeStepUpFilterTest {
 
         assertThrows(ServletException.class, () -> filter.doFilter(request, response, filterChain));
         verify(response, never()).sendRedirect(anyString());
+        // The existing sign-in is left exactly as it was
+        for (String attribute : new String[]{KINDE_TOKENS, KINDE_AUTHENTICATION, AUTHENTICATED_USER,
+                com.kinde.constants.KindeConstants.ACCESS_TOKEN, com.kinde.constants.KindeConstants.ID_TOKEN,
+                com.kinde.constants.KindeConstants.REFRESH_TOKEN}) {
+            verify(session, never()).setAttribute(eq(attribute), any());
+        }
+        verify(mockSession, never()).retrieveUserInfo();
+        // ...and the answer cannot be replayed
+        ArgumentCaptor<AuthorizationUrl> consumed = ArgumentCaptor.forClass(AuthorizationUrl.class);
+        verify(session).setAttribute(eq(AUTHORIZATION_URL), consumed.capture());
+        assertNull(consumed.getValue().getState());
+    }
+
+    @Test
+    public void aShortMaxAgeAcceptsAVerificationMadeAfterTheRequest() throws Exception {
+        KindeStepUpFilter strict = new KindeStepUpFilter();
+        strict.init(config("mfa", "1"));
+        // Sent 10 seconds ago; the user verified 3 seconds ago; the callback arrives now
+        AuthorizationUrl pending = new AuthorizationUrl(new URL("http://test.kinde.com/oauth2/auth"), null,
+                "state-123", "mfa", 1, now() - 10);
+        KindeTokens fresh = tokens("mfa", now() - 3);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(pending);
+        when(request.getParameter("code")).thenReturn("authCode");
+        when(request.getParameter("state")).thenReturn("state-123");
+        when(mockSession.isStepUpSupported()).thenReturn(true);
+        when(mockSession.retrieveTokens()).thenReturn(fresh);
+        when(mockSession.retrieveUserInfo()).thenReturn(mock(UserInfo.class));
+
+        strict.doFilter(request, response, filterChain);
+
+        verify(session).setAttribute(KINDE_TOKENS, fresh);
+        verify(response).sendRedirect("/private/transfer");
+    }
+
+    @Test
+    public void aShortMaxAgeStillRejectsAnAuthenticationFromBeforeTheRequest() throws Exception {
+        KindeStepUpFilter strict = new KindeStepUpFilter();
+        strict.init(config("mfa", "1"));
+        AuthorizationUrl pending = new AuthorizationUrl(new URL("http://test.kinde.com/oauth2/auth"), null,
+                "state-123", "mfa", 1, now() - 10);
+        when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(pending);
+        when(request.getParameter("code")).thenReturn("authCode");
+        when(request.getParameter("state")).thenReturn("state-123");
+        when(mockSession.isStepUpSupported()).thenReturn(true);
+        KindeTokens stale = tokens("mfa", now() - 60);
+        when(mockSession.retrieveTokens()).thenReturn(stale);
+
+        assertThrows(ServletException.class, () -> strict.doFilter(request, response, filterChain));
+        verify(session, never()).setAttribute(eq(KINDE_TOKENS), any());
     }
 
     @Test

@@ -81,4 +81,22 @@ class AuthorizationCallbackTest {
         assertEquals("access_denied", ex.getError());
         assertEquals("", ex.getErrorDescription());
     }
+
+    @Test
+    @DisplayName("the allowed age is never less than the time since the request was sent")
+    void effectiveMaxAge() throws Exception {
+        URL url = new URL("https://example.kinde.com/oauth2/auth");
+        AuthorizationUrl fresh = new AuthorizationUrl(url, null, "s", "mfa", 0, 1_000L);
+        assertEquals(0, fresh.effectiveMaxAge(1_000L));
+        assertEquals(5, fresh.effectiveMaxAge(1_005L));
+        assertEquals(0, fresh.effectiveMaxAge(990L));
+
+        AuthorizationUrl window = new AuthorizationUrl(url, null, "s", "mfa", 300, 1_000L);
+        assertEquals(300, window.effectiveMaxAge(1_005L));
+        assertEquals(400, window.effectiveMaxAge(1_400L));
+
+        assertNull(new AuthorizationUrl(url, null, "s", "mfa", null, 1_000L).effectiveMaxAge(1_005L));
+        assertEquals(60, new AuthorizationUrl(url, null, "s", null, 60, null).effectiveMaxAge(9_999L));
+        assertEquals(Long.valueOf(1_000L), fresh.consumed().getRequestedAt());
+    }
 }
