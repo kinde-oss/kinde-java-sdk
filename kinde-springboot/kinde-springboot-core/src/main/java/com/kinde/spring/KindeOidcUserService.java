@@ -25,6 +25,6 @@ final class KindeOidcUserService extends OidcUserService {
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         OidcUser user = super.loadUser(userRequest);
-        return UserUtil.decorateUser(user, userRequest, authoritiesProviders, kindeSdkClient.getClient());
+        return UserUtil.decorateUser(user, userRequest, authoritiesProviders);
     }
 }

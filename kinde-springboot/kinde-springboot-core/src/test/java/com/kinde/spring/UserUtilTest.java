@@ -112,11 +112,11 @@ public class UserUtilTest {
 
 
         // test false route
-        UserUtil.decorateUser(oidcUser, oidcUserRequest, authoritiesProviderCollection, kindeClient);
+        UserUtil.decorateUser(oidcUser, oidcUserRequest, authoritiesProviderCollection);
 
         when(clientRegistration.getRegistrationId())
                 .thenReturn("kinde");
-        UserUtil.decorateUser(oidcUser, oidcUserRequest, authoritiesProviderCollection, kindeClient);
+        UserUtil.decorateUser(oidcUser, oidcUserRequest, authoritiesProviderCollection);
 
     }
 }

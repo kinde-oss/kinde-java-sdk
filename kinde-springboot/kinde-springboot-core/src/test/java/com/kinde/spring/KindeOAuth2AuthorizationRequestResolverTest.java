@@ -3,7 +3,12 @@ package com.kinde.spring;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
@@ -244,5 +249,98 @@ class KindeOAuth2AuthorizationRequestResolverTest {
 
         assertNotNull(authRequest);
         assertEquals("conn_client_reg", authRequest.getAdditionalParameters().get("connection_id"));
+    }
+
+    private static MockHttpServletRequest authorizationRequest() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/kinde");
+        request.setServletPath("/oauth2/authorization/kinde");
+        return request;
+    }
+
+    @Test
+    @DisplayName("Resolve with acr_values and max_age forwards normalized step-up params")
+    void resolveWithStepUpParamsForwardsThem() {
+        MockHttpServletRequest request = authorizationRequest();
+        request.setParameter("acr_values", " MFA ");
+        request.setParameter("max_age", "0300");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertNotNull(authRequest);
+        assertEquals("mfa", authRequest.getAdditionalParameters().get("acr_values"));
+        assertEquals("300", authRequest.getAdditionalParameters().get("max_age"));
+        String authUri = authRequest.getAuthorizationRequestUri();
+        assertTrue(authUri.contains("acr_values=mfa"), "Redirect URI should contain acr_values");
+        assertTrue(authUri.contains("max_age=300"), "Redirect URI should contain max_age");
+    }
+
+    @Test
+    @DisplayName("Resolve with max_age=0 forwards it, and blank step-up params are omitted")
+    void resolveWithMaxAgeZeroAndBlankParams() {
+        MockHttpServletRequest request = authorizationRequest();
+        request.setParameter("max_age", "0");
+        request.setParameter("acr_values", " ");
+
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request);
+
+        assertEquals("0", authRequest.getAdditionalParameters().get("max_age"));
+        assertNull(authRequest.getAdditionalParameters().get("acr_values"));
+    }
+
+    @Test
+    @DisplayName("Resolve rejects an unrecognised acr_values or a malformed max_age")
+    void resolveRejectsInvalidStepUpParams() {
+        MockHttpServletRequest unknownAcr = authorizationRequest();
+        unknownAcr.setParameter("acr_values", "gold");
+        ResponseStatusException rejected =
+                assertThrows(ResponseStatusException.class, () -> resolver.resolve(unknownAcr));
+        assertEquals(HttpStatus.BAD_REQUEST, rejected.getStatusCode());
+
+        MockHttpServletRequest badMaxAge = authorizationRequest();
+        badMaxAge.setParameter("max_age", "undefined");
+        assertThrows(ResponseStatusException.class, () -> resolver.resolve(badMaxAge));
+    }
+
+    private MockHttpServletResponse runRedirectFilter(MockHttpServletRequest request) throws Exception {
+        OAuth2AuthorizationRequestRedirectFilter filter = new OAuth2AuthorizationRequestRedirectFilter(resolver);
+        filter.setAuthenticationFailureHandler(new KindeAuthorizationRequestFailureHandler());
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        filter.doFilter(request, response, new MockFilterChain());
+        return response;
+    }
+
+    @Test
+    @DisplayName("Spring's redirect filter answers invalid step-up params with HTTP 400")
+    void redirectFilterAnswersInvalidStepUpParamsWith400() throws Exception {
+        MockHttpServletRequest unknownAcr = authorizationRequest();
+        unknownAcr.setParameter("acr_values", "gold");
+        assertEquals(400, runRedirectFilter(unknownAcr).getStatus());
+
+        MockHttpServletRequest badMaxAge = authorizationRequest();
+        badMaxAge.setParameter("max_age", "-1");
+        assertEquals(400, runRedirectFilter(badMaxAge).getStatus());
+    }
+
+    @Test
+    @DisplayName("Spring's redirect filter still redirects valid step-up requests")
+    void redirectFilterRedirectsValidStepUpRequest() throws Exception {
+        MockHttpServletRequest request = authorizationRequest();
+        request.setParameter("acr_values", "mfa");
+
+        MockHttpServletResponse response = runRedirectFilter(request);
+
+        assertEquals(302, response.getStatus());
+        assertTrue(response.getRedirectedUrl().contains("acr_values=mfa"));
+    }
+
+    @Test
+    @DisplayName("Other authorization request failures stay HTTP 500")
+    void failureHandlerKeepsOtherFailuresAs500() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        new KindeAuthorizationRequestFailureHandler().onAuthenticationFailure(
+                authorizationRequest(), response,
+                new org.springframework.security.authentication.AuthenticationServiceException(
+                        "boom", new IllegalStateException("boom")));
+        assertEquals(500, response.getStatus());
     }
 }

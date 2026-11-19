@@ -3,7 +3,10 @@ package com.kinde.filter;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
+import com.kinde.callback.KindeCallbackSupport;
+import com.kinde.stepup.AcrValue;
 import com.kinde.constants.KindeAuthenticationAction;
+import com.kinde.principal.KindeAuthentication;
 import com.kinde.principal.KindePrincipal;
 import com.kinde.servlet.KindeSingleton;
 import com.kinde.token.KindeTokens;
@@ -21,7 +24,20 @@ import static com.kinde.constants.KindeConstants.*;
 import static com.kinde.constants.KindeJ2eeConstants.*;
 
 public abstract class KindeAuthenticationFilter implements Filter {
+
+    private volatile Boolean stepUpSupported;
+
     protected void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain, KindeAuthenticationAction kindeAuthenticationAction) throws IOException, ServletException {
+        doFilter(servletRequest, servletResponse, filterChain, kindeAuthenticationAction, null, null);
+    }
+
+    /**
+     * @param requiredAcrValues for {@link KindeAuthenticationAction#STEP_UP}: the authentication
+     *        context the session must have ({@code mfa} / {@code phr}), or null
+     * @param requiredMaxAge for {@link KindeAuthenticationAction#STEP_UP}: the maximum age, in
+     *        seconds, of the user's last authentication, or null
+     */
+    protected void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain, KindeAuthenticationAction kindeAuthenticationAction, String requiredAcrValues, Integer requiredMaxAge) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         HttpServletResponse resp = (HttpServletResponse) servletResponse;
 
@@ -34,16 +50,16 @@ public abstract class KindeAuthenticationFilter implements Filter {
                     String normalized = reauthStateParam.replaceAll("\\s", "");
                     String urlParams = new String(Base64.getUrlDecoder().decode(normalized), StandardCharsets.UTF_8);
                     KindeClientSession kindeClientSession = createKindeClientSession(req);
-                    AuthorizationUrl authorizationUrl = kindeClientSession.login();
+                    // A step-up filter restarts with its own requirement, never as an ordinary login
+                    AuthorizationUrl authorizationUrl = KindeCallbackSupport.restartAfterExpiredLink(
+                            kindeClientSession, kindeAuthenticationAction, requiredAcrValues,
+                            requiredMaxAge == null ? null : String.valueOf(requiredMaxAge));
                     req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
-                    String redirectUrl = authorizationUrl.getUrl().toString();
-                    if (redirectUrl.contains("?")) {
-                        redirectUrl = redirectUrl + "&" + urlParams;
-                    } else {
-                        redirectUrl = redirectUrl + "?" + urlParams;
-                    }
-                    resp.sendRedirect(redirectUrl);
+                    resp.sendRedirect(KindeCallbackSupport.appendReauthParameters(
+                            authorizationUrl.getUrl().toString(), urlParams, kindeAuthenticationAction));
                     return;
+                } catch (ServletException ex) {
+                    throw ex;
                 } catch (Exception ex) {
                     throw new ServletException("Error parsing reauth state: " + ex.getMessage(), ex);
                 }
@@ -53,43 +69,160 @@ public abstract class KindeAuthenticationFilter implements Filter {
         String code = req.getParameter("code");
         String invitationCode = optionalQueryParam(req, INVITATION_CODE);
         String connectionId = optionalQueryParam(req, CONNECTION_ID);
-        Principal userPrincipal = (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
-        AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
-        if (invitationCode != null) {
+        // The principal and the tokens come from one session attribute, so a callback completing
+        // in parallel cannot mix two sign-ins. The step-up check and the wrapped request both use
+        // this pair. A session without it fails the step-up check and goes through a step-up.
+        Object storedAuthentication = req.getSession().getAttribute(KINDE_AUTHENTICATION);
+        KindeAuthentication authentication = storedAuthentication instanceof KindeAuthentication
+                ? (KindeAuthentication) storedAuthentication : null;
+        Principal userPrincipal = authentication != null
+                ? authentication.getPrincipal()
+                : (Principal) req.getSession().getAttribute(AUTHENTICATED_USER);
+        KindeTokens sessionTokens = authentication != null ? authentication.getTokens() : null;
+        AuthorizationUrl authorizationUrl = KindeCallbackSupport.pendingAuthorization(req);
+        boolean stepUp = kindeAuthenticationAction == KindeAuthenticationAction.STEP_UP;
+        String maxAgeText = requiredMaxAge == null ? null : String.valueOf(requiredMaxAge);
+
+        // While an authorization is pending, a request carrying a code or an error is its
+        // callback, and a missing or wrong state is rejected. With nothing pending, the
+        // protected resource's own "code" or "error" parameters are left alone.
+        boolean callback = KindeCallbackSupport.isAwaitingCallback(authorizationUrl)
+                && (code != null || (errorParam != null && !errorParam.isBlank()));
+
+        if (callback) {
+            // Validates the state, and throws if Kinde returned an OAuth error (for example
+            // unmet_authentication_requirements). The session's tokens are left untouched then.
+            KindeCallbackSupport.validateCallback(req, authorizationUrl);
+            // Exchange the authorization code for tokens
+            KindeTokens kindeTokens;
+            KindeClientSession kindeClientSession;
+            boolean trustAuthTime = false;
+            try {
+                kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
+                if (stepUp) {
+                    trustAuthTime = stepUpSupported(kindeClientSession);
+                }
+                kindeTokens = kindeClientSession.retrieveTokens();
+            } catch (Exception e) {
+                throw new ServletException("OAuth token exchange failed", e);
+            }
+            // Checked before anything is stored: a rejected step-up leaves the existing sign-in
+            // in place. Asking again would only redirect in a loop, so this fails instead.
+            if (stepUp && !KindeCallbackSupport.callbackMeets(
+                    kindeTokens, requiredAcrValues, requiredMaxAge, authorizationUrl, trustAuthTime)) {
+                req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
+                throw new ServletException("Step-up authentication completed, but the new tokens do not meet the requirement: acr_values="
+                        + requiredAcrValues + ", max_age=" + requiredMaxAge);
+            }
+            try {
+                UserInfo userInfo = kindeClientSession.retrieveUserInfo();
+                Principal principal = new KindePrincipal(kindeTokens.getAccessToken().getUser(), kindeTokens.getAccessToken().getPermissions(), userInfo);
+                // The new tokens replace all of the stored ones, so nothing issued before this
+                // authorization (such as a refresh token from before a step-up) is left behind
+                req.getSession().setAttribute(KINDE_TOKENS,kindeTokens);
+                req.getSession().setAttribute(ACCESS_TOKEN,kindeTokens.getAccessToken());
+                req.getSession().setAttribute(AUTHENTICATED_USER,principal);
+                req.getSession().setAttribute(ID_TOKEN,kindeTokens.getIdToken());
+                req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
+                KindeAuthentication checked = new KindeAuthentication(principal, kindeTokens);
+                req.getSession().setAttribute(KINDE_AUTHENTICATION, checked);
+                if (stepUp) {
+                    // The redirect below reaches the page with this sign-in, which was just
+                    // checked against the request it answers. A max_age shorter than the time
+                    // the redirect takes would otherwise start another step-up, in a loop.
+                    req.getSession().setAttribute(KINDE_STEP_UP_GRANT, new StepUpGrant(checked, req.getRequestURI()));
+                }
+                // Single use: the same callback cannot be replayed
+                req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
+            } catch (Exception e) {
+                throw new ServletException("OAuth token exchange failed", e);
+            }
+            resp.sendRedirect(req.getRequestURI());
+        } else if (invitationCode != null) {
             // Invitation code always starts a new auth flow, even if already authenticated
             KindeClientSession kindeClientSession = createKindeClientSession(req);
-            authorizationUrl = startAuthorization(kindeClientSession, kindeAuthenticationAction, req, invitationCode, connectionId);
+            authorizationUrl = startAuthorization(kindeClientSession, kindeAuthenticationAction, req, invitationCode, connectionId, requiredAcrValues, maxAgeText);
             req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
         } else if (userPrincipal == null || authorizationUrl == null) {
             // Redirect to the OAuth provider's authorization page
             KindeClientSession kindeClientSession = createKindeClientSession(req);
-            authorizationUrl = startAuthorization(kindeClientSession, kindeAuthenticationAction, req, null, connectionId);
+            authorizationUrl = startAuthorization(kindeClientSession, kindeAuthenticationAction, req, null, connectionId, requiredAcrValues, maxAgeText);
             req.getSession().setAttribute(AUTHORIZATION_URL,authorizationUrl);
             resp.sendRedirect(authorizationUrl.getUrl().toString());
-        } else if (code != null) {
-            // Exchange the authorization code for an access token
-            try {
-                KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
-                KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
-                req.getSession().setAttribute(KINDE_TOKENS,kindeTokens);
-                req.getSession().setAttribute(ACCESS_TOKEN,kindeTokens.getAccessToken());
-                UserInfo userInfo = kindeClientSession.retrieveUserInfo();
-                Principal principal = new KindePrincipal(kindeTokens.getAccessToken().getUser(), kindeTokens.getAccessToken().getPermissions(), userInfo);
-                req.getSession().setAttribute(AUTHENTICATED_USER,principal);
-                req.getSession().setAttribute(ID_TOKEN,kindeTokens.getIdToken());
-                req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
-                resp.sendRedirect(req.getRequestURI());
-            } catch (Exception e) {
-                throw new ServletException("OAuth token exchange failed", e);
-            }
+        } else if (stepUp && !consumeStepUpGrant(req, authentication)
+                && !meetsStoredRequirement(req, userPrincipal, sessionTokens, requiredAcrValues, requiredMaxAge)) {
+            // Signed in, but not strongly or recently enough: ask Kinde for what is missing.
+            // The current tokens stay in place until the callback replaces them. Without
+            // step-up support this fails rather than trusting auth_time.
+            KindeClientSession kindeClientSession = createKindeClientSession(req);
+            authorizationUrl = KindeCallbackSupport.startStepUp(kindeClientSession, requiredAcrValues, maxAgeText);
+            req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
+            resp.sendRedirect(authorizationUrl.getUrl().toString());
         } else {
-            if (userPrincipal == null) {
-                throw new ServletException("Authentication failure as the user principal has not been set correctly");
-            }
             HttpServletRequest wrappedRequest = new KindeHttpRequestWrapper(req, userPrincipal);
             filterChain.doFilter(wrappedRequest,servletResponse);
         }
+    }
+
+    private boolean meetsStoredRequirement(HttpServletRequest req, Principal principal, KindeTokens tokens,
+                                           String requiredAcrValues, Integer requiredMaxAge) {
+        if (tokens == null || !sameSubject(principal, tokens)) {
+            // Fails closed: the user is sent through a step-up, whose callback stores a
+            // matching principal and tokens
+            return false;
+        }
+        boolean trustAuthTime = stepUpSupported != null
+                ? stepUpSupported
+                : stepUpSupported(createKindeClientSession(req));
+        return meetsRequirement(tokens, requiredAcrValues, requiredMaxAge, trustAuthTime);
+    }
+
+    /**
+     * Uses the one-use pass left by an accepted step-up callback. It lets the redirected request
+     * through once, for the same page and the same sign-in; it is removed whether or not it
+     * matches, so every later request is checked against the configured requirement.
+     */
+    private static boolean consumeStepUpGrant(HttpServletRequest req, KindeAuthentication authentication) {
+        Object grant = req.getSession().getAttribute(KINDE_STEP_UP_GRANT);
+        if (grant == null) {
+            return false;
+        }
+        req.getSession().removeAttribute(KINDE_STEP_UP_GRANT);
+        return grant instanceof StepUpGrant
+                && authentication != null
+                && ((StepUpGrant) grant).authentication == authentication
+                && ((StepUpGrant) grant).requestUri.equals(req.getRequestURI());
+    }
+
+    /** A one-use pass for the page an accepted step-up callback redirects to. */
+    private static final class StepUpGrant {
+        private final KindeAuthentication authentication;
+        private final String requestUri;
+
+        private StepUpGrant(KindeAuthentication authentication, String requestUri) {
+            this.authentication = authentication;
+            this.requestUri = requestUri;
+        }
+    }
+
+    /** Whether the principal and the tokens belong to the same user. */
+    private static boolean sameSubject(Principal principal, KindeTokens tokens) {
+        String name = principal == null ? null : principal.getName();
+        String subject = tokens.getAccessToken() == null ? null : tokens.getAccessToken().getUser();
+        return name != null && name.equals(subject);
+    }
+
+    private static boolean meetsRequirement(KindeTokens tokens, String requiredAcrValues, Integer requiredMaxAge, Boolean trustAuthTime) {
+        AcrValue requiredAcr = AcrValue.strongest(requiredAcrValues).orElse(null);
+        return tokens.getAuthenticationContext(Boolean.TRUE.equals(trustAuthTime)).satisfies(requiredAcr, requiredMaxAge);
+    }
+
+    /** Whether the environment advertises step-up, read from discovery once per filter. */
+    private boolean stepUpSupported(KindeClientSession kindeClientSession) {
+        boolean supported = kindeClientSession.isStepUpSupported();
+        stepUpSupported = supported;
+        return supported;
     }
 
     private static AuthorizationUrl startAuthorization(
@@ -97,7 +230,13 @@ public abstract class KindeAuthenticationFilter implements Filter {
             KindeAuthenticationAction kindeAuthenticationAction,
             HttpServletRequest req,
             String invitationCode,
-            String connectionId) throws ServletException {
+            String connectionId,
+            String requiredAcrValues,
+            String requiredMaxAge) throws ServletException {
+        if (kindeAuthenticationAction == KindeAuthenticationAction.STEP_UP) {
+            // For a user who is not signed in, this is a sign-in that must reach the context
+            return KindeCallbackSupport.startStepUp(kindeClientSession, requiredAcrValues, requiredMaxAge);
+        }
         if (kindeAuthenticationAction == KindeAuthenticationAction.LOGIN) {
             if (connectionId != null) {
                 return kindeClientSession.login(invitationCode, connectionId);

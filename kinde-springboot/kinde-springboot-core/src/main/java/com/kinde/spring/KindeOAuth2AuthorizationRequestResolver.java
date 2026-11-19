@@ -1,15 +1,19 @@
 package com.kinde.spring;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.kinde.session.KindeRequestParameters;
+import com.kinde.stepup.StepUp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers.withPkce;
 
@@ -20,6 +24,16 @@ import static org.springframework.security.oauth2.client.web.OAuth2Authorization
  * parameter, this resolver appends {@code invitation_code} and
  * {@code is_invitation=true}. When it contains a {@code connection_id}
  * parameter, that value is forwarded so Kinde can skip the identity picker.
+ *
+ * <p>For step-up authentication (RFC 9470), {@code acr_values} ({@code mfa} or {@code phr})
+ * and {@code max_age} (seconds) are validated and forwarded, so
+ * {@code /oauth2/authorization/kinde?acr_values=mfa&max_age=300} asks an already signed-in
+ * user for a stronger or more recent authentication. Invalid values are rejected with a
+ * {@link ResponseStatusException} for HTTP 400: Kinde would silently ignore an unknown
+ * {@code acr_values} and read a malformed {@code max_age} as "re-authenticate". Spring's
+ * redirect filter reports any resolver failure as HTTP 500 unless
+ * {@link KindeAuthorizationRequestFailureHandler} is set on it, which
+ * {@link Kinde#configureOAuth2WithPkce} does.
  */
 public class KindeOAuth2AuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
 
@@ -47,14 +61,34 @@ public class KindeOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
 
     private OAuth2AuthorizationRequest addKindeParameters(
             HttpServletRequest request, OAuth2AuthorizationRequest authorizationRequest) {
+        try {
+            return withKindeParameters(authorizationRequest, request::getParameter);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Adds the Kinde-specific parameters found on the originating request to an authorization
+     * request. Shared with the reactive resolver.
+     *
+     * @param requestParameter looks up a query parameter of the originating request
+     * @throws IllegalArgumentException if {@code acr_values} or {@code max_age} is invalid
+     */
+    static OAuth2AuthorizationRequest withKindeParameters(
+            OAuth2AuthorizationRequest authorizationRequest, Function<String, String> requestParameter) {
         if (authorizationRequest == null) {
             return null;
         }
-        String invitationCode = request.getParameter(KindeRequestParameters.INVITATION_CODE);
-        String connectionId = request.getParameter(KindeRequestParameters.CONNECTION_ID);
+        String invitationCode = requestParameter.apply(KindeRequestParameters.INVITATION_CODE);
+        String connectionId = requestParameter.apply(KindeRequestParameters.CONNECTION_ID);
+        String acrValuesParam = requestParameter.apply(KindeRequestParameters.ACR_VALUES);
+        String acrValues = acrValuesParam == null || acrValuesParam.isBlank()
+                ? null : StepUp.normalizeAcrValues(acrValuesParam);
+        String maxAge = StepUp.normalizeMaxAgeParameter(requestParameter.apply(KindeRequestParameters.MAX_AGE));
         boolean hasInvitation = invitationCode != null && !invitationCode.isBlank();
         boolean hasConnectionId = connectionId != null && !connectionId.isBlank();
-        if (!hasInvitation && !hasConnectionId) {
+        if (!hasInvitation && !hasConnectionId && acrValues == null && maxAge == null) {
             return authorizationRequest;
         }
         Map<String, Object> additionalParams = new HashMap<>(authorizationRequest.getAdditionalParameters());
@@ -62,8 +96,14 @@ public class KindeOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
             additionalParams.put(KindeRequestParameters.INVITATION_CODE, invitationCode);
             additionalParams.put(KindeRequestParameters.IS_INVITATION, "true");
         }
-        if (hasConnectionId && connectionId != null) {
+        if (hasConnectionId) {
             additionalParams.put(KindeRequestParameters.CONNECTION_ID, connectionId.trim());
+        }
+        if (acrValues != null) {
+            additionalParams.put(KindeRequestParameters.ACR_VALUES, acrValues);
+        }
+        if (maxAge != null) {
+            additionalParams.put(KindeRequestParameters.MAX_AGE, maxAge);
         }
         return OAuth2AuthorizationRequest.from(authorizationRequest)
                 .additionalParameters(additionalParams)

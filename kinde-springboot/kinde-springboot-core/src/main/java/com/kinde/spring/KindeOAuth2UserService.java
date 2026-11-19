@@ -35,6 +35,10 @@ final class KindeOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
         OAuth2User user = super.loadUser(userRequest);
+        if (!UserUtil.isKindeRegistration(userRequest)) {
+            // Never build the Kinde client for another provider's login
+            return user;
+        }
         return UserUtil.decorateUser(user, userRequest, authoritiesProviders, kindeSdkClient.getClient());
     }
 }

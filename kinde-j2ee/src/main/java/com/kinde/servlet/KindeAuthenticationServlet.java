@@ -3,7 +3,9 @@ package com.kinde.servlet;
 import com.kinde.KindeClientSession;
 import com.kinde.authorization.AuthorizationType;
 import com.kinde.authorization.AuthorizationUrl;
+import com.kinde.callback.KindeCallbackSupport;
 import com.kinde.constants.KindeAuthenticationAction;
+import com.kinde.principal.KindeAuthentication;
 import com.kinde.principal.KindePrincipal;
 import com.kinde.token.KindeTokens;
 import com.kinde.user.UserInfo;
@@ -33,11 +35,15 @@ public class KindeAuthenticationServlet extends HttpServlet {
                     String normalized = reauthStateParam.replaceAll("\\s", "");
                     String urlParams = new String(Base64.getUrlDecoder().decode(normalized), StandardCharsets.UTF_8);
                     KindeClientSession kindeClientSession = createKindeClientSession(req);
-                    AuthorizationUrl authorizationUrl = kindeClientSession.login();
+                    // A step-up restarts as the same step-up, never as an ordinary login
+                    AuthorizationUrl pending = KindeCallbackSupport.pendingAuthorization(req);
+                    AuthorizationUrl authorizationUrl = KindeCallbackSupport.restartAfterExpiredLink(
+                            kindeClientSession, kindeAuthenticationAction,
+                            pending == null ? null : pending.getAcrValues(),
+                            pending == null || pending.getMaxAge() == null ? null : String.valueOf(pending.getMaxAge()));
                     req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl);
-                    String redirectUrl = authorizationUrl.getUrl().toString();
-                    redirectUrl = redirectUrl + (redirectUrl.contains("?") ? "&" : "?") + urlParams;
-                    resp.sendRedirect(redirectUrl);
+                    resp.sendRedirect(KindeCallbackSupport.appendReauthParameters(
+                            authorizationUrl.getUrl().toString(), urlParams, kindeAuthenticationAction));
                     return;
                 } catch (IllegalArgumentException ex) {
                     throw new ServletException("Error parsing reauth state: " + ex.getMessage(), ex);
@@ -46,6 +52,12 @@ public class KindeAuthenticationServlet extends HttpServlet {
         }
 
         String code = req.getParameter("code");
+        if (errorParam != null && !errorParam.isBlank()) {
+            // Kinde returned an OAuth error (for example unmet_authentication_requirements after
+            // a step-up). The state is validated first; the session's tokens are left untouched.
+            KindeCallbackSupport.validateCallback(req, KindeCallbackSupport.pendingAuthorization(req));
+            throw new ServletException("Authorization failed: " + errorParam);
+        }
         String invitationCode = optionalQueryParam(req, INVITATION_CODE);
         String connectionId = optionalQueryParam(req, CONNECTION_ID);
         if (code == null) {
@@ -62,20 +74,37 @@ public class KindeAuthenticationServlet extends HttpServlet {
             resp.sendRedirect(authorizationUrl.getUrl().toString());
         } else {
             // Exchange the authorization code for an access token
+            AuthorizationUrl authorizationUrl = KindeCallbackSupport.pendingAuthorization(req);
+            KindeCallbackSupport.validateCallback(req, authorizationUrl);
             try {
-                AuthorizationUrl authorizationUrl = (AuthorizationUrl)req.getSession().getAttribute(AUTHORIZATION_URL);
                 String postLoginUrl = (String)req.getSession().getAttribute(POST_LOGIN_URL);
                 KindeClientSession kindeClientSession = KindeSingleton.getInstance().getKindeClient().initClientSession(code,authorizationUrl);
                 KindeTokens kindeTokens = kindeClientSession.retrieveTokens();
+                // A step-up callback succeeds only if the new tokens meet what was asked for;
+                // otherwise nothing is stored and the existing session is kept
+                try {
+                    KindeCallbackSupport.requireStepUpMet(kindeClientSession, kindeTokens, authorizationUrl);
+                } catch (ServletException unmet) {
+                    // The answer has arrived: the same callback cannot be replayed
+                    req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
+                    throw unmet;
+                }
                 req.getSession().setAttribute(KINDE_TOKENS,kindeTokens);
                 req.getSession().setAttribute(ACCESS_TOKEN,kindeTokens.getAccessToken());
                 UserInfo userInfo = kindeClientSession.retrieveUserInfo();
                 Principal principal = new KindePrincipal(kindeTokens.getAccessToken().getUser(), kindeTokens.getAccessToken().getPermissions(), userInfo);
                 req.getSession().setAttribute(AUTHENTICATED_USER,principal);
                 req.getSession().setAttribute(ID_TOKEN,kindeTokens.getIdToken());
+                // The new tokens replace all of the stored ones, so nothing issued before this
+                // authorization (such as a refresh token from before a step-up) is left behind
                 req.getSession().setAttribute(REFRESH_TOKEN,kindeTokens.getRefreshToken());
+                req.getSession().setAttribute(KINDE_AUTHENTICATION, new KindeAuthentication(principal, kindeTokens));
+                // Single use: the same callback cannot be replayed
+                req.getSession().setAttribute(AUTHORIZATION_URL, authorizationUrl.consumed());
 
                 resp.sendRedirect(postLoginUrl);
+            } catch (ServletException e) {
+                throw e;
             } catch (Exception e) {
                 throw new ServletException("OAuth token exchange failed", e);
             }
@@ -106,6 +135,10 @@ public class KindeAuthenticationServlet extends HttpServlet {
             return connectionId != null
                     ? kindeClientSession.createOrg(orgName.trim(), invitationCode, connectionId)
                     : kindeClientSession.createOrg(orgName.trim(), invitationCode);
+        }
+        if (kindeAuthenticationAction == KindeAuthenticationAction.STEP_UP) {
+            return KindeCallbackSupport.startStepUp(
+                    kindeClientSession, optionalQueryParam(req, ACR_VALUES), optionalQueryParam(req, MAX_AGE));
         }
         throw new ServletException("Unknown authentication action: " + kindeAuthenticationAction);
     }

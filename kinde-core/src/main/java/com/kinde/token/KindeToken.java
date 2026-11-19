@@ -45,6 +45,56 @@ public interface KindeToken {
         return Collections.emptyMap();
     }
 
+    // ========== Authentication context (step-up authentication) ==========
+
+    /**
+     * The authentication context of the sign-in this token came from: {@code "mfa"},
+     * {@code "phr"}, or null for a single-factor sign-in (Kinde omits the claim).
+     *
+     * @return the {@code acr} claim, or null
+     */
+    default String getAcr() {
+        Object acr = getClaim("acr");
+        return acr instanceof String ? (String) acr : null;
+    }
+
+    /**
+     * The authentication methods used, for example {@code ["pwd", "totp"]}. Informational
+     * only: decide on {@link #getAcr()}, which Kinde derives from these.
+     *
+     * @return the {@code amr} claim, never null (empty if absent)
+     */
+    default List<String> getAmr() {
+        Object amr = getClaim("amr");
+        if (!(amr instanceof java.util.Collection)) {
+            return Collections.emptyList();
+        }
+        List<String> methods = new java.util.ArrayList<>();
+        for (Object value : (java.util.Collection<?>) amr) {
+            if (value instanceof String) {
+                methods.add((String) value);
+            }
+        }
+        return Collections.unmodifiableList(methods);
+    }
+
+    /**
+     * When the user last actively authenticated, in seconds since the epoch. Kinde always
+     * sets this on the ID token, and on the access token only when it can establish it.
+     *
+     * @return the {@code auth_time} claim, or null
+     */
+    default Long getAuthTime() {
+        Object authTime = getClaim("auth_time");
+        if (authTime instanceof Number) {
+            return ((Number) authTime).longValue();
+        }
+        if (authTime instanceof java.util.Date) {
+            return ((java.util.Date) authTime).getTime() / 1000L;
+        }
+        return null;
+    }
+
     // ========== Hard Check Methods (API Fallback) ==========
 
     /**

@@ -69,6 +69,8 @@ class ReactiveKindeOAuth2AutoConfig {
     }
 
     private void customDecoder(ServerHttpSecurity.OAuth2ResourceServerSpec server, ReactiveJwtDecoder decoder) {
+        // Answers a failed step-up check with the RFC 9470 challenge
+        server.accessDeniedHandler(new KindeStepUpServerAccessDeniedHandler());
         server.jwt(jwt -> jwt.jwtDecoder(decoder));
     }
 }

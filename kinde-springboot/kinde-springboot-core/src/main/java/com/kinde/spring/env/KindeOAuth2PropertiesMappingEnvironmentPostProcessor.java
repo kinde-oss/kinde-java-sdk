@@ -69,8 +69,13 @@ public class KindeOAuth2PropertiesMappingEnvironmentPostProcessor implements Env
             environment.getPropertySources().addLast(defaultKindeScopesSource(environment, kindeClient));
             // Kinde's endpoints can be resolved from an issuer
             environment.getPropertySources().addLast(kindeStaticDiscoveryPropertySource(environment, kindeClient));
-            // Auth0 does not have an introspection endpoint
-            environment.getPropertySources().addLast(kindeOpaqueTokenPropertySource(environment, kindeClient));
+            // Opaque token introspection is only wired up for servlet applications. In a reactive
+            // application these properties would make Spring Boot build an opaque token security
+            // chain, which cannot coexist with the JWT resource server the Kinde starter configures
+            // on every ServerHttpSecurity ("only supports JWTs or Opaque Tokens, not both").
+            if (!ReactiveWebApplicationDetection.isReactive(environment, application)) {
+                environment.getPropertySources().addLast(kindeOpaqueTokenPropertySource(environment, kindeClient));
+            }
             environment.getPropertySources().addLast(kindeForcePkcePropertySource(environment, kindeClient));
         }
         

@@ -105,6 +105,8 @@ public class KindeAuthenticationFilterTest {
     @Test
     public void testExchangeCodeAndRedirect() throws Exception {
         when(request.getParameter("code")).thenReturn("authCode");
+        when(request.getParameter("state")).thenReturn("state-123");
+        when(mockAuthUrl.getState()).thenReturn("state-123");
         Principal principal = mock(KindePrincipal.class);
         when(session.getAttribute(AUTHENTICATED_USER)).thenReturn(principal);
         when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(mockAuthUrl);

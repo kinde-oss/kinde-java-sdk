@@ -7,6 +7,7 @@ import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2Clien
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
@@ -39,6 +40,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
         // if OAuth2ClientProperties bean is not available do NOT configure
         OAuth2ClientProperties.Provider propertiesProvider;
         OAuth2ClientProperties.Registration propertiesRegistration;
+        boolean loginConfigured = false;
         if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
             && (propertiesProvider = context.getBean(OAuth2ClientProperties.class).getProvider().get("kinde")) != null
             && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("kinde")) != null
@@ -46,6 +48,7 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
             && StringUtils.hasText(propertiesRegistration.getClientId())) {
 
             configureLogin(http, kindeOAuth2Properties, context.getEnvironment());
+            loginConfigured = true;
 
             // check for RP-Initiated logout
             if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -54,22 +57,33 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
                 http.logout(logout -> logout.logoutSuccessHandler(handler));
             }
 
-            // Resource Server Config
-            OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
-
-            if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                log.debug("JWT configurer is set in OAuth resource server configuration. " +
-                    "JWT validation will be configured.");
-                configureResourceServerForJwtValidation(http, kindeOAuth2Properties);
-            } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
-                    "Opaque Token validation/introspection will be configured.");
-                configureResourceServerForOpaqueTokenValidation(http, kindeOAuth2Properties);
-            } else {
-                log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
-            }
         } else {
             log.debug("Kinde/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
+        }
+
+        // Resource Server Config
+        OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
+        boolean jwt = getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent();
+        boolean opaque = !jwt && getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent();
+
+        if (!loginConfigured) {
+            // An API that is only a resource server (no OAuth2 client registration) keeps its own
+            // token configuration, but still answers a failed step-up check with the RFC 9470
+            // challenge instead of a plain 403
+            if (jwt || opaque) {
+                AccessDeniedHandler handler = stepUpAccessDeniedHandler(oAuth2ResourceServerConfigurer);
+                http.oauth2ResourceServer(oauth2 -> oauth2.accessDeniedHandler(handler));
+            }
+        } else if (jwt) {
+            log.debug("JWT configurer is set in OAuth resource server configuration. " +
+                "JWT validation will be configured.");
+            configureResourceServerForJwtValidation(http, kindeOAuth2Properties);
+        } else if (opaque) {
+            log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
+                "Opaque Token validation/introspection will be configured.");
+            configureResourceServerForOpaqueTokenValidation(http, kindeOAuth2Properties);
+        } else {
+            log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
         }
     }
 
@@ -88,6 +102,22 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
     }
 
     @SuppressWarnings("unchecked")
+    /**
+     * The step-up access denied handler, wrapping the handler already configured on the resource
+     * server (the application's own, or Spring's default). Ordinary denials keep going to that
+     * handler; only a failed step-up check is answered with the RFC 9470 challenge.
+     */
+    private AccessDeniedHandler stepUpAccessDeniedHandler(OAuth2ResourceServerConfigurer<?> resourceServer) {
+        Optional<AccessDeniedHandler> current = resourceServer == null
+                ? Optional.empty()
+                : getFieldValue(resourceServer, "accessDeniedHandler");
+        if (current.isPresent() && current.get() instanceof KindeStepUpAccessDeniedHandler) {
+            return current.get();
+        }
+        return current.<AccessDeniedHandler>map(KindeStepUpAccessDeniedHandler::new)
+                .orElseGet(KindeStepUpAccessDeniedHandler::new);
+    }
+
     private <T> Optional<T> getFieldValue(Object source, String fieldName) {
         Field field;
         try {
@@ -149,15 +179,19 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
     }
 
     private void configureResourceServerForJwtValidation(HttpSecurity http, KindeOAuth2Properties kindeOAuth2Properties) {
-        http.oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(
-                        new KindeJwtAuthenticationConverter(kindeOAuth2Properties.getPermissionsClaim()))));
+        // The access denied handler answers a failed step-up check with the RFC 9470 challenge
+        // (401 insufficient_user_authentication) and otherwise behaves like Spring's default
+        http.oauth2ResourceServer(oauth2 -> {
+            oauth2.accessDeniedHandler(stepUpAccessDeniedHandler(oauth2));
+            oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(
+                    new KindeJwtAuthenticationConverter(kindeOAuth2Properties.getPermissionsClaim())));
+        });
     }
 
     @SuppressWarnings("rawtypes")
     private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, KindeOAuth2Properties kindeOAuth2Properties) {
 
-        if (!kindeOAuth2Properties.getClientId().isEmpty() && !kindeOAuth2Properties.getClientSecret().isEmpty()) {
+        if (StringUtils.hasText(kindeOAuth2Properties.getClientId()) && StringUtils.hasText(kindeOAuth2Properties.getClientSecret())) {
             // Spring (2.7.x+) configures JWT by default and this creates a startup failure ("Spring Security
             // only supports JWTs or Opaque Tokens, not both at the same time") when we try to configure Opaque Token
             // mode in the following call. Therefore, we unset the JWT configuration before attempting to configure
@@ -168,7 +202,11 @@ final class KindeOAuth2Configurer extends AbstractHttpConfigurer<KindeOAuth2Conf
                 unsetJwtConfigurer(existing);
             }
 
-            http.oauth2ResourceServer(oauth2 -> oauth2.opaqueToken(opaque -> {}));
+            // Step-up checks read the introspection response's claims (see KindeStepUp)
+            http.oauth2ResourceServer(oauth2 -> {
+                oauth2.accessDeniedHandler(stepUpAccessDeniedHandler(oauth2));
+                oauth2.opaqueToken(opaque -> {});
+            });
         }
     }
 

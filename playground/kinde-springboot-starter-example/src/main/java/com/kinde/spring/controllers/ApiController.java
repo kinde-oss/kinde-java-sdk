@@ -32,6 +32,17 @@ public class ApiController {
         return result;
     }
 
+    /** Step-up protected (see SecurityConfig): only reachable with a recent MFA token. */
+    @GetMapping("/sensitive")
+    public Map<String, Object> sensitive(JwtAuthenticationToken authentication) {
+        Jwt jwt = authentication.getToken();
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("acr", jwt.getClaims().get("acr"));
+        result.put("amr", jwt.getClaims().get("amr"));
+        result.put("auth_time", jwt.getClaims().get("auth_time"));
+        return result;
+    }
+
     @GetMapping("/permissions")
     public Object permissions(Authentication authentication) {
         return authentication.getAuthorities();

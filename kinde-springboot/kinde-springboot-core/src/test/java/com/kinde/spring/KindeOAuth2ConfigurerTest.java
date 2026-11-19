@@ -231,6 +231,50 @@ public class KindeOAuth2ConfigurerTest {
 
         verify(fx.httpSecurity).oauth2ResourceServer(any());
         verify(rsCustomizerTarget).opaqueToken(any());
+        verify(rsCustomizerTarget).accessDeniedHandler(any(KindeStepUpAccessDeniedHandler.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void initWithoutClientRegistrationStillInstallsStepUpHandlerOnJwtResourceServer() {
+        // A resource-server-only API: Kinde properties, no OAuth2 client registration
+        HttpSecurity httpSecurity = mock(HttpSecurity.class);
+        ApplicationContext context = mock(ApplicationContext.class);
+        when(httpSecurity.getSharedObject(ApplicationContext.class)).thenReturn(context);
+        seedKindeProperties(context, mock(KindeOAuth2Properties.class));
+        when(context.getBeansOfType(OAuth2ClientProperties.class)).thenReturn(Collections.emptyMap());
+
+        OAuth2ResourceServerConfigurer<?> resourceServerConfigurer = mock(OAuth2ResourceServerConfigurer.class);
+        setReflectionField(resourceServerConfigurer, "jwtConfigurer", mock(OAuth2ResourceServerConfigurer.JwtConfigurer.class));
+        when(httpSecurity.getConfigurer(OAuth2ResourceServerConfigurer.class)).thenAnswer(inv -> resourceServerConfigurer);
+
+        OAuth2ResourceServerConfigurer<HttpSecurity> rsCustomizerTarget =
+                (OAuth2ResourceServerConfigurer<HttpSecurity>) mock(OAuth2ResourceServerConfigurer.class);
+        when(httpSecurity.oauth2ResourceServer(any())).thenAnswer(inv -> {
+            Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> customizer = inv.getArgument(0);
+            customizer.customize(rsCustomizerTarget);
+            return httpSecurity;
+        });
+
+        new KindeOAuth2Configurer().init(httpSecurity);
+
+        verify(httpSecurity, never()).oauth2Login(any());
+        verify(rsCustomizerTarget).accessDeniedHandler(any(KindeStepUpAccessDeniedHandler.class));
+        // The application's own token configuration is left alone
+        verify(rsCustomizerTarget, never()).jwt(any());
+    }
+
+    @Test
+    public void initWithoutLoginOrResourceServerConfiguresNothing() {
+        HttpSecurity httpSecurity = mock(HttpSecurity.class);
+        ApplicationContext context = mock(ApplicationContext.class);
+        when(httpSecurity.getSharedObject(ApplicationContext.class)).thenReturn(context);
+        seedKindeProperties(context, mock(KindeOAuth2Properties.class));
+        when(context.getBeansOfType(OAuth2ClientProperties.class)).thenReturn(Collections.emptyMap());
+
+        new KindeOAuth2Configurer().init(httpSecurity);
+
+        verify(httpSecurity, never()).oauth2ResourceServer(any());
     }
 
     /**

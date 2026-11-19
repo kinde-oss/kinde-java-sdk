@@ -115,6 +115,10 @@ public class KindeAuthenticationServletTest {
     @Test
     public void testDoGet_WithCode_TokenExchange() throws Exception {
         when(request.getParameter("code")).thenReturn("authCode");
+        when(request.getParameter("state")).thenReturn("state-123");
+        when(mockAuthUrl.getState()).thenReturn("state-123");
+        // An ordinary sign-in: no step-up requirement (Mockito would return 0 for max_age)
+        when(mockAuthUrl.getMaxAge()).thenReturn(null);
         when(session.getAttribute(AUTHORIZATION_URL)).thenReturn(mockAuthUrl);
         when(session.getAttribute(POST_LOGIN_URL)).thenReturn("http://redirect.com");
         when(mockSession.retrieveTokens()).thenReturn(mockTokens);
